@@ -47,11 +47,11 @@ providing enough power for hours of sailing. The motor, as mentioned above, is p
 
 ## 🤖 Autopilot
 
-For the fun and exciting part I have to disappoint you because this system is still in its early stages,
-but will be discussed and explained soon. 🙃
+For the fun and exciting part I have to disappoint you because the autopilot conecpt is still in its early stages,
+but will be discussed and explained soon. Stay tuned 📻
 
 ## 🚧 Going further
 
-I am grateful for any kind of feedback, inspiration and questions regarding CosmicSail.<br>
-Feel free to create an Issue regarding any of that.
+I am grateful for any type of feedback, inspiration or question regarding CosmicSail.<br>
+Feel free to create an Issue to get in touch.
 
