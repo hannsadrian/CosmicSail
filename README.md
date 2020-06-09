@@ -5,7 +5,7 @@
 A while ago I found an old rusty rc sailboat on my attic without any controls or batteries.
 So I decided to **burn my money** with making this boat as cool and advanced as possible...
 
-Altough at first I went over a few ordinary systems with radio control,
+At first I went over a few ordinary systems with radio control, but
 I noticed very quickly that the problem with those radio controls is that they lose signal after about 50 meters.
 It may was related to the antennas being located somewhat below the waterline, blocking the range.
 
