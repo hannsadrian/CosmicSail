@@ -10,7 +10,10 @@ import {DBHelper} from "./helpers"
 
 let helper = new DBHelper();
 helper.connect()
-helper.saveSample()
+
+export function getDBHelper(): DBHelper {
+  return helper;
+}
 
 // Static files
 app.get("/", (req, res) => {

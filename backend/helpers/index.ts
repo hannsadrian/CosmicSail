@@ -47,8 +47,6 @@ export class DBHelper {
     });
   }
 
-  public saveSample(): void {
-    const Cat = mongoose.model('Cat', { name: String });
   public async findUser(username:string): Promise<UserEntity> {
     return new Promise((resolve, reject) => {
       User.findOne({username: username}).exec((err, user) => {
@@ -75,8 +73,18 @@ export class DBHelper {
     })
   }
 
+  public async registerUser(username:string, password:string, type:number): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      let entity = await this.findUser(username);
 
-    const kitty = new Cat({ name: 'Zildjian' });
-    kitty.save().then(() => console.log('meow'));
+      if (entity) {
+        reject("User already registered");
+        return;
+      }
+
+      const user = new User({username: username, password: password, type: type});
+      user.save().then(() => console.log(username + ' registered!'));
+      resolve();
+    })
   }
 }
