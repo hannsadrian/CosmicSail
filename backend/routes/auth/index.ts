@@ -70,9 +70,6 @@ export function verifyJWT(req, res): AuthenticatedEntity {
       case 1:
         type = ClientType.CONTROLLER;
         break;
-      case 2:
-        type= ClientType.PROXY;
-        break;
     }
     return new AuthenticatedEntity(decoded.id, type, decoded.admin, decoded.username);
   } catch (error) {
