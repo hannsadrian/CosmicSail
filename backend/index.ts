@@ -1,4 +1,4 @@
-import * as users from "./routes/users"
+import users from "./routes/users"
 import auth from "./routes/auth"
 
 import express = require("express");
@@ -25,6 +25,9 @@ app.get("/logo.svg", (req, res) => {
 
 // Authentication handling
 app.use("/auth", auth)
+
+// Frontend methods
+app.use("/user", users)
 
 app.listen(3000);
 console.log("server listening");

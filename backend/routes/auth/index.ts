@@ -7,21 +7,6 @@ var express = require('express');
 var router = express.Router();
 var jwt = require('jsonwebtoken');
 
-class AuthenticatedEntity {
-  id: string
-  type: ClientType
-  admin: boolean
-  username?: string
-
-  constructor(id: string, type: ClientType, admin: boolean, username?: string) {
-    this.id = id;
-    this.type = type;
-    this.admin = admin;
-    if (username)
-      this.username = username;
-  }
-}
-
 router.get('/', function (req, res) {
   res.json({message: "Auth endpoint"});
 });
@@ -30,27 +15,41 @@ router.post('/status', function (req, res) {
   try {
     var entity = verifyJWT(req, res);
   } catch(error) {
+    sendError("JWT invalid", res)
     return;
   }
 
-  res.json(entity);
+  res.json({
+    message: "JWT valid",
+    authenticated: true,
+    payload: entity
+  });
 });
 
-router.post('/login', function (req, res) {
+router.post('/login', async function (req, res) {
   if (req.query.username == null || req.query.password == null){
     sendError("username or password not specified", res);
     return;
   }
 
-  // TODO: replace with db connection
-  if (req.query.username === "client" && req.query.password === "client") {
-    const token = jwt.sign({
-      username: "client",
-      type: 0,
-      admin: false
-    }, process.env.SECRET, { expiresIn: '10h' });
-    res.json({message: "generated jwt", token: token})
-    return;
+  if (req.query.username != null && req.query.password != null) {
+    let helper = getDBHelper();
+
+    let user = await helper.findUser(req.query.username);
+    if (user == null) {
+      sendError("user not found", res);
+      return;
+    }
+    let passwordMatches = await bcrypt.compare(req.query.password, user.password)
+    if (passwordMatches) {
+      const token = jwt.sign({...user.toObject(), isAdmin: undefined}, process.env.SECRET, {
+        expiresIn: '10h',
+        issuer: "Funzel Environment",
+        subject: "CosmicSail"
+      });
+      res.json({message: "generated jwt", token: token, payload: user.toObject()})
+      return;
+    }
   }
 
   sendError("username or password invalid", res);
@@ -83,7 +82,7 @@ export async function registerUser(username:string, password:string, type:Client
   })
 }
 
-export function verifyJWT(req, res): AuthenticatedEntity {
+export function verifyJWT(req, res): object {
   if (!req.query.jwt) {
     sendError("JWT not specified", res);
     throw new Error("JWT not specified");
@@ -91,16 +90,7 @@ export function verifyJWT(req, res): AuthenticatedEntity {
 
   try {
     let decoded = jwt.verify(req.query.jwt, process.env.SECRET);
-    let type: ClientType;
-    switch (decoded.type) {
-      case 0:
-        type = ClientType.BOAT;
-        break;
-      case 1:
-        type = ClientType.CONTROLLER;
-        break;
-    }
-    return new AuthenticatedEntity(decoded.id, type, decoded.admin, decoded.username);
+    return decoded;
   } catch (error) {
     throw new Error(error.message);
   }
