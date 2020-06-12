@@ -1,19 +1,23 @@
-import users from "./routes/users"
-import auth from "./routes/auth"
+import users from "./routes/users";
+import auth from "./routes/auth";
 
 import express = require("express");
 import path = require("path");
-require('dotenv').config()
+require('dotenv').config();
 const app = express();
 
-import {DBHelper} from "./helpers"
+import {DBHelper} from "./helpers";
 
 let helper = new DBHelper();
-helper.connect()
-
+helper.connect();
 export function getDBHelper(): DBHelper {
   return helper;
 }
+
+import {SocketHandler} from "./socket";
+let socket = new SocketHandler();
+socket.registerEvents();
+socket.listen();
 
 // Static files
 app.get("/", (req, res) => {

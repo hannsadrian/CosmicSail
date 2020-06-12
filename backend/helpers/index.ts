@@ -87,7 +87,7 @@ export class DBHelper {
   public async registerBoat(name: string, model: string, owner: string): Promise<typeof Boat> {
     const id = makeId(7);
     const token = jwt.sign({id: id, model: model}, process.env.SECRET, {issuer: "Funzel Environment", subject: "CosmicSail"});
-    const boat = new Boat({id: makeId(7), token: token, name: name, model: model, parts: []});
+    const boat = new Boat({id: id, token: token, name: name, model: model, parts: []});
     boat.save().then(async (res) => {
       // add boat to user
       let user = await this.findUser(owner);
@@ -106,6 +106,7 @@ export class DBHelper {
       await asyncForEach(user.boats, async (id) => {
         let boat = await Boat.findById(id)
         boats.push({
+          _id: boat._id,
           id: boat.id,
           name: boat.name,
           model: boat.model,
@@ -114,6 +115,18 @@ export class DBHelper {
       })
       resolve(boats);
     });
+  }
+  public async getBoat(boatId: string): Promise<typeof Boat> {
+    return new Promise(async (resolve, reject) => {
+      Boat.findOne({id: boatId}).exec((err, boat) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        resolve(boat)
+      })
+    })
   }
 }
 

@@ -89,7 +89,19 @@ export function verifyJWT(req, res): object {
   }
 
   try {
-    let decoded = jwt.verify(req.query.jwt, process.env.SECRET);
+    return onlyVerifyJWT(req.query.jwt)
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export function onlyVerifyJWT(token:string): object {
+  try {
+    let decoded = jwt.verify(token, process.env.SECRET);
+    if (decoded.model)
+      decoded.type = "boat"
+    else
+      decoded.type = "controller"
     return decoded;
   } catch (error) {
     throw new Error(error.message);
