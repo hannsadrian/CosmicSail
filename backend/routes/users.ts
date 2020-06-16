@@ -1,4 +1,5 @@
-import { verifyJWT, sendError } from "./auth";
+import { sendError } from "../helpers/ErrorUtils";
+import { verifyJWTRequest} from "../helpers/AuthUtils";
 import { getDBHelper } from "..";
 
 var express = require('express');
@@ -6,7 +7,7 @@ var router = express.Router();
 
 router.get("/boats", async (req, res) => {
   try {
-    const entity = verifyJWT(req, res);
+    verifyJWTRequest(req, res);
   } catch(error) {
     sendError("JWT invalid", res)
     return;
@@ -18,11 +19,11 @@ router.get("/boats", async (req, res) => {
   }
 
   const helper = getDBHelper();
-  const boats = await helper.getBoats(req.query.username).catch(err => {
+  await helper.getBoats(req.query.username).catch(err => {
     sendError(err, res);
+  }).then(boats => {
+    res.json(boats)
   })
-
-  res.json(boats)
 })
 
 export default router;
