@@ -1,6 +1,6 @@
 import {sendError} from "../helpers/ErrorUtils";
 import {verifyJWTRequest} from "../helpers/AuthUtils";
-import {ClientType} from "../helpers";
+import {EntityType} from "../helpers";
 import {getDBHelper} from "../index";
 import bcrypt = require('bcrypt');
 
@@ -86,7 +86,7 @@ export async function registerUser(username: string, password: string): Promise<
                 throw new Error(err.message)
             }
 
-            helper.registerUser(username, hash, ClientType.CONTROLLER).then(() => {
+            helper.registerUser(username, hash, EntityType.CONTROLLER).then(() => {
                 resolve({message: username + " registered!"})
             }).catch(err => {
                 reject(new Error(err))

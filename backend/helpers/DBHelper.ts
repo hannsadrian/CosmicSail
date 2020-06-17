@@ -14,6 +14,7 @@ const Boat = mongoose.model('Boat', {
     name: String,
     model: String,
     online: Boolean,
+    lastOnline: Date,
     parts: [{type: mongoose.Schema.Types.ObjectId, ref: 'Part'}]
 })
 
@@ -46,9 +47,8 @@ export default class DBHelper {
                 console.log("Db connected");
                 this.connected = true;
             }
-        }).then(err => {
-            if (err)
-                console.warn(err)
+        }).catch(err => {
+            console.warn(err.message)
         });
     }
 
@@ -113,6 +113,18 @@ export default class DBHelper {
             })
             resolve(boats);
         });
+    }
+    public async getBoatByDbId(id: string): Promise<typeof Boat> {
+        return new Promise(async (resolve, reject) => {
+            Boat.findOne({_id: id}).exec((err, boat) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                resolve(boat)
+            })
+        })
     }
     public async getBoat(boatId: string): Promise<typeof Boat> {
         return new Promise(async (resolve, reject) => {

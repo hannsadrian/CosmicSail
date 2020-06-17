@@ -1,4 +1,4 @@
-import {ClientType} from "./ClientType";
+import {EntityType} from "./EntityType";
 import DBHelper from "./DBHelper";
 
-export {ClientType, DBHelper}
+export {EntityType, DBHelper}

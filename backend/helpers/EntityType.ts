@@ -1,4 +1,4 @@
-export enum ClientType {
+export enum EntityType {
     BOAT,
     CONTROLLER
 }
