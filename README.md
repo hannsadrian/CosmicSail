@@ -17,7 +17,7 @@ And that the Pi is compatible with Surfsticks. And my phone has a SIM card which
 
 ## 📡 Connectivity
 
-As I had to discover, you cannot open a WebSocket server from mobile phone network. This required me to use a proxy server,
+As I had to discover, you *cannot* open a WebSocket server from mobile phone network. This required me to use a proxy server,
 instead of a direct connection to the boat.
 All the realtime transmission happens over Socket.io which is adopted by frameworks for many different languages.
 Here is a simple connection diagram:
@@ -34,10 +34,11 @@ The main engine requires a bit more power than the raspberry can provide,
 so I decided to use a L293D microcontroller with external AA batteries.
 The motor speed is controlled via PWM and the direction via standard GPIO outputs.
 Sadly the L293D isn't actually rated for the power my motor requires, so it gets hot after a few minutes driving,
-but for returning home that is enough.
+but for returning home that is enough. I have plans for replacing the L293D with a [WP1060](https://www.krickshop.de/Elektronik-Motoren/RC-Fernsteuerungen-Zubehoer/Elektronische-Fahrtregler/Fahrtregler-Quicrun-WP1060-Brushed.htm?a=article&ProdNr=67051&p=350),
+but therefore I would need an additional battery as well as a charger.
 
 **Sensors**<br>
-I plan to use a Neo6m GPS module and a HMC5883L compass sensor for extended data and the autopilot.<br>
+I plan to use a Neo6m GPS module and a QMC5883L compass sensor for extended data and the autopilot.<br>
 Speaking of autopilot: I have not yet determined which wind speed and direction sensor to use,
 when it comes to autopilot sailing.
 
