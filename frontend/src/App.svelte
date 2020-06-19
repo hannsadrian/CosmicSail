@@ -78,6 +78,9 @@
             <PageAnimator authorized={true} path="boats">
                 <Boats/>
             </PageAnimator>
+            <PageAnimator>
+                <Error code="404" message="The page you are looking for is not here"/>
+            </PageAnimator>
         </div>
     </Router>
 </main>
