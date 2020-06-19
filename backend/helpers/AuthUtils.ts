@@ -10,7 +10,6 @@ const jwt = require("jsonwebtoken");
  */
 export function verifyJWTRequest(req, res): object {
     if (!req.query.jwt) {
-        sendError("JWT not specified", res);
         throw new Error("JWT not specified");
     }
 
