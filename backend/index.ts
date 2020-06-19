@@ -4,7 +4,9 @@ import auth from "./routes/auth";
 import express = require("express");
 import path = require("path");
 require('dotenv').config();
+const cors = require("cors");
 const app = express();
+app.use(cors())
 
 import {DBHelper} from "./helpers";
 
