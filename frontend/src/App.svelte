@@ -75,6 +75,9 @@
             <PageAnimator path="login">
                 <Login/>
             </PageAnimator>
+            <PageAnimator authorized={true} path="boats">
+                <Boats/>
+            </PageAnimator>
         </div>
     </Router>
 </main>
