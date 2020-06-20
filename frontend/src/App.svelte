@@ -1,6 +1,7 @@
 <script>
     import Tailwindcss from "./Tailwindcss.svelte";
-    import {Router, Link, navigate} from "svelte-routing";
+    import {Router, Link, Route, navigate} from "svelte-routing";
+    import {fade} from "svelte/transition";
     import PageAnimator from "./utils/PageAnimator.svelte";
     import Button from "./components/Button.svelte";
     import PrimaryButton from "./components/PrimaryButton.svelte";
@@ -9,6 +10,8 @@
     import Login from "./views/Login.svelte";
     import Error from "./views/Error.svelte";
     import Boats from "./views/Boats.svelte";
+    import Boat from "./views/Boat/Boat.svelte";
+    import Authorizer from "./utils/Authorizer.svelte";
 
     export let url = "";
     let open = false;
@@ -78,6 +81,12 @@
             <PageAnimator authorized={true} path="boats">
                 <Boats/>
             </PageAnimator>
+            <Route path="boats/:id" let:params>
+                <div class="absolute w-full overflow-hidden h-auto" transition:fade="{{ duration: 100 }}">
+                    <Authorizer authorized={true} />
+                    <Boat id={params.id}/>
+                </div>
+            </Route>
             <PageAnimator>
                 <Error code="404" message="The page you are looking for is not here"/>
             </PageAnimator>
