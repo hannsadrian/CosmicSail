@@ -7,22 +7,47 @@ var router = express.Router();
 
 router.get("/boats", async (req, res) => {
   try {
-    verifyJWTRequest(req, res);
+    var entity = verifyJWTRequest(req, res);
   } catch(error) {
     sendError("JWT invalid", res)
     return;
   }
 
-  if (!req.query.username) {
+  // @ts-ignore
+  if (!req.query.username || entity.username !== req.query.username) {
     sendError("No username specified", res);
     return;
   }
 
   const helper = getDBHelper();
-  await helper.getBoats(req.query.username).catch(err => {
+  // @ts-ignore
+  await helper.getBoats(entity.username).catch(err => {
     sendError(err, res);
   }).then(boats => {
     res.json(boats)
+  })
+})
+
+router.get("/boats/:id", async (req, res) => {
+  try {
+    var entity = verifyJWTRequest(req, res);
+  } catch(error) {
+    sendError("JWT invalid", res)
+    return;
+  }
+
+  const helper = getDBHelper();
+  // @ts-ignore
+  const user = await helper.findUser(entity.username)
+
+  await helper.getBoat(req.params.id).catch(err => {
+    sendError(err, res)
+  }).then(boat => {
+    if (!user.boats.includes(boat._id)) {
+      sendError("Boat doesn't belong to user", res);
+      return;
+    }
+    res.json({...boat._doc, token: undefined})
   })
 })
 

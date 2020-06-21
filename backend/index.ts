@@ -28,6 +28,9 @@ app.get("/", (req, res) => {
 app.get("/logo.svg", (req, res) => {
   res.sendFile(path.join(__dirname + '/static/Beach.svg'));
 })
+app.get("/arrow_up.png", (req, res) => {
+  res.sendFile(path.join(__dirname + '/static/arrow_up.png'));
+})
 
 // Authentication handling
 app.use("/auth", auth)
