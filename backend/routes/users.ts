@@ -43,6 +43,10 @@ router.get("/boats/:id", async (req, res) => {
   await helper.getBoat(req.params.id).catch(err => {
     sendError(err, res)
   }).then(boat => {
+    if (boat == null) {
+      sendError("Boat not found", res);
+      return;
+    }
     if (!user.boats.includes(boat._id)) {
       sendError("Boat doesn't belong to user", res);
       return;
