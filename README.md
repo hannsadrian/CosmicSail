@@ -38,7 +38,7 @@ but for returning home that is enough. I have plans for replacing the L293D with
 but therefore I would need an additional battery as well as a charger.
 
 **Sensors**<br>
-I plan to use a Neo6m GPS module and a QMC5883L compass sensor for extended data and the autopilot.<br>
+I plan to use a Neo6m GPS module and a QMC5883L compass sensor for extended metadata and the autopilot.<br>
 Speaking of autopilot: I have not yet determined which wind speed and direction sensor to use,
 when it comes to autopilot sailing.
 
