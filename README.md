@@ -40,7 +40,8 @@ but therefore I would need an additional battery as well as a charger.
 **Sensors**<br>
 I plan to use a Neo6m GPS module and a QMC5883L compass sensor for extended metadata and the autopilot.<br>
 Speaking of autopilot: I have not yet determined which wind speed and direction sensor to use,
-when it comes to autopilot sailing.
+when it comes to autopilot sailing. However it should also be possible to query wind directions from a weather service,
+but that wouldn't include local changes in the wind and needs to be tested for accuracy and functionality.
 
 **Power**<br>
 The raspberrypi and with it the servos as well as the sensors are powered by a pretty standard big powerbank,
