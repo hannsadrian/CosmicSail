@@ -37,7 +37,8 @@ export default {
 		  process: JSON.stringify({
 			env: {
 			  APIURL: process.env.APIURL,
-			  SOCKETURL: process.env.SOCKETURL
+			  SOCKETURL: process.env.SOCKETURL,
+			  MAPBOX_TOKEN: process.env.MAPBOX_TOKEN
 			}
 		  }),
 		}),

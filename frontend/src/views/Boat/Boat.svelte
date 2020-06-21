@@ -6,7 +6,22 @@
     import ControlView from "./ControlView.svelte";
 
     export let id;
+
+    let connected = false;
+    const socket = io(process.env.SOCKETURL + "?boatId=" + id + "&token=" + localStorage.getItem("token"));
+    socket.on("connect", () => {
+        connected = true;
+        console.log("connected")
+    })
+    socket.on("exception", data => {
+        console.log(data)
+    })
+    socket.on("disconnect", () => {
+        connected = false;
+    })
+
     let online = false;
+    let selected = "Control"
 
     let boat = getBoats();
 
@@ -20,14 +35,22 @@
         <Loading/>
     {:then res}
         <div class="flex mb-4">
-            <div class="my-auto bg-red-600 rounded-full h-4 w-4 mx-4"></div>
+            <div class="my-auto {connected === true ? 'bg-red-600' : 'bg-gray-600'} rounded-full h-4 w-4 mx-4"></div>
             <div>
-                <p class="text-sm font-medium text-gray-700">{res.data.model} • {res.data.id}</p>
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-400">{res.data.model} • {res.data.id}</p>
                 <h1 class="text-xl font-bold">{res.data.name}</h1>
             </div>
         </div>
-        <SegmentedControl/>
-        <ControlView/>
+        <SegmentedControl bind:selected/>
+        <div class="{selected !== 'Control' ? 'hidden': ''}">
+            <ControlView {socket}/>
+        </div>
+        <div class="{selected !== 'Autopilot' ? 'hidden': ''}">
+            <p>Work in progress (Autopilot)</p>
+        </div>
+        <div class="{selected !== 'Tracker' ? 'hidden': ''}">
+            <p>Tracker in progress</p>
+        </div>
     {:catch err}
         {#if err.response}
             <InlineError>{err.response.data.message}</InlineError>
