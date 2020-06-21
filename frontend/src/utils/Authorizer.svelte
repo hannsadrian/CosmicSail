@@ -19,6 +19,9 @@
                 console.log(err.response.data)
 
             navigate("/login")
+        }).then(res => {
+            if (res.data.payload.username !== localStorage.getItem("username"))
+                navigate("/login")
         })
     });
 </script>
