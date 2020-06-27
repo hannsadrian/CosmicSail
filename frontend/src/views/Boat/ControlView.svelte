@@ -2,8 +2,8 @@
     import Map from "./ControlView/Map.svelte";
     export let socket;
 
-    let lng = 0;
-    let lat = 0;
+    let lat = 50.9;
+    let lng = 13.6;
     let rotation = 0;
 
     socket.on("pos", data => {
