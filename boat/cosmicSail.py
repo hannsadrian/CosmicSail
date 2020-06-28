@@ -28,11 +28,16 @@ def disconnect():
 
 def init():
     try:
-        sio.connect(os.getenv("SERVER"))
+        sio.connect(os.getenv("SERVER") + "?token=" + os.getenv("TOKEN") + "&boatId=" + os.getenv("BOATID"))
     except socketio.exceptions.ConnectionError:
         time.sleep(2)
         print("Reconnecting...")
         init()
+        return
+
+    while True:
+        sio.emit("meta", {'test': 123})
+        time.sleep(1)
 
 
 init()

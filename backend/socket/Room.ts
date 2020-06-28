@@ -32,6 +32,7 @@ export class Room {
         if (entity.data.type === "boat") {
             entity.type = EntityType.BOAT;
             this.boat = entity;
+            // TODO: set online in DB
         }
         if (entity.data.type === "controller") {
             entity.type = EntityType.CONTROLLER;
@@ -42,6 +43,7 @@ export class Room {
     removeEntity(entity:Entity) {
         if (entity.type === EntityType.BOAT)
             this.boat = undefined;
+            // TODO: set offline and lastSeen in DB
         if (entity.type === EntityType.CONTROLLER)
             this.controllers.forEach((controller: Entity, index: number) => {
                 if (controller.data.username == entity.data.username)

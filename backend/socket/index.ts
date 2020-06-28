@@ -1,7 +1,8 @@
 import {verifyJWT} from "../helpers/AuthUtils";
 import {getDBHelper} from "../"
-import {DBHelper} from "../helpers"
+import {DBHelper, EntityType} from "../helpers"
 import {Entity, Room} from "./Room";
+
 const io = require('socket.io')();
 
 
@@ -27,7 +28,6 @@ export class SocketHandler {
       let room: Room;
 
       try {
-        console.log(client.handshake.query)
         // get boatId from query
         boatId = client.handshake.query["boatId"];
         if (!boatId)
@@ -57,9 +57,13 @@ export class SocketHandler {
 
       // TODO: Register actual events for data transmission
 
-      // Controller event for rudder
-      client.on("rudder", data => {
-        console.log(data)
+      // Meta event
+      client.on("meta", data => {
+        if (entity.type !== EntityType.BOAT)
+          return;
+        room.controllers.forEach((controller: Entity, index) => {
+          controller.socket.emit("meta", data)
+        })
       })
 
       client.on("disconnect", () => {
