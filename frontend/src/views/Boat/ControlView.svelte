@@ -6,7 +6,7 @@
     let lng = 13.6;
     let rotation = 0;
 
-    socket.on("pos", data => {
+    socket.on("meta", data => {
 
     })
 </script>

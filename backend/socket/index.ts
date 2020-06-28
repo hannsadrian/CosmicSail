@@ -27,6 +27,7 @@ export class SocketHandler {
       let room: Room;
 
       try {
+        console.log(client.handshake.query)
         // get boatId from query
         boatId = client.handshake.query["boatId"];
         if (!boatId)
@@ -82,6 +83,7 @@ export class SocketHandler {
   }
 
   listen() {
-    io.listen(3333);
+    io.listen(3300);
+    console.log("Socket listening")
   }
 }
