@@ -7,7 +7,7 @@
     let rotation = 0;
 
     socket.on("meta", data => {
-
+        console.log(data)
     })
 </script>
 

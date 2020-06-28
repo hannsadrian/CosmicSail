@@ -35,7 +35,7 @@
         <Loading/>
     {:then res}
         <div class="flex mb-4">
-            <div class="my-auto {connected === true ? 'bg-red-600' : 'bg-gray-600'} rounded-full h-4 w-4 mx-4"></div>
+            <div class="my-auto {connected ? (online ? 'bg-green-600' : 'bg-red-600') : 'bg-gray-600'} rounded-full h-4 w-4 mx-4"></div>
             <div>
                 <p class="text-sm font-medium text-gray-700 dark:text-gray-400">{res.data.model} • {res.data.id}</p>
                 <h1 class="text-xl font-bold">{res.data.name}</h1>
