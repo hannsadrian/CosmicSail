@@ -16,6 +16,19 @@
     }
 </script>
 
-<div style="height: 60vh" class="sm:w-2/5 mt-4 mb-4 sm:mb-0">
+<div id="mapbox" class="sm:w-2/5 mt-4 mb-4 sm:mb-0">
     <Map {lng} {lat} {rotation} />
 </div>
+<input type="range" min="-1" max="1" step="0.05" bind:value={rudder}>
+
+<style>
+    @media screen and (max-width: 500px) {
+        #mapbox {
+            height: 30vh !important;
+        }
+    }
+
+    #mapbox {
+        height: 60vh;
+    }
+</style>
