@@ -55,8 +55,6 @@ export class SocketHandler {
         return;
       }
 
-      // TODO: Register actual events for data transmission
-
       // Meta event
       client.on("meta", data => {
         if (entity.type !== EntityType.BOAT)
@@ -64,6 +62,12 @@ export class SocketHandler {
         room.controllers.forEach((controller: Entity, index) => {
           controller.socket.emit("meta", data)
         })
+      })
+
+      client.on("instruction", data => {
+        if (entity.type !== EntityType.CONTROLLER || room.boat == undefined)
+          return;
+        room.boat.socket.emit("instruction", data)
       })
 
       client.on("disconnect", () => {

@@ -26,6 +26,14 @@ def disconnect():
     print("I'm disconnected!")
 
 
+@sio.event
+def instruction(data):
+    motor = motors[data['name']]
+    if motor is None:
+        return
+    motor.setstate(data['value'])
+
+
 def init():
     try:
         sio.connect(os.getenv("SERVER") + "?token=" + os.getenv("TOKEN") + "&boatId=" + os.getenv("BOATID"))
