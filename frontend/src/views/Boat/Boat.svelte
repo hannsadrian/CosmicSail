@@ -20,6 +20,10 @@
         connected = false;
     })
 
+    socket.on("online", data => {
+        online = data.online;
+    })
+
     let online = false;
     let selected = "Control"
 

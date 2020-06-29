@@ -15,6 +15,7 @@ const Boat = mongoose.model('Boat', {
     model: String,
     online: Boolean,
     lastOnline: Date,
+    meta: Object,
     parts: [{type: mongoose.Schema.Types.ObjectId, ref: 'Part'}]
 })
 
@@ -35,11 +36,11 @@ export default class DBHelper {
 
     public connect(): void {
         mongoose.connect(
-            'mongodb+srv://'+
-            process.env.MONGODB_USER+':'+
-            process.env.MONGODB_PASSWORD+'@'+
-            process.env.MONGODB_URL+'/'+
-            process.env.MONGODB_NAME+
+            'mongodb+srv://' +
+            process.env.MONGODB_USER + ':' +
+            process.env.MONGODB_PASSWORD + '@' +
+            process.env.MONGODB_URL + '/' +
+            process.env.MONGODB_NAME +
             '?retryWrites=true&w=majority',
             {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false}
         ).then(() => {
@@ -52,7 +53,7 @@ export default class DBHelper {
         });
     }
 
-    public async findUser(username:string): Promise<typeof User> {
+    public async findUser(username: string): Promise<typeof User> {
         return new Promise((resolve, reject) => {
             User.findOne({username: username}).exec((err, user) => {
                 if (err) {
@@ -68,7 +69,8 @@ export default class DBHelper {
             })
         })
     }
-    public async registerUser(username:string, password:string, type:number): Promise<void> {
+
+    public async registerUser(username: string, password: string, type: number): Promise<void> {
         return new Promise(async (resolve, reject) => {
             let entity = await this.findUser(username);
 
@@ -85,14 +87,19 @@ export default class DBHelper {
 
     public async registerBoat(name: string, model: string, owner: string): Promise<typeof Boat> {
         const id = makeId(7);
-        const token = jwt.sign({id: id, model: model}, process.env.SECRET, {issuer: "Funzel Environment", subject: "CosmicSail"});
+        const token = jwt.sign({id: id, model: model}, process.env.SECRET, {
+            issuer: "Funzel Environment",
+            subject: "CosmicSail"
+        });
         const boat = new Boat({id: id, token: token, name: name, model: model, parts: []});
         boat.save().then(async (res) => {
             // add boat to user
             let user = await this.findUser(owner);
-            await User.findOneAndUpdate({_id: user._id}, { $set: { boats: [...user.boats, res._id] }}, {upsert: true}, () => {});
+            await User.findOneAndUpdate({_id: user._id}, {$set: {boats: [...user.boats, res._id]}}, {upsert: true}, () => {
+            });
         });
     }
+
     public async getBoats(username: string): Promise<typeof Boat[]> {
         return new Promise(async (resolve, reject) => {
             const user = await this.findUser(username)
@@ -114,6 +121,7 @@ export default class DBHelper {
             resolve(boats);
         });
     }
+
     public async getBoatByDbId(id: string): Promise<typeof Boat> {
         return new Promise(async (resolve, reject) => {
             Boat.findOne({_id: id}).exec((err, boat) => {
@@ -126,6 +134,7 @@ export default class DBHelper {
             })
         })
     }
+
     public async getBoat(boatId: string): Promise<typeof Boat> {
         return new Promise(async (resolve, reject) => {
             Boat.findOne({id: boatId}).exec((err, boat) => {
@@ -138,17 +147,29 @@ export default class DBHelper {
             })
         })
     }
+
+    public setOnline(boatId: string): void {
+        Boat.updateOne({id: boatId}, {$set: {online: true}}, {upsert: true})
+    }
+
+    public setOffline(boatId: string): void {
+        Boat.updateOne({id: boatId},
+            {$set: {online: false, lastOnline: new Date(Date.now()).toISOString()}},
+            {upsert: true}, (err, doc) => {
+            })
+    }
 }
 
 function makeId(length) {
-    var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
+    for (var i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
 }
+
 const asyncForEach = async (array, callback) => {
     for (let index = 0; index < array.length; index++) {
         await callback(array[index], index, array)

@@ -39,4 +39,4 @@ app.use("/auth", auth)
 app.use("/user", users)
 
 app.listen(3000);
-console.log("server listening");
+console.log("Server listening");

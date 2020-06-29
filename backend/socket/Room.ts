@@ -1,4 +1,5 @@
-import {EntityType} from "../helpers";
+import {DBHelper, EntityType} from "../helpers";
+import {getDBHelper} from "../index";
 
 export class Entity {
     type: EntityType = EntityType.CONTROLLER;
@@ -16,9 +17,11 @@ export class Room {
     id = null;
     boat = undefined;
     controllers = [];
+    dbHelper: DBHelper;
 
     constructor(id: any) {
         this.id = id;
+        this.dbHelper = getDBHelper();
     }
 
     getEntities() {
@@ -32,18 +35,26 @@ export class Room {
         if (entity.data.type === "boat") {
             entity.type = EntityType.BOAT;
             this.boat = entity;
-            // TODO: set online in DB
+            this.dbHelper.setOnline(entity.data.id);
+            this.controllers.forEach((controller) => {
+                controller.socket.emit("online", {online: true})
+            })
         }
         if (entity.data.type === "controller") {
             entity.type = EntityType.CONTROLLER;
             this.controllers.push(entity);
+            entity.socket.emit("online", {online: !!this.boat});
         }
     }
 
     removeEntity(entity:Entity) {
-        if (entity.type === EntityType.BOAT)
+        if (entity.type === EntityType.BOAT) {
             this.boat = undefined;
-            // TODO: set offline and lastSeen in DB
+            this.dbHelper.setOffline(entity.data.id)
+            this.controllers.forEach((controller) => {
+                controller.socket.emit("online", {online: false})
+            })
+        }
         if (entity.type === EntityType.CONTROLLER)
             this.controllers.forEach((controller: Entity, index: number) => {
                 if (controller.data.username == entity.data.username)

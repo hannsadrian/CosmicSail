@@ -28,7 +28,7 @@
             <div class="my-3">
                 <Link to={"/boats/"+boat.id}>
                     <div class="rounded-lg shadow-sm hover:shadow-lg transition duration-200 flex bg-white dark:bg-gray-900 p-4 w-full">
-                        <div class="my-auto bg-red-600 rounded-full h-4 w-4 ml-2 mr-4"></div>
+                        <div class="my-auto {boat.online ? 'bg-green-600' : 'bg-red-600'} rounded-full h-4 w-4 ml-2 mr-4"></div>
                         <div>
                             <p class="text-sm font-medium text-gray-500">{boat.model} • {boat.id}</p>
                             <h1 class="text-xl font-bold">{boat.name}</h1>
