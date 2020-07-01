@@ -99,9 +99,11 @@
 
             function updateBoatPos() {
                 try {
-                    map.getSource('point').setData(getBoatPos());
-                    map.getSource('route').setData(getBoatRoute());
-                    map.setLayoutProperty('point', 'icon-rotate', rotation)
+                    if (lastLat !== lat) {
+                        map.getSource('point').setData(getBoatPos());
+                        map.getSource('route').setData(getBoatRoute());
+                        map.setLayoutProperty('point', 'icon-rotate', rotation)
+                    }
                 } catch (err) {
 
                 }
