@@ -4,7 +4,9 @@ import time
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
+
 from hardware.motors.servo import ServoMotor
+from hardware.sensors.gps import GpsSensor
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -12,6 +14,7 @@ load_dotenv(dotenv_path)
 sio = socketio.Client()
 
 motors = {}
+sensors = {}
 
 @sio.event
 def connect():
@@ -42,6 +45,9 @@ def init():
 
         rudder = ServoMotor("Rudder", 8, 4, 7, 3)
         motors.__setitem__("rudder", rudder)
+
+        gps = GpsSensor()
+        sensors.__setitem__("gps", gps)
     except socketio.exceptions.ConnectionError:
         time.sleep(2)
         print("Reconnecting...")
