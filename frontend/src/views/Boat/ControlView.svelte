@@ -1,5 +1,7 @@
 <script>
     import Map from "./ControlView/Map.svelte";
+    import Rudder from "./ControlView/Rudder.svelte";
+
     export let socket;
 
     let lat = 0;
@@ -11,7 +13,7 @@
     let precision = [0, 0]
 
     socket.on("meta", data => {
-        console.log(data)
+        //console.log(data)
         sats = data.gps.sats;
         mode = data.gps.mode;
         if (data.gps.position != null) {
@@ -22,18 +24,14 @@
             precision = data.gps.precision
         }
     })
-
-    let rudder = 0;
-    $: {
-        socket.emit("instruction", {name: "rudder", value: rudder})
-    }
 </script>
 
-<div id="mapbox" class="sm:w-2/5 mt-4 mb-8 sm:mb-0">
+<div id="mapbox" class="sm:w-2/5 mt-4">
     <Map {lng} {lat} {rotation} />
-    <p>M {mode} {"<->"} {sats} Sats {"<->"} {parseFloat(speed).toFixed(2)} m/s | {parseFloat(speed * 3.6).toFixed(2)} km/h</p>
 </div>
-<input type="range" min="-1" max="1" step="0.05" bind:value={rudder}>
+<p>M {mode} {"<->"} {sats} Sats {"<->"} {parseFloat(speed).toFixed(2)} m/s | {parseFloat(speed * 3.6).toFixed(2)} km/h</p>
+
+<Rudder {socket}/>
 
 <style>
     @media screen and (max-width: 500px) {
