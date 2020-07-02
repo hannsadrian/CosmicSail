@@ -116,4 +116,4 @@
     })
 </script>
 
-<div id='map' class="rounded-lg h-full w-full"></div>
+<div id='map' class="h-full w-full"></div>
