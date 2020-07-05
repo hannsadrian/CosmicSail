@@ -8,12 +8,13 @@
     let lastLat = 0;
 
     let points = [];
+    var map;
 
     onMount(async () => {
         mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
-        var map = new mapboxgl.Map({
+        map = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
+            style: 'mapbox://styles/mapbox/outdoors-v11', // stylesheet location
             center: [lng, lat], // starting position [lng, lat]
             zoom: 17 // starting zoom
         });
