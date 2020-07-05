@@ -4,6 +4,7 @@
 
     export let socket;
 
+    let bandwidth = 0;
     let lat = 0;
     let lng = 0;
     let rotation = 0;
@@ -13,6 +14,7 @@
     let precision = [0, 0]
 
     socket.on("meta", data => {
+        bandwidth = data.network
         sats = data.gps.sats;
         mode = data.gps.mode;
         if (data.gps.position != null) {
@@ -35,6 +37,7 @@
         </div>
         <p>🌍 M{mode} {"<->"} {sats} Sats {"<->"} {parseFloat(speed * 3.6).toFixed(1)} km/h {"<->"}
             {parseFloat(rotation).toFixed(1)}°<br/>
+            🤖 {parseFloat(bandwidth).toFixed(2)} MB
         </p>
     </div>
     <div class="mt-4">

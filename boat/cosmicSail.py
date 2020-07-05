@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 from hardware.motors.servo import ServoMotor
 from hardware.sensors.gps import GpsSensor
+from hardware.sensors.bandwidth import Bandwidth
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -48,6 +49,8 @@ def init():
 
         gps = GpsSensor()
         sensors.__setitem__("gps", gps)
+        bandwidth = Bandwidth()
+        sensors.__setitem__("bandwidth", bandwidth)
     except socketio.exceptions.ConnectionError:
         time.sleep(2)
         print("Reconnecting...")
@@ -61,28 +64,32 @@ def init():
 
 
 def sendMeta():
-    current_gps_data = sensors["gps"].get_value()
-    position = None
-    speed = None
-    precision = None
-    heading = None
-    mode = current_gps_data.mode
-    sats = current_gps_data.sats
-    if current_gps_data.mode > 1:
-        position = current_gps_data.position()
-        speed = current_gps_data.hspeed
-        precision = current_gps_data.position_precision()
-        heading = current_gps_data.track
-    sio.emit("meta", {'gps':
-                          {
-                              'mode': mode,
-                              'position': position,
-                              'speed': speed,
-                              'precision': precision,
-                              'heading': heading,
-                              'sats': sats
-                           }
-                      })
+    try:
+        current_gps_data = sensors["gps"].get_value()
+        position = None
+        speed = None
+        precision = None
+        heading = None
+        mode = current_gps_data.mode
+        sats = current_gps_data.sats
+        if current_gps_data.mode > 1:
+            position = current_gps_data.position()
+            speed = current_gps_data.hspeed
+            precision = current_gps_data.position_precision()
+            heading = current_gps_data.track
+        sio.emit("meta", {'gps':
+                              {
+                                  'mode': mode,
+                                  'position': position,
+                                  'speed': speed,
+                                  'precision': precision,
+                                  'heading': heading,
+                                  'sats': sats
+                              },
+                          'network': sensors["bandwidth"].get_value()
+                          })
+    except UserWarning as e:
+        print(e)
 
 
 init()
