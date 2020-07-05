@@ -50,6 +50,7 @@ export class SocketHandler {
         // add entity to room
         room.addEntity(entity);
       } catch(err) {
+        console.log(err)
         client.emit("exception", err.message)
         client.disconnect();
         return;
@@ -65,7 +66,12 @@ export class SocketHandler {
       })
 
       client.on("instruction", data => {
-        if (entity.type !== EntityType.CONTROLLER || room.boat == undefined)
+        if (entity.type !== EntityType.CONTROLLER)
+          return;
+
+        // TODO: Sync. with other controllers
+
+        if (room.boat == undefined)
           return;
         room.boat.socket.emit("instruction", data)
       })
