@@ -34,7 +34,7 @@
                 } else if (orientation < -30) {
                     orientation = -30;
                 }
-                orientation = Math.floor(orientation / 3) / 10
+                orientation = Math.floor(orientation / 6) / 5
                 if (orientation === previousOrientation)
                     return
 
@@ -62,4 +62,5 @@
     </div>
     <button class='text-blue-600 mt-4' on:click={requestPermission}>Allow</button>
 </InformationModal>
-<input type="range" min="-1" max="1" step="0.05" bind:value={rudder}>
+<p class="text-sm uppercase text-gray-500 font-semibold tracking-wide">Rudder</p>
+<input type="range" min="-1" max="1" step="0.05" class="w-full" on:change={console.log("change")} bind:value={rudder}>

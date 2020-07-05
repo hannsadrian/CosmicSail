@@ -13,7 +13,6 @@
     let precision = [0, 0]
 
     socket.on("meta", data => {
-        //console.log(data)
         sats = data.gps.sats;
         mode = data.gps.mode;
         if (data.gps.position != null) {
@@ -22,16 +21,26 @@
             rotation = data.gps.heading
             speed = data.gps.speed
             precision = data.gps.precision
+        } else {
+            speed = 0;
+            precision = 0;
         }
     })
 </script>
 
-<div id="mapbox" class="sm:w-2/5 mt-4">
-    <Map {lng} {lat} {rotation} />
+<div class="sm:flex mt-4">
+    <div style="max-width: 430px" class="w-full">
+        <div id="mapbox" class="sm:w-full">
+            <Map {lng} {lat} {rotation}/>
+        </div>
+        <p>🌍 M{mode} {"<->"} {sats} Sats {"<->"} {parseFloat(speed * 3.6).toFixed(1)} km/h {"<->"}
+            {parseFloat(rotation).toFixed(1)}°<br/>
+        </p>
+    </div>
+    <div class="mt-4">
+        <Rudder {socket}/>
+    </div>
 </div>
-<p>M {mode} {"<->"} {sats} Sats {"<->"} {parseFloat(speed).toFixed(2)} m/s | {parseFloat(speed * 3.6).toFixed(2)} km/h</p>
-
-<Rudder {socket}/>
 
 <style>
     @media screen and (max-width: 500px) {
