@@ -11,7 +11,7 @@
 
 {#if shown}
     <div transition:fade="{{ duration: 200 }}" on:click={closeModal} id="close"
-         style="background-color: rgba(20, 20, 20, 0.6); z-index: 2"
+         style="background-color: rgba(20, 20, 20, 0.6); z-index: 200"
          class="fixed w-full h-full top-0 left-0 flex items-center justify-center overflow-scroll">
         <div class="m-4 w-full sm:max-w-sm rounded-lg p-5 bg-white dark:bg-gray-800 transition-all duration-200 shadow-lg">
             <div class="flex justify-between mb-2">
