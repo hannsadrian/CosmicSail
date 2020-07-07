@@ -47,7 +47,7 @@ def init():
         rudder = ServoMotor("Rudder", 8, 4, 7, 3)
         motors.__setitem__("rudder", rudder)
 
-        gps = GpsSensor()
+        gps = GpsSensor(os.getenv("UBLOX_TOKEN"), os.getenv("PORT"))
         sensors.__setitem__("gps", gps)
         bandwidth = Bandwidth()
         sensors.__setitem__("bandwidth", bandwidth)

@@ -1,9 +1,39 @@
 import gpsd
+import time
+import requests
+import serial
+import subprocess
 
 # https://github.com/MartijnBraam/gpsd-py3/blob/master/DOCS.md
 class GpsSensor():
-    def __init__(self):
+    def __init__(self, token, port):
+        self.token = token
+        self.port = port
+        self.get_agps()
         gpsd.connect()
+
+    def get_agps(self):
+        print("Stopping GPSD for AGPS")
+        subprocess.run("sudo service gpsd stop", shell=True, check=True)
+        time.sleep(2)
+
+        token = self.token
+        comPort = self.port
+        r = requests.get(
+            "http://online-live1.services.u-blox.com/GetOnlineData.ashx?token=" + token + ";gnss=gps;datatype=eph,alm,aux,pos;format=aid;",
+            stream=True)
+
+        ser = serial.Serial(comPort, 9600)
+        drainer = True
+        while drainer:
+            drainer = ser.inWaiting()
+            ser.read(drainer)
+
+        ser.write(r.content)
+
+        ser.close()
+        subprocess.run("sudo service gpsd start", shell=True, check=True)
+        print("Uploaded AGPS Data!")
 
     def get_value(self):
         return gpsd.get_current()
