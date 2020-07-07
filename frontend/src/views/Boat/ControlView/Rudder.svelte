@@ -8,8 +8,7 @@
     let hasPermissionForOrientation = true;
 
     let rudder = 0;
-    let previousRudder = 0;
-    let previousOrientation = 0;
+    let previousValue = 0;
     $: {
         // ☢️ ATTENTION ☣️
         //
@@ -17,9 +16,14 @@
         // TAKE CAUTION (may cause bugs)
         //
         // ☢️ ATTENTION ☣️
-        socket.emit("instruction", {name: "rudder", value: rudder})
+        let value = Math.floor((rudder * 30) / 6) / 5
+        if (value !== previousValue) {
+            previousValue = value;
+            socket.emit("instruction", {name: "rudder", value: value})
+        }
     }
 
+    let previousRudder = 0;
     onMount(() => {
         if ("DeviceOrientationEvent" in window) {
             console.log("Supports Orientation! 🎉")
@@ -34,12 +38,11 @@
                 } else if (orientation < -30) {
                     orientation = -30;
                 }
-                orientation = Math.floor(orientation / 6) / 5
-                if (orientation === previousOrientation)
-                    return
-
-                previousOrientation = orientation;
-                rudder = orientation;
+                let value = Math.round(orientation*10) / 300;
+                if (value !== previousRudder) {
+                    previousRudder = value;
+                    rudder = value;
+                }
             });
         } else {
             console.log("No Orientation on this device 😕")
@@ -62,5 +65,5 @@
     </div>
     <button class='text-blue-600 mt-4' on:click={requestPermission}>Allow</button>
 </InformationModal>
-<p class="text-sm uppercase text-gray-500 font-semibold tracking-wide">Rudder</p>
-<input type="range" min="-1" max="1" step="0.05" class="w-full" on:change={console.log("change")} bind:value={rudder}>
+<p class="text-sm uppercase text-gray-500 font-semibold tracking-wide -mb-2">Rudder</p>
+<input type="range" min="-1" max="1" step="0.0005" class="w-full" bind:value={rudder}>
