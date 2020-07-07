@@ -8,7 +8,11 @@
     let lastLat = 0;
 
     let points = [];
-    var map;
+    let map;
+
+    function flyToBoat() {
+        map.flyTo({center: [lng, lat], zoom: 17})
+    }
 
     onMount(async () => {
         mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
@@ -16,14 +20,14 @@
             container: 'map',
             style: 'mapbox://styles/mapbox/outdoors-v11', // stylesheet location
             center: [lng, lat], // starting position [lng, lat]
-            zoom: 17 // starting zoom
+            zoom: -17 // starting zoom
         });
 
         function getBoatRoute() {
             if (lastLng !== lng || lastLat !== lat) {
                 points.push([lng, lat])
                 if (lastLat === 0)
-                    map.flyTo({center: [lng, lat]})
+                    map.flyTo({center: [lng, lat], zoom: 17})
                 lastLat = lat;
                 lastLng = lng;
             }
@@ -117,4 +121,6 @@
     })
 </script>
 
-<div id='map' class="h-full w-full"></div>
+<div id='map' class="h-full w-full">
+    <button style="z-index:10;right:0;" on:click={flyToBoat} class="absolute m-2 text-lg">⛵️</button>
+</div>
