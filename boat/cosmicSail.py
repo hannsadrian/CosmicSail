@@ -34,6 +34,12 @@ def disconnect():
 
 @sio.event
 def instruction(data):
+    if "setup_" in data['name']:
+        if "agps" in data['name']:
+            gps = GpsSensor(os.getenv("UBLOX_TOKEN"), os.getenv("PORT"), data['lat'], data['lon'])
+            sensors.__setitem__("gps", gps)
+        return
+
     motor = motors[data['name']]
     if motor is None:
         return
@@ -47,8 +53,6 @@ def init():
         rudder = ServoMotor("Rudder", 8, 4, 7, 3)
         motors.__setitem__("rudder", rudder)
 
-        gps = GpsSensor(os.getenv("UBLOX_TOKEN"), os.getenv("PORT"))
-        sensors.__setitem__("gps", gps)
         bandwidth = Bandwidth()
         sensors.__setitem__("bandwidth", bandwidth)
     except socketio.exceptions.ConnectionError:
@@ -69,8 +73,9 @@ def sendMeta():
             'gps': sensors["gps"].get_meta(),
             'network': sensors["bandwidth"].get_value()
         })
-    except UserWarning as e:
-        print(e)
+    except KeyError as e:
+        sio.emit("exception", {'name': "setup"})
+        return
 
 
 init()
