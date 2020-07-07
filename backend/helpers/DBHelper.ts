@@ -149,14 +149,12 @@ export default class DBHelper {
     }
 
     public setOnline(boatId: string): void {
-        Boat.updateOne({id: boatId}, {$set: {online: true}}, {upsert: true})
+        Boat.updateOne({id: boatId}, {$set: {online: true}}, {}, (err, doc) => {})
     }
 
     public setOffline(boatId: string): void {
         Boat.updateOne({id: boatId},
-            {$set: {online: false, lastOnline: new Date(Date.now()).toISOString()}},
-            {upsert: true}, (err, doc) => {
-            })
+            {$set: {online: false, lastOnline: new Date(Date.now()).toISOString()}}, {}, (err, doc) => {})
     }
 }
 
