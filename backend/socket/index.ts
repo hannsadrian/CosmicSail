@@ -76,6 +76,12 @@ export class SocketHandler {
         room.boat.socket.emit("instruction", data)
       })
 
+      client.on("exception", data => {
+        room.controllers.forEach(controller => {
+          controller.socket.emit("exception", data)
+        })
+      })
+
       client.on("disconnect", () => {
         if (!room || !entity)
           return;
