@@ -11,12 +11,14 @@
     let sats = 0;
     let mode = 0;
     let speed = 0;
-    let precision = [0, 0]
+    let precision = [0, 0];
+    let error = {}
 
     socket.on("meta", data => {
         bandwidth = data.network
         sats = data.gps.sats;
         mode = data.gps.mode;
+        error = data.gps.error;
         if (data.gps.position != null) {
             lat = data.gps.position[0]
             lng = data.gps.position[1]
@@ -37,6 +39,7 @@
         </div>
         <p>🌍 M{mode} {"<->"} {sats} Sats {"<->"} {parseFloat(speed * 3.6).toFixed(1)} km/h {"<->"}
             {parseFloat(rotation).toFixed(1)}°<br/>
+            🚧 {error ? "± " + error.s + " km/h | ± " + ((error.x+error.y)/2).toFixed(1) + " m" : "No position..."}<br/>
             🤖 {parseFloat(bandwidth).toFixed(2)} MB
         </p>
     </div>

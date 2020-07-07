@@ -65,29 +65,10 @@ def init():
 
 def sendMeta():
     try:
-        current_gps_data = sensors["gps"].get_value()
-        position = None
-        speed = None
-        precision = None
-        heading = None
-        mode = current_gps_data.mode
-        sats = current_gps_data.sats
-        if current_gps_data.mode > 1:
-            position = current_gps_data.position()
-            speed = current_gps_data.hspeed
-            precision = current_gps_data.position_precision()
-            heading = current_gps_data.track
-        sio.emit("meta", {'gps':
-                              {
-                                  'mode': mode,
-                                  'position': position,
-                                  'speed': speed,
-                                  'precision': precision,
-                                  'heading': heading,
-                                  'sats': sats
-                              },
-                          'network': sensors["bandwidth"].get_value()
-                          })
+        sio.emit("meta", {
+            'gps': sensors["gps"].get_meta(),
+            'network': sensors["bandwidth"].get_value()
+        })
     except UserWarning as e:
         print(e)
 
