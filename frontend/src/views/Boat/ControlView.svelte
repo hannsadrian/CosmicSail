@@ -69,7 +69,7 @@
         {:else}
             <p>🌍 M{mode} {"<->"} {sats} Sats {"<->"} {parseFloat(speed * 3.6).toFixed(1)} km/h {"<->"}
                 {parseFloat(rotation).toFixed(1)}°<br/>
-                🚧 {error ? "± " + (error.s || 0.00) + " km/h | ± " + ((error.x || 0+error.y || 0)/2).toFixed(1) + " m" : "Loading..."}
+                {error ? "🚧 ± " + (error.s || 0.00) + " km/h | ± " + ((error.x || 0+error.y || 0)/2).toFixed(1) + " m" : "📍 Locating..."}
                 <br/>
                 🤖 {parseFloat(bandwidth).toFixed(2)} MB
             </p>
