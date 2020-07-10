@@ -63,6 +63,8 @@ def init():
         motors.__setitem__("rudder", rudder)
         sail = ServoMotor("Sail", 1, 2000, 3000, 1500, pca)
         motors.__setitem__("sail", sail)
+        esc = ServoMotor("Esc", 2, 2250, 2750, 2500, pca)
+        motors.__setitem__("esc", esc)
 
         bandwidth = Bandwidth()
         sensors.__setitem__("bandwidth", bandwidth)
