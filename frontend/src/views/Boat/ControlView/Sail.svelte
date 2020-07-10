@@ -5,7 +5,7 @@
     $: {
         // ☢️ ATTENTION ☣️
         //
-        // AUTOMATIC VALUE BINDING WHICH EMITS EVERY TIME THE RUDDER VALUE CHANGES
+        // AUTOMATIC VALUE BINDING WHICH EMITS EVERY TIME THE VALUE CHANGES
         // TAKE CAUTION (may cause bugs)
         //
         // ☢️ ATTENTION ☣️
