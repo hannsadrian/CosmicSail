@@ -4,6 +4,9 @@ import time
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
+from board import SCL, SDA
+import busio
+from adafruit_pca9685 import PCA9685
 
 from hardware.motors.servo import ServoMotor
 from hardware.sensors.gps import GpsSensor
@@ -16,6 +19,12 @@ sio = socketio.Client()
 
 motors = {}
 sensors = {}
+
+# Create the I2C bus interface.
+i2c_bus = busio.I2C(SCL, SDA)
+# Create a simple PCA9685 class instance.
+pca = PCA9685(i2c_bus)
+pca.frequency = 24
 
 @sio.event
 def connect():
@@ -50,8 +59,10 @@ def init():
     try:
         sio.connect(os.getenv("SERVER") + "?token=" + os.getenv("TOKEN") + "&boatId=" + os.getenv("BOATID"))
 
-        rudder = ServoMotor("Rudder", 8, 4, 7, 3)
+        rudder = ServoMotor("Rudder", 0, 1500, 3000, 2000, pca)
         motors.__setitem__("rudder", rudder)
+        sail = ServoMotor("Sail", 1, 2000, 3000, 1500, pca)
+        motors.__setitem__("sail", sail)
 
         bandwidth = Bandwidth()
         sensors.__setitem__("bandwidth", bandwidth)
