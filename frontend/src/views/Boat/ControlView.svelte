@@ -1,7 +1,8 @@
 <script>
     import Map from "./ControlView/Map.svelte";
     import Rudder from "./ControlView/Rudder.svelte";
-    import Sail from "./ControlView/Sail.svelte"
+    import Sail from "./ControlView/Sail.svelte";
+    import Esc from "./ControlView/Esc.svelte";
 
     export let socket;
 
@@ -79,6 +80,7 @@
     <div class="mt-4">
         <Rudder {socket}/>
         <Sail {socket}/>
+        <Esc {socket}/>
     </div>
 </div>
 
