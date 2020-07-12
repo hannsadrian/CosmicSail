@@ -7,7 +7,7 @@ So I decided to **burn my money** with making this boat as cool and advanced as 
 
 At first I went over a few ordinary systems with radio control, but
 I noticed very quickly that the problem with those radio controls is that they lose signal after about 50 meters.
-It may was related to the antennas being located somewhat below the waterline, blocking the range.
+In my case that may was related to the antennas being located somewhat below the waterline, blocking the signal.
 
 That was a bit disappointing but nevertheless I brainstormed for a better solution and
 came up with the idea of controlling the boat and its motors with a Raspberrypi.<br>
