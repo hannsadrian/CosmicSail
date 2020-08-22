@@ -51,7 +51,7 @@ but that wouldn't include local changes in the wind and needs to be tested for a
 
 **Power**<br>
 The raspberrypi and with it the servos as well as the sensors are powered by a pretty standard big powerbank,
-providing enough power for hours of sailing. The motor, as mentioned above, is powered by some default AA batteries.
+providing enough power for hours of sailing. The motor, is powered by a [LiPo 2S 7.4V/1500mAh](https://www.krickshop.de/Elektronik-Motoren/Akkus-Ladetechnik/LiPo-Akku-7-4V-1500-mAh-15-C.htm?a=article&ProdNr=646090&p=365) battery.
 
 ## 🤖 Autopilot
 
