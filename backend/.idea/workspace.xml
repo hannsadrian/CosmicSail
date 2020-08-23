@@ -23,9 +23,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d3f5024d-f077-40ea-b752-137473a2350c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/server.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -63,12 +61,26 @@
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+    <property name="restartRequiresConfirmation" value="false" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
   <component name="RunManager">
     <configuration name="go build CosmicSailBackend" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="backend" />
       <working_directory value="$PROJECT_DIR$" />
+      <envs>
+        <env name="SERVER_PORT" value="3000" />
+      </envs>
+      <EXTENSION ID="net.ashald.envfile">
+        <option name="IS_ENABLED" value="false" />
+        <option name="IS_SUBST" value="false" />
+        <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+        <option name="IS_IGNORE_MISSING_FILES" value="false" />
+        <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+        <ENTRIES>
+          <ENTRY IS_ENABLED="true" PARSER="runconfig" />
+        </ENTRIES>
+      </EXTENSION>
       <kind value="PACKAGE" />
       <filePath value="$PROJECT_DIR$/server.go" />
       <package value="CosmicSailBackend" />
@@ -101,37 +113,47 @@
     <integration-enabled>true</integration-enabled>
   </component>
   <component name="WindowStateProjectService">
-    <state x="410" y="166" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1598127886075">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state x="-1510" y="-277" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1598175189059">
+      <screen x="-1920" y="-443" width="1920" height="1040" />
     </state>
+    <state x="-1510" y="-277" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040/-1920.-443.1920.1040@-1920.-443.1920.1040" timestamp="1598175189059" />
     <state x="410" y="166" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1598127886075" />
     <state x="635" y="303" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1598130957185">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="635" y="303" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1598130957185" />
+    <state x="-1143" y="-224" key="EnvironmentVariablesDialog" timestamp="1598175174649">
+      <screen x="-1920" y="-443" width="1920" height="1040" />
+    </state>
+    <state x="-1143" y="-224" key="EnvironmentVariablesDialog/0.0.1920.1040/-1920.-443.1920.1040@-1920.-443.1920.1040" timestamp="1598175174649" />
     <state x="443" y="351" key="FileChooserDialogImpl" timestamp="1598114340232">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="443" y="351" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1598114340231" />
-    <state width="1867" height="235" key="GridCell.Tab.0.bottom" timestamp="1598131728799">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1867" height="235" key="GridCell.Tab.0.bottom" timestamp="1598176869191">
+      <screen x="-1920" y="-443" width="1920" height="1040" />
     </state>
-    <state width="1867" height="235" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1598131728799" />
-    <state width="1867" height="235" key="GridCell.Tab.0.center" timestamp="1598131728799">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1867" height="235" key="GridCell.Tab.0.bottom/0.0.1920.1040/-1920.-443.1920.1040@-1920.-443.1920.1040" timestamp="1598176869191" />
+    <state width="1867" height="235" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1598132112352" />
+    <state width="1867" height="235" key="GridCell.Tab.0.center" timestamp="1598176869191">
+      <screen x="-1920" y="-443" width="1920" height="1040" />
     </state>
-    <state width="1867" height="235" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1598131728799" />
-    <state width="1867" height="235" key="GridCell.Tab.0.left" timestamp="1598131728799">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1867" height="235" key="GridCell.Tab.0.center/0.0.1920.1040/-1920.-443.1920.1040@-1920.-443.1920.1040" timestamp="1598176869191" />
+    <state width="1867" height="235" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1598132112352" />
+    <state width="1867" height="235" key="GridCell.Tab.0.left" timestamp="1598176869191">
+      <screen x="-1920" y="-443" width="1920" height="1040" />
     </state>
-    <state width="1867" height="235" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1598131728799" />
-    <state width="1867" height="235" key="GridCell.Tab.0.right" timestamp="1598131728799">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1867" height="235" key="GridCell.Tab.0.left/0.0.1920.1040/-1920.-443.1920.1040@-1920.-443.1920.1040" timestamp="1598176869191" />
+    <state width="1867" height="235" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1598132112348" />
+    <state width="1867" height="235" key="GridCell.Tab.0.right" timestamp="1598176869191">
+      <screen x="-1920" y="-443" width="1920" height="1040" />
     </state>
-    <state width="1867" height="235" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1598131728799" />
-    <state x="673" y="7" key="SettingsEditor" timestamp="1598126113698">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1867" height="235" key="GridCell.Tab.0.right/0.0.1920.1040/-1920.-443.1920.1040@-1920.-443.1920.1040" timestamp="1598176869191" />
+    <state width="1867" height="235" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1598132112352" />
+    <state x="-1247" y="-436" key="SettingsEditor" timestamp="1598175615009">
+      <screen x="-1920" y="-443" width="1920" height="1040" />
     </state>
+    <state x="-1247" y="-436" key="SettingsEditor/0.0.1920.1040/-1920.-443.1920.1040@-1920.-443.1920.1040" timestamp="1598175615009" />
     <state x="673" y="7" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1598126113698" />
     <state x="539" y="5" width="840" height="1034" key="search.everywhere.popup" timestamp="1598126071010">
       <screen x="0" y="0" width="1920" height="1040" />
