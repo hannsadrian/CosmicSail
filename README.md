@@ -1,4 +1,4 @@
-> Work in progress.
+*work in progress*
 
 # ⛵️ CosmicSail
 
