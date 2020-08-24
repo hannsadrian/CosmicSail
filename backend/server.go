@@ -1,12 +1,11 @@
 package main
 
 import (
-	"CosmicSailBackend/src/models"
+	"CosmicSailBackend/controllers"
+	"CosmicSailBackend/models"
 	"github.com/gofiber/cors"
 	"github.com/gofiber/fiber"
 	"github.com/gofiber/fiber/middleware"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -21,13 +20,13 @@ func main() {
 		log.Println("-> Loaded env file")
 	}
 
+
 	// Connect to postgres
-	db, dbErr := gorm.Open("postgres",
-		"host="+os.Getenv("POSTGRES_HOST")+
-		" port="+os.Getenv("POSTGRES_PORT")+
-		" user="+os.Getenv("POSTGRES_USER")+
-		" dbname="+os.Getenv("POSTGRES_DB")+
-		" password="+os.Getenv("POSTGRES_PSWD"))
+	db, dbErr := models.ConnectDb("host="+os.Getenv("POSTGRES_HOST")+
+			" port="+os.Getenv("POSTGRES_PORT")+
+			" user="+os.Getenv("POSTGRES_USER")+
+			" dbname="+os.Getenv("POSTGRES_DB")+
+			" password="+os.Getenv("POSTGRES_PSWD"))
 	if dbErr != nil {
 		panic(dbErr)
 	} else {
@@ -37,12 +36,19 @@ func main() {
 
 	// Migrate Models
 	db.AutoMigrate(&models.Boat{})
+	db.AutoMigrate(&models.User{})
+
+
 
 	// Init webserver
 	app := fiber.New()
 	app.Use(cors.New())
 	app.Use(middleware.Recover())
 	app.Use(middleware.Logger("${time} | ${status} ${method} from ${ip} -> ${path}"))
+
+	auth := app.Group("/auth")
+
+	auth.Post("/register", controllers.RegisterUser)
 
 	// Register routes
 	app.Get("/v1/boats", func(c *fiber.Ctx) {

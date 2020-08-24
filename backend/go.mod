@@ -11,6 +11,7 @@ require (
 	github.com/maxwellhealth/go-dotaccess v0.0.0-20190924013105-74ea4f4ca4eb // indirect
 	github.com/oleiade/reflections v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.16.0 // indirect
+	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/sys v0.0.0-20200821140526-fda516888d29 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
 )
