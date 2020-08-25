@@ -44,11 +44,12 @@ func main() {
 	app := fiber.New()
 	app.Use(cors.New())
 	app.Use(middleware.Recover())
-	app.Use(middleware.Logger("${time} | ${status} ${method} from ${ip} -> ${path}"))
+	app.Use(middleware.Logger("${time} | ${status} ${method} from ${ip} -> ${path} \n"))
 
 	auth := app.Group("/auth")
-
 	auth.Post("/register", controllers.RegisterUser)
+	auth.Post("/login", controllers.LoginUser)
+
 
 	// Register routes
 	app.Get("/v1/boats", func(c *fiber.Ctx) {

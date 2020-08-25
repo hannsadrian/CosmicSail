@@ -26,7 +26,7 @@ func CreateUser(username string, password string, name string, email string) (Us
 
 	// Unique username
 	var users []User
-	Db.Find(&users).Where("username = ?", username)
+	Db.Where("username = ?", username).Find(&users)
 	if len(users) > 0 {
 		panic(fiber.NewError(fiber.StatusBadRequest, "A user with that name already exists!"))
 	}
@@ -38,7 +38,7 @@ func CreateUser(username string, password string, name string, email string) (Us
 
 	// Email invalid
 	if len(email) == 0 || !strings.Contains(email, "@") || !strings.Contains(email, ".") {
-		panic(fiber.NewError(fiber.StatusBadRequest, "E-Mail not valid"))
+		panic(fiber.NewError(fiber.StatusBadRequest, "E-Mail invalid"))
 	}
 
 	// Create user
