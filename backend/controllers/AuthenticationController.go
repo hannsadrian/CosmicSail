@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// Register function
 type registerBody struct {
 	Username string `json:"username" xml:"username" form:"username"`
 	Password string `json:"password" xml:"password" form:"password"`
@@ -34,9 +35,10 @@ func RegisterUser(c *fiber.Ctx) {
 	if err != nil {
 		panic(fiber.NewError(fiber.StatusForbidden, err.Error()))
 	}
-	c.JSON(fiber.Map{"username": user.Username, "fullName": user.FullName, "mail": user.Email, "token": token})
+	c.JSON(fiber.Map{"Username": user.Username, "FullName": user.FullName, "Email": user.Email, "Token": token})
 }
 
+// Login function
 type loginBody struct {
 	Username string `json:"username" xml:"username" form:"username"`
 	Password string `json:"password" xml:"password" form:"password"`
@@ -54,9 +56,10 @@ func LoginUser(c *fiber.Ctx) {
 		panic(fiber.NewError(fiber.StatusForbidden, err.Error()))
 	}
 
-	c.JSON(fiber.Map{"username": body.Username, "token": token})
+	c.JSON(fiber.Map{"Username": body.Username, "Token": token})
 }
 
+// JWT Management
 type CosmicPayload struct {
 	jwt.Payload
 	Type       string `json:"type,omitempty"`
@@ -65,6 +68,7 @@ type CosmicPayload struct {
 
 var hs = jwt.NewHS256([]byte(os.Getenv("JWT_SECRET")))
 
+// Generating JWT
 func GetJWTForUser(username string, password string) (string, error) {
 	var users []models.User
 	models.Db.Where("username = ?", username).Find(&users)
@@ -80,17 +84,30 @@ func GetJWTForUser(username string, password string) (string, error) {
 		return "", errors.New("Password invalid")
 	}
 
+	return GetJWT("user", username, true)
+}
+
+func GetJWTForBoat(boatId string) (string, error) {
+	return GetJWT("boat", boatId, false)
+}
+
+func GetJWT(jwtType string, jwtIdentifier string, expires bool) (string, error) {
 	now := time.Now()
+	expiration := jwt.NumericDate(now.Add(24 * time.Hour))
+	if !expires {
+		expiration = nil
+	}
+
 	pl := CosmicPayload{
 		Payload: jwt.Payload{
 			Issuer:         "CosmicSail",
-			Subject:        username,
-			ExpirationTime: jwt.NumericDate(now.Add(24 * time.Hour)),
+			Subject:        jwtIdentifier,
+			ExpirationTime: expiration,
 			NotBefore:      jwt.NumericDate(now),
 			IssuedAt:       jwt.NumericDate(now),
 		},
-		Type:       "user",
-		Identifier: username,
+		Type:       jwtType,
+		Identifier: jwtIdentifier,
 	}
 
 	token, err := jwt.Sign(pl, hs)
@@ -99,4 +116,39 @@ func GetJWTForUser(username string, password string) (string, error) {
 	}
 
 	return string(token), nil
+}
+
+// Verifying JWT
+func VerifyUserJWT(token string) (CosmicPayload, error) {
+	payload, err := VerifyJWT(token)
+	if err != nil {
+		return CosmicPayload{}, err
+	}
+	if payload.Type != "user" {
+		return CosmicPayload{}, errors.New("Insufficient permission")
+	}
+
+	return payload, nil
+}
+
+func VerifyBoatJWT(token string) (CosmicPayload, error) {
+	payload, err := VerifyJWT(token)
+	if err != nil {
+		return CosmicPayload{}, err
+	}
+	if payload.Type != "boat" {
+		return CosmicPayload{}, errors.New("Insufficient permission")
+	}
+
+	return payload, nil
+}
+
+func VerifyJWT(token string) (CosmicPayload, error) {
+	var payload CosmicPayload
+	_, err := jwt.Verify([]byte(token), hs, &payload)
+	if err != nil {
+		return CosmicPayload{}, err
+	}
+
+	return payload, nil
 }

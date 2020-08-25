@@ -13,6 +13,7 @@ type User struct {
 	PasswordHash string `gorm:"not null"`
 	FullName     string `gorm:"not null"`
 	Email        string `gorm:"unique;not null"`
+	Boats		 []Boat `gorm:"foreignkey:UserID"`
 	IsAdmin      bool
 }
 
