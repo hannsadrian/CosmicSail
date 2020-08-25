@@ -13,7 +13,9 @@ That was a bit disappointing but nevertheless I brainstormed for a better soluti
 came up with the idea of controlling the boat and its motors with a Raspberrypi.<br>
 *You may wonder how the Raspberrypi is connected* to any kind of controller. (via radio? 😅)<br>
 **No**, it turns out that most of the lakes in my area have quite a decent 4G coverage.
-And that the Pi is compatible with Surfsticks. And my phone has a SIM card which is compatible with Surfsticks. 😏
+And that the Pi is compatible with Surfsticks. And my phone has a SIM card which is compatible with Surfsticks. 😏<br>
+In the future I am planning to use [hologram.io](https://hologram.io) as SIM card provider, 
+so that users don't have to put their personal SIM in the boat.
 
 ## 📡 Connectivity
 
