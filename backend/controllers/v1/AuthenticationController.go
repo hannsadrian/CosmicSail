@@ -1,4 +1,4 @@
-package controllers
+package v1
 
 import (
 	"CosmicSailBackend/models"
@@ -146,6 +146,9 @@ func VerifyBoatJWT(token string) (CosmicPayload, error) {
 func VerifyJWT(token string) (CosmicPayload, error) {
 	var payload CosmicPayload
 	_, err := jwt.Verify([]byte(token), hs, &payload)
+	if payload.ExpirationTime.Unix() < time.Now().Unix() {
+		return CosmicPayload{}, errors.New("Token expired")
+	}
 	if err != nil {
 		return CosmicPayload{}, err
 	}

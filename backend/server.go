@@ -1,7 +1,7 @@
 package main
 
 import (
-	"CosmicSailBackend/controllers"
+	v1 "CosmicSailBackend/controllers/v1"
 	"CosmicSailBackend/models"
 	"github.com/gbrlsnchs/jwt/v3"
 	"github.com/gofiber/cors"
@@ -52,10 +52,10 @@ func main() {
 
 	// Register Routes
 	auth := app.Group("/auth")
-	auth.Post("/register", controllers.RegisterUser)
-	auth.Post("/login", controllers.LoginUser)
+	auth.Post("/register", v1.RegisterUser)
+	auth.Post("/login", v1.LoginUser)
 
-	v1 := app.Group("/v1", func(c *fiber.Ctx) {
+	apiV1 := app.Group("/v1", func(c *fiber.Ctx) {
 		// Get Header
 		bearer := c.Get("Authorization", "")
 		if bearer == "" {
@@ -63,7 +63,7 @@ func main() {
 		}
 
 		// Verify JWT
-		payload, err := controllers.VerifyUserJWT(strings.ReplaceAll(bearer, "Bearer ", ""))
+		payload, err := v1.VerifyUserJWT(strings.ReplaceAll(bearer, "Bearer ", ""))
 		if err != nil {
 			panic(fiber.NewError(fiber.StatusForbidden, err.Error()))
 		}
@@ -75,8 +75,8 @@ func main() {
 
 		c.Next()
 	})
-	v1.Post("/boats", controllers.RegisterBoatForUser)
-	v1.Get("/boats", controllers.GetAllBoats)
+	apiV1.Post("/boats", v1.RegisterBoatForUser)
+	apiV1.Get("/boats", v1.GetAllBoats)
 
 	// Deliver static files
 	app.Static("/", "static")
