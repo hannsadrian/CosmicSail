@@ -40,6 +40,8 @@ func main() {
 	// Migrate Models
 	models.Db.AutoMigrate(&models.Boat{})
 	models.Db.AutoMigrate(&models.User{})
+	models.Db.AutoMigrate(&models.Motor{})
+	models.Db.AutoMigrate(&models.Sensor{})
 
 
 

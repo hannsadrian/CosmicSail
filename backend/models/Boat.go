@@ -15,6 +15,8 @@ type Boat struct {
 	Make       string
 	Online     bool
 	LastOnline time.Time
+	Motors     []Motor
+	Sensors    []Sensor
 }
 
 func CreateBoat(owner User, name string, series string, make string) (Boat, error) {
@@ -38,6 +40,7 @@ func CreateBoat(owner User, name string, series string, make string) (Boat, erro
 }
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
 func randSeq(n int) string {
 	b := make([]rune, n)
 	for i := range b {
