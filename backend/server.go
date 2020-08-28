@@ -79,10 +79,10 @@ func main() {
 	})
 	apiV1.Post("/boats", v1.RegisterBoatForUser)
 	apiV1.Get("/boats", v1.GetAllBoats)
-	apiV1.Post("/boats/:emblem/motor", v1.RegisterBoatMotor)
-	apiV1.Post("/boats/:emblem/sensor", v1.RegisterBoatSensor)
-	apiV1.Delete("/boats/:emblem/motor/:id", v1.DeleteBoatMotor)
-	apiV1.Delete("/boats/:emblem/sensor/:id", v1.DeleteBoatSensor)
+	// Hardware
+	apiV1.Post("/boats/:emblem/:hardware", v1.RegisterBoatHardware)
+	apiV1.Put("/boats/:emblem/:hardware/:id", v1.UpdateBoatHardware)
+	apiV1.Delete("/boats/:emblem/:hardware/:id", v1.DeleteBoatHardware)
 
 	// Deliver static files
 	app.Static("/", "static")

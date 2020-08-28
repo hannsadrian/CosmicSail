@@ -27,6 +27,11 @@ func AddMotor(motor Motor, boat Boat) {
 	Db.Create(&motor)
 }
 
+func UpdateMotor(id uint, motor Motor) {
+	motor.ID = id
+	Db.Model(&motor).Updates(motor)
+}
+
 func RemoveMotor(id uint) {
 	Db.Where("id = ?", id).Delete(Motor{})
 }
@@ -35,6 +40,11 @@ func AddSensor(sensor Sensor, boat Boat) {
 	sensor.BoatID = boat.ID
 	Db.NewRecord(sensor)
 	Db.Create(&sensor)
+}
+
+func UpdateSensor(id uint, sensor Sensor) {
+	sensor.ID = id
+	Db.Model(&sensor).Updates(sensor)
 }
 
 func RemoveSensor(id uint) {
