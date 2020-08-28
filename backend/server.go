@@ -4,6 +4,7 @@ import (
 	v1 "CosmicSailBackend/controllers/v1"
 	"CosmicSailBackend/models"
 	"CosmicSailBackend/models/boat"
+	"CosmicSailBackend/models/boat/telemetry"
 	"github.com/gbrlsnchs/jwt/v3"
 	"github.com/gofiber/cors"
 	"github.com/gofiber/fiber"
@@ -39,11 +40,14 @@ func main() {
 	defer models.Db.Close()
 
 	// Migrate Models
-	models.Db.AutoMigrate(&boat.Boat{})
 	models.Db.AutoMigrate(&models.User{})
+
+	models.Db.AutoMigrate(&boat.Boat{})
 	models.Db.AutoMigrate(&boat.Motor{})
 	models.Db.AutoMigrate(&boat.Sensor{})
 
+	models.Db.AutoMigrate(&telemetry.Trip{})
+	models.Db.AutoMigrate(&telemetry.Datapoint{})
 
 
 	// Init webserver
