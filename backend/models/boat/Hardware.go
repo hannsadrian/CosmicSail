@@ -1,6 +1,9 @@
-package models
+package boat
 
-import "github.com/jinzhu/gorm"
+import (
+	"CosmicSailBackend/models"
+	"github.com/jinzhu/gorm"
+)
 
 type Motor struct {
 	gorm.Model
@@ -23,30 +26,30 @@ type Sensor struct {
 
 func AddMotor(motor Motor, boat Boat) {
 	motor.BoatID = boat.ID
-	Db.NewRecord(motor)
-	Db.Create(&motor)
+	models.Db.NewRecord(motor)
+	models.Db.Create(&motor)
 }
 
 func UpdateMotor(id uint, motor Motor) {
 	motor.ID = id
-	Db.Model(&motor).Updates(motor)
+	models.Db.Model(&motor).Updates(motor)
 }
 
 func RemoveMotor(id uint) {
-	Db.Where("id = ?", id).Delete(Motor{})
+	models.Db.Where("id = ?", id).Delete(Motor{})
 }
 
 func AddSensor(sensor Sensor, boat Boat) {
 	sensor.BoatID = boat.ID
-	Db.NewRecord(sensor)
-	Db.Create(&sensor)
+	models.Db.NewRecord(sensor)
+	models.Db.Create(&sensor)
 }
 
 func UpdateSensor(id uint, sensor Sensor) {
 	sensor.ID = id
-	Db.Model(&sensor).Updates(sensor)
+	models.Db.Model(&sensor).Updates(sensor)
 }
 
 func RemoveSensor(id uint) {
-	Db.Where("id = ?", id).Delete(Sensor{})
+	models.Db.Where("id = ?", id).Delete(Sensor{})
 }

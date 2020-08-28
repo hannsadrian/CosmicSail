@@ -1,6 +1,7 @@
 package models
 
 import (
+	"CosmicSailBackend/models/boat"
 	"github.com/gofiber/fiber"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
@@ -9,11 +10,11 @@ import (
 
 type User struct {
 	gorm.Model
-	Username     string `gorm:"unique;not null"`
-	PasswordHash string `gorm:"not null"`
-	FullName     string `gorm:"not null"`
-	Email        string `gorm:"unique;not null"`
-	Boats		 []Boat `gorm:"foreignkey:UserID"`
+	Username     string       `gorm:"unique;not null"`
+	PasswordHash string       `gorm:"not null"`
+	FullName     string       `gorm:"not null"`
+	Email        string       `gorm:"unique;not null"`
+	Boats		 []boat.Boat  `gorm:"foreignkey:UserID"`
 	IsAdmin      bool
 }
 

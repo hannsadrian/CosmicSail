@@ -1,6 +1,7 @@
-package models
+package boat
 
 import (
+	"CosmicSailBackend/models"
 	"github.com/jinzhu/gorm"
 	"math/rand"
 	"time"
@@ -19,7 +20,7 @@ type Boat struct {
 	Sensors    []Sensor
 }
 
-func CreateBoat(owner User, name string, series string, make string) (Boat, error) {
+func CreateBoat(owner models.User, name string, series string, make string) (Boat, error) {
 	rand.Seed(time.Now().UnixNano())
 	boatId := randSeq(5)
 
@@ -33,8 +34,8 @@ func CreateBoat(owner User, name string, series string, make string) (Boat, erro
 		LastOnline: time.Now(),
 	}
 
-	Db.NewRecord(boat)
-	Db.Create(&boat)
+	models.Db.NewRecord(boat)
+	models.Db.Create(&boat)
 
 	return boat, nil
 }
