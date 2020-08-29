@@ -9,10 +9,10 @@ import (
 
 type Trip struct {
 	gorm.Model
-	BoatID uint
-	Name string
-	StartDate time.Time
-	EndDate time.Time
+	BoatID     uint
+	Name       string
+	StartDate  time.Time
+	EndDate    time.Time
 	Datapoints []Datapoint
 }
 
@@ -34,9 +34,20 @@ func GetLatestTripOrCreateNew(boatID uint, timeout int) Trip {
 		createNewTrip = true
 	}
 
-	// Skip this step if a new Trip will already be created
-	if !createNewTrip {
-		// TODO: Determine latest Datapoint and check whether to create a new Trip
+	// Skip this step if a new Trip will already be created or there are no datapoints yet
+	if !createNewTrip && len(trip.Datapoints) != 0 {
+		// Determine latest Datapoint
+		var latestStamp int64 = 0
+		for _, datapoint := range trip.Datapoints {
+			if latestStamp < datapoint.Timestamp.Unix() {
+				latestStamp = datapoint.Timestamp.Unix()
+			}
+		}
+
+		// Check whether timestamp is out of timeout
+		if latestStamp - (time.Now().Unix() - int64(60*timeout)) < 0 {
+			createNewTrip = true
+		}
 	}
 
 	if createNewTrip {
