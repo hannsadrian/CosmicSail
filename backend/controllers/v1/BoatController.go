@@ -35,6 +35,20 @@ func RegisterBoatForUser(c *fiber.Ctx) {
 	c.JSON(fiber.Map{"Token": token, "Boat": fiber.Map{"BoatEmblem": boat.BoatEmblem, "Name": boat.Name, "Owner": c.Locals("user").(models.User).Username}})
 }
 
+func GetBoatTrips(c *fiber.Ctx) {
+	result, err := GetBoatForUser(c.Locals("user").(models.User), c.Params("emblem"))
+	if err != nil {
+		panic(fiber.NewError(fiber.StatusForbidden, err.Error()))
+	}
+
+	trips, tripErr := models.GetAllTrips(result.ID)
+	if tripErr != nil {
+		panic(fiber.NewError(fiber.StatusNotFound, tripErr.Error()))
+	}
+
+	c.JSON(trips)
+}
+
 func GetAllBoats(c *fiber.Ctx) {
 	var user models.User
 	user = c.Locals("user").(models.User)
