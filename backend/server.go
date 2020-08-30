@@ -83,6 +83,22 @@ func main() {
 	})
 	apiV1.Post("/boats", v1.RegisterBoatForUser)
 	apiV1.Get("/boats", v1.GetAllBoats)
+
+	// Trips
+	apiV1.Get("/boats/:emblem/trips", func(c *fiber.Ctx) {
+		result, err := v1.GetBoatForUser(c.Locals("user").(models.User), c.Params("emblem"))
+		if err != nil {
+			panic(fiber.NewError(fiber.StatusForbidden, err.Error()))
+		}
+
+		trips, tripErr := models.GetAllTrips(result.ID)
+		if tripErr != nil {
+			panic(fiber.NewError(fiber.StatusNotFound, tripErr.Error()))
+		}
+
+		c.JSON(trips)
+	})
+
 	// Hardware
 	apiV1.Post("/boats/:emblem/:hardware", v1.RegisterBoatHardware)
 	apiV1.Put("/boats/:emblem/:hardware/:id", v1.UpdateBoatHardware)
