@@ -1,7 +1,7 @@
 package models
 
 import (
-	"CosmicSailBackend/models/boat"
+	"CosmicSailBackend/models/database"
 	"github.com/gofiber/fiber"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
@@ -10,11 +10,11 @@ import (
 
 type User struct {
 	gorm.Model
-	Username     string       `gorm:"unique;not null"`
-	PasswordHash string       `gorm:"not null"`
-	FullName     string       `gorm:"not null"`
-	Email        string       `gorm:"unique;not null"`
-	Boats		 []boat.Boat  `gorm:"foreignkey:UserID"`
+	Username     string  `gorm:"unique;not null"`
+	PasswordHash string  `gorm:"not null"`
+	FullName     string  `gorm:"not null"`
+	Email        string  `gorm:"unique;not null"`
+	Boats		 []Boat `gorm:"foreignkey:UserID"`
 	IsAdmin      bool
 }
 
@@ -28,7 +28,7 @@ func CreateUser(username string, password string, name string, email string) (Us
 
 	// Unique username
 	var users []User
-	Db.Where("username = ?", username).Find(&users)
+	database.Db.Where("username = ?", username).Find(&users)
 	if len(users) > 0 {
 		panic(fiber.NewError(fiber.StatusBadRequest, "A user with that name already exists!"))
 	}
@@ -53,8 +53,8 @@ func CreateUser(username string, password string, name string, email string) (Us
 		IsAdmin:      false,
 	}
 
-	Db.NewRecord(user)
-	Db.Create(&user)
+	database.Db.NewRecord(user)
+	database.Db.Create(&user)
 
 	return user, err
 }

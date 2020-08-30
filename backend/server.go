@@ -3,8 +3,7 @@ package main
 import (
 	v1 "CosmicSailBackend/controllers/v1"
 	"CosmicSailBackend/models"
-	"CosmicSailBackend/models/boat"
-	"CosmicSailBackend/models/boat/telemetry"
+	"CosmicSailBackend/models/database"
 	"github.com/gbrlsnchs/jwt/v3"
 	"github.com/gofiber/cors"
 	"github.com/gofiber/fiber"
@@ -27,7 +26,7 @@ func main() {
 
 
 	// Connect to postgres
-	_, dbErr := models.ConnectDb("host="+os.Getenv("POSTGRES_HOST")+
+	_, dbErr := database.ConnectDb("host="+os.Getenv("POSTGRES_HOST")+
 			" port="+os.Getenv("POSTGRES_PORT")+
 			" user="+os.Getenv("POSTGRES_USER")+
 			" dbname="+os.Getenv("POSTGRES_DB")+
@@ -37,17 +36,17 @@ func main() {
 	} else {
 		log.Println("-> Connected to database at " + os.Getenv("POSTGRES_HOST"))
 	}
-	defer models.Db.Close()
+	defer database.Db.Close()
 
 	// Migrate Models
-	models.Db.AutoMigrate(&models.User{})
+	database.Db.AutoMigrate(&models.User{})
 
-	models.Db.AutoMigrate(&boat.Boat{})
-	models.Db.AutoMigrate(&boat.Motor{})
-	models.Db.AutoMigrate(&boat.Sensor{})
+	database.Db.AutoMigrate(&models.Boat{})
+	database.Db.AutoMigrate(&models.Motor{})
+	database.Db.AutoMigrate(&models.Sensor{})
 
-	models.Db.AutoMigrate(&telemetry.Trip{})
-	models.Db.AutoMigrate(&telemetry.Datapoint{})
+	database.Db.AutoMigrate(&models.Trip{})
+	database.Db.AutoMigrate(&models.Datapoint{})
 
 
 	// Init webserver
@@ -77,7 +76,7 @@ func main() {
 
 		// Add user from db to context
 		var user models.User
-		models.Db.Where("username = ?", payload.Identifier).First(&user)
+		database.Db.Where("username = ?", payload.Identifier).First(&user)
 		c.Locals("user", user)
 
 		c.Next()
@@ -88,6 +87,8 @@ func main() {
 	apiV1.Post("/boats/:emblem/:hardware", v1.RegisterBoatHardware)
 	apiV1.Put("/boats/:emblem/:hardware/:id", v1.UpdateBoatHardware)
 	apiV1.Delete("/boats/:emblem/:hardware/:id", v1.DeleteBoatHardware)
+
+
 
 	// Deliver static files
 	app.Static("/", "static")

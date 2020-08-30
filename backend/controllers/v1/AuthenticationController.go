@@ -2,6 +2,7 @@ package v1
 
 import (
 	"CosmicSailBackend/models"
+	"CosmicSailBackend/models/database"
 	"errors"
 	"github.com/gbrlsnchs/jwt/v3"
 	"github.com/gofiber/fiber"
@@ -71,7 +72,7 @@ var hs = jwt.NewHS256([]byte(os.Getenv("JWT_SECRET")))
 // Generating JWT
 func GetJWTForUser(username string, password string) (string, error) {
 	var users []models.User
-	models.Db.Where("username = ?", username).Find(&users)
+	database.Db.Where("username = ?", username).Find(&users)
 	if len(users) == 0 {
 		return "", errors.New("User not found")
 	}
@@ -146,12 +147,35 @@ func VerifyBoatJWT(token string) (CosmicPayload, error) {
 func VerifyJWT(token string) (CosmicPayload, error) {
 	var payload CosmicPayload
 	_, err := jwt.Verify([]byte(token), hs, &payload)
-	if payload.ExpirationTime.Unix() < time.Now().Unix() {
-		return CosmicPayload{}, errors.New("Token expired")
-	}
 	if err != nil {
 		return CosmicPayload{}, err
 	}
+	if payload.ExpirationTime.Unix() < time.Now().Unix() {
+		return CosmicPayload{}, errors.New("Token expired")
+	}
 
 	return payload, nil
+}
+
+// GetBoatForUser searches in all to the user available boats and returns the corresponding one.
+// Admins have access to all boats.
+func GetBoatForUser(user models.User, emblem string) (models.Boat, error) {
+	var boats []models.Boat
+	if user.IsAdmin {
+		database.Db.Find(&boats)
+	} else {
+		database.Db.Model(&user).Association("Boats").Find(&boats)
+	}
+
+	var entity models.Boat
+	for _, value := range boats {
+		if value.BoatEmblem == emblem {
+			entity = value
+		}
+	}
+	if entity.BoatEmblem == "" {
+		return models.Boat{}, errors.New("No Boat found!")
+	}
+
+	return entity, nil
 }

@@ -2,7 +2,7 @@ package v1
 
 import (
 	"CosmicSailBackend/models"
-	"CosmicSailBackend/models/boat"
+	"CosmicSailBackend/models/database"
 	"github.com/gofiber/fiber"
 )
 
@@ -21,7 +21,7 @@ func RegisterBoatForUser(c *fiber.Ctx) {
 	if err := c.BodyParser(&body); err != nil {
 		panic(fiber.NewError(fiber.StatusBadRequest, "Could not parse request!"))
 	}
-	boat, err := boat.CreateBoat(c.Locals("user").(models.User), body.Name, body.Series, body.Make)
+	boat, err := models.CreateBoat(c.Locals("user").(models.User), body.Name, body.Series, body.Make)
 	if err != nil {
 		panic(fiber.NewError(fiber.StatusBadRequest, err.Error()))
 	}
@@ -39,18 +39,20 @@ func GetAllBoats(c *fiber.Ctx) {
 	var user models.User
 	user = c.Locals("user").(models.User)
 	if !user.IsAdmin {
-		var boats []boat.Boat
-		models.Db.Model(&user).Related(&boats)
+		var boats []models.Boat
+		database.Db.Model(&user).Related(&boats)
 		var output []fiber.Map
 		for _, boat := range boats {
-			models.Db.Model(&boat).Association("Motors").Find(&boat.Motors)
-			models.Db.Model(&boat).Association("Sensors").Find(&boat.Sensors)
+			database.Db.Model(&boat).Association("Motors").Find(&boat.Motors)
+			database.Db.Model(&boat).Association("Sensors").Find(&boat.Sensors)
+			database.Db.Model(&boat).Association("Sensors").Find(&boat.Trips)
 			output = append(output, serializeBoat(boat))
 		}
 		c.JSON(output)
 	} else {
-		var boats []boat.Boat
-		models.Db.Model(&boats)
+		var boats []models.Boat
+		database.Db.Model(&boats)
+
 		var output []fiber.Map
 		for _, boat := range boats {
 			output = append(output, serializeBoat(boat))
@@ -59,6 +61,6 @@ func GetAllBoats(c *fiber.Ctx) {
 	}
 }
 
-func serializeBoat(boat boat.Boat) fiber.Map {
+func serializeBoat(boat models.Boat) fiber.Map {
 	return fiber.Map{"BoatEmblem": boat.BoatEmblem, "Name": boat.Name, "Series": boat.Series, "Make": boat.Make, "Online": boat.Online, "LastOnline": boat.LastOnline, "Motors": boat.Motors, "Sensors": boat.Sensors}
 }
