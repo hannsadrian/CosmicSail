@@ -4,6 +4,7 @@ import (
 	v1 "CosmicSailBackend/controllers/v1"
 	"CosmicSailBackend/models"
 	"CosmicSailBackend/models/database"
+	"CosmicSailBackend/socket"
 	"github.com/gbrlsnchs/jwt/v3"
 	"github.com/gofiber/cors"
 	"github.com/gofiber/fiber"
@@ -92,11 +93,10 @@ func main() {
 	apiV1.Put("/boats/:emblem/:hardware/:id", v1.UpdateBoatHardware)
 	apiV1.Delete("/boats/:emblem/:hardware/:id", v1.DeleteBoatHardware)
 
-
-
 	// Deliver static files
 	app.Static("/", "static")
 
+	go socket.StartSocket("3030")
 	// Start the server
 	panic(app.Listen(os.Getenv("SERVER_PORT")))
 }
