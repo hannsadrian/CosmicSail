@@ -48,6 +48,7 @@ func main() {
 
 	database.Db.AutoMigrate(&models.Trip{})
 	database.Db.AutoMigrate(&models.Datapoint{})
+	log.Println("   -> Migrated Models")
 
 
 	// Init webserver

@@ -88,8 +88,8 @@ func GetJWTForUser(username string, password string) (string, error) {
 	return GetJWT("user", username, true)
 }
 
-func GetJWTForBoat(boatId string) (string, error) {
-	return GetJWT("boat", boatId, false)
+func GetJWTForBoat(boatEmblem string) (string, error) {
+	return GetJWT("boat", boatEmblem, false)
 }
 
 func GetJWT(jwtType string, jwtIdentifier string, expires bool) (string, error) {
@@ -150,7 +150,7 @@ func VerifyJWT(token string) (CosmicPayload, error) {
 	if err != nil {
 		return CosmicPayload{}, err
 	}
-	if payload.ExpirationTime.Unix() < time.Now().Unix() {
+	if payload.ExpirationTime != nil && payload.ExpirationTime.Unix() < time.Now().Unix() {
 		return CosmicPayload{}, errors.New("Token expired")
 	}
 
