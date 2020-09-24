@@ -101,10 +101,37 @@ func main() {
 	apiV1.Put("/boats/:emblem/:hardware/:id", v1.UpdateBoatHardware)
 	apiV1.Delete("/boats/:emblem/:hardware/:id", v1.DeleteBoatHardware)
 
+	boatV1 := app.Group("/boat/v1", func(c *fiber.Ctx) {
+		// Get Header
+		bearer := c.Get("Authorization", "")
+		if bearer == "" {
+			panic(fiber.NewError(fiber.StatusBadRequest, "No Authorization Header present"))
+		}
+
+		// Verify JWT
+		payload, err := v1.VerifyBoatJWT(strings.ReplaceAll(bearer, "Bearer ", ""))
+		if err != nil {
+			panic(fiber.NewError(fiber.StatusForbidden, err.Error()))
+		}
+
+		// Add user from db to context
+		var boat models.Boat
+		database.Db.Where("boat_emblem = ?", payload.Identifier).First(&boat)
+		database.Db.Model(&boat).Association("Motors").Find(&boat.Motors)
+		database.Db.Model(&boat).Association("Sensors").Find(&boat.Sensors)
+		database.Db.Model(&boat).Association("Trips").Find(&boat.Trips)
+		c.Locals("boat", boat)
+
+		c.Next()
+	})
+	boatV1.Get("/", func(c *fiber.Ctx) {
+		c.JSON(v1.SerializeBoat(c.Locals("boat").(models.Boat)))
+	})
+
 	// Deliver static files
 	app.Static("/", "static")
 
-	go socket.StartSocket("3030")
+	go socket.StartSocket(os.Getenv("SOCKET_PORT"))
 	// Start the server
 	panic(app.Listen(os.Getenv("SERVER_PORT")))
 }
