@@ -6,11 +6,14 @@ import subprocess
 
 # https://github.com/MartijnBraam/gpsd-py3/blob/master/DOCS.md
 class GpsSensor():
-    def __init__(self, token, port, lat, lon):
-        subprocess.run("sudo service gpsd start", shell=True, check=True)
+    name = ""
+
+    def __init__(self, name, token, port):
+        self.name = name
+        #subprocess.run("sudo service gpsd start", shell=True, check=True)
         self.token = token
         self.port = port
-        self.get_agps(lat, lon)
+        #self.get_agps(lat, lon)
         gpsd.connect()
 
     def get_agps(self, lat, lon):
@@ -44,6 +47,9 @@ class GpsSensor():
 
     def get_device(self):
         return gpsd.device()
+
+    def get_name(self):
+        return self.name
 
     def get_meta(self):
         current_gps_data = self.get_value()
