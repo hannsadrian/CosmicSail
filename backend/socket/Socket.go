@@ -75,12 +75,29 @@ func registerMethods(server *socketio.Server) {
 	// ---------------------
 
 	server.OnEvent("/", "command", func(s socketio.Conn, msg string) {
-		server.BroadcastToRoom("/", s.Rooms()[0], "command", msg)
-	})
-	server.OnEvent("/", "hi", func(s socketio.Conn, msg string) {
-		log.Println(getBoatEmblemFromRooms(s.Rooms()))
+		emblem, isBoat, err := getBoatEmblemFromRooms(s.Rooms())
 
-		s.Emit("hi")
+		if err != nil {
+			log.Println("Error while executing command event")
+			return
+		}
+
+		if !isBoat {
+			server.BroadcastToRoom("/", emblem + boatSuffix, "command", msg)
+		}
+	})
+
+	server.OnEvent("/", "data", func(s socketio.Conn, msg string) {
+		emblem, isBoat, err := getBoatEmblemFromRooms(s.Rooms())
+
+		if err != nil {
+			log.Println("Error while executing data event")
+			return
+		}
+
+		if isBoat {
+			server.BroadcastToRoom("/", emblem + userSuffix, "data", msg)
+		}
 	})
 }
 
@@ -89,12 +106,12 @@ func registerMethods(server *socketio.Server) {
 // so we cannot just use the first index of a room array.
 func getBoatEmblemFromRooms(rooms []string) (boatEmblem string, isBoat bool, err error) {
 	for _, room := range rooms {
-		if strings.Contains(room, "-boat") {
+		if strings.Contains(room, boatSuffix) {
 			isBoat = true
-			boatEmblem = strings.ReplaceAll(room, "-boat", "")
-		} else if strings.Contains(room, "-user") {
+			boatEmblem = strings.ReplaceAll(room, boatSuffix, "")
+		} else if strings.Contains(room, userSuffix) {
 			isBoat = false
-			boatEmblem = strings.ReplaceAll(room, "-user", "")
+			boatEmblem = strings.ReplaceAll(room, userSuffix, "")
 		}
 	}
 
