@@ -9,6 +9,9 @@ import (
 	"strings"
 )
 
+const boatSuffix = "-boat"
+const userSuffix = "-user"
+
 func StartSocket(port string) {
 	server, err := socketio.NewServer(nil)
 	if err != nil {
@@ -56,9 +59,9 @@ func registerMethods(server *socketio.Server) {
 			// join right room
 			roomName := url.Query().Get("boatEmblem")
 			if payload.Type == "boat" {
-				roomName += "-boat"
+				roomName += boatSuffix
 			} else if payload.Type == "user" {
-				roomName += "-user"
+				roomName += userSuffix
 			}
 			s.Join(roomName)
 

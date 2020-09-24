@@ -59,8 +59,8 @@ func GetAllBoats(c *fiber.Ctx) {
 		for _, boat := range boats {
 			database.Db.Model(&boat).Association("Motors").Find(&boat.Motors)
 			database.Db.Model(&boat).Association("Sensors").Find(&boat.Sensors)
-			database.Db.Model(&boat).Association("Sensors").Find(&boat.Trips)
-			output = append(output, serializeBoat(boat))
+			database.Db.Model(&boat).Association("Trips").Find(&boat.Trips)
+			output = append(output, SerializeBoat(boat))
 		}
 		c.JSON(output)
 	} else {
@@ -69,12 +69,12 @@ func GetAllBoats(c *fiber.Ctx) {
 
 		var output []fiber.Map
 		for _, boat := range boats {
-			output = append(output, serializeBoat(boat))
+			output = append(output, SerializeBoat(boat))
 		}
 		c.JSON(output)
 	}
 }
 
-func serializeBoat(boat models.Boat) fiber.Map {
+func SerializeBoat(boat models.Boat) fiber.Map {
 	return fiber.Map{"BoatEmblem": boat.BoatEmblem, "Name": boat.Name, "Series": boat.Series, "Make": boat.Make, "Online": boat.Online, "LastOnline": boat.LastOnline, "Motors": boat.Motors, "Sensors": boat.Sensors}
 }

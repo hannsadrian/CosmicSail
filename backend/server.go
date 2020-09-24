@@ -13,6 +13,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 var hs = jwt.NewHS256([]byte(os.Getenv("JWT_SECRET")))
@@ -37,6 +38,12 @@ func main() {
 	} else {
 		log.Println("-> Connected to database at " + os.Getenv("POSTGRES_HOST"))
 	}
+	go func() {
+		for {
+			database.Db.DB().Ping()
+			time.Sleep(10 * time.Minute)
+		}
+	}()
 	defer database.Db.Close()
 
 	// Migrate Models
@@ -48,7 +55,7 @@ func main() {
 
 	database.Db.AutoMigrate(&models.Trip{})
 	database.Db.AutoMigrate(&models.Datapoint{})
-	log.Println("   -> Migrated Models")
+	log.Println("-> Migrated Models")
 
 
 	// Init webserver
