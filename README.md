@@ -62,6 +62,8 @@ but will be discussed and explained soon. Stay tuned 📻
 
 ## 🚧 Going further
 
+If you are interested, you can look into our [Documentation](./docs)
+
 I am grateful for any type of feedback, inspiration or question regarding CosmicSail.<br>
 Feel free to create an Issue to get in touch.
 
