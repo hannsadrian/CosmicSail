@@ -7,7 +7,7 @@ from os.path import join, dirname
 from dotenv import load_dotenv
 from board import SCL, SDA
 import busio
-from adafruit_pca9685 import PCA9685
+import adafruit_pca9685 as pca_driver
 
 from hardware.motors.servo import ServoMotor
 from hardware.sensors.gps import GpsSensor
@@ -25,7 +25,7 @@ sio = socketio.Client()
 
 # PWM Control
 i2c_bus = busio.I2C(SCL, SDA)
-pca = PCA9685(i2c_bus)
+pca = pca_driver.PCA9685(i2c_bus)
 pca.frequency = 24
 
 # boat data
@@ -36,17 +36,31 @@ motors = {}
 
 @sio.event
 def connect():
+    set_all_motors(1)
+    time.sleep(0.7)
+    set_all_motors(0)
+    time.sleep(0.7)
+    set_all_motors(-1)
+    time.sleep(0.7)
+    set_all_motors(0)
     print("I'm connected!")
 
 
 @sio.event
 def connect_error(data):
+    set_all_motors(0)
     print(data)
 
 
 @sio.event
 def disconnect():
+    set_all_motors(0)
     print("I'm disconnected!")
+
+
+@sio.event
+def command(data):
+    print(data)
 
 
 # @sio.event
@@ -101,8 +115,8 @@ def init():
     # ⚠ We are currently ignoring per-motor-pwm-cycle from config ⚠
     for motor in boatData['Motors']:
         motors.__setitem__(motor['Name'],
-                           ServoMotor(motor['Name'], pca.channels[motor['Channel']], motor['Min'], motor['Max'],
-                                      motor['Default']))
+                           ServoMotor(motor['Name'], pca.channels[int(motor['Channel']) - 1], float(motor['Min']),
+                                      float(motor['Max']), float(motor['Default'])))
 
     for sensor in boatData['Sensors']:
         if sensor['Type'] == "gps":
@@ -110,36 +124,33 @@ def init():
         if sensor['Type'] == "bandwidth":
             sensors.__setitem__(sensor['Name'], Bandwidth(sensor['Name']))
 
-    print(motors)
-    print(sensors)
-
     # connect to socket
     connect_socket()
 
     while True:
-        send_meta()
-        time.sleep(1)
+        try:
+            send_meta()
+            time.sleep(1)
+        except KeyboardInterrupt:
+            pca.deinit()
+            quit()
 
 
 def connect_socket():
     try:
         print("connection to socket!")
-        # sio.connect(os.getenv("SERVER") + "?token=" + os.getenv("TOKEN") + "&boatId=" + os.getenv("BOATID"))
-
-        # rudder = ServoMotor("Rudder", 0, 1500, 3000, 2000, pca)
-        # motors.__setitem__("rudder", rudder)
-        # sail = ServoMotor("Sail", 1, 2000, 3000, 1500, pca)
-        # motors.__setitem__("sail", sail)
-        # esc = ServoMotor("Esc", 2, 2250, 2750, 2500, pca)
-        # motors.__setitem__("esc", esc)
-        #
-        # bandwidth = Bandwidth()
-        # sensors.__setitem__("bandwidth", bandwidth)
+        sio.connect(os.getenv("SOCKET") + "?token=" + os.getenv("TOKEN") + "&boatEmblem=" + os.getenv("BOAT_EMBLEM"))
+        print("connected!")
     except socketio.exceptions.ConnectionError:
         time.sleep(2)
         print("Reconnecting...")
-        init()
+        connect_socket()
         return
+
+
+def set_all_motors(to):
+    for motor in motors:
+        motors[motor].set_state(to)
 
 
 def send_meta():
