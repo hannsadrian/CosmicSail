@@ -4,17 +4,23 @@
     import axios from "axios";
 
     let loginError = ""
+    let loading = false
 
     function handleLogin(event) {
         event.preventDefault();
         const formdata = new FormData(event.target);
-        axios.post(process.env.APIURL + "/auth/login?username="+formdata.get("username")+"&password="+formdata.get("password")).then(res => {
-            localStorage.setItem("username", formdata.get("username"))
-            localStorage.setItem("token", res.data.token)
+        loading = true
+        axios.post(process.env.APIURL + "/auth/login", {username: formdata.get("username"), password: formdata.get("password")}).then(res => {
+            loading = false
+            console.log(res)
+            localStorage.setItem("username", res.data.Username)
+            localStorage.setItem("token", res.data.Token)
             navigate("/boats")
         }).catch(err => {
+            loading = false
+            console.log(err.response)
             if (err.response)
-                loginError = err.response.data.message
+                loginError = err.response.data
             else
                 loginError = "Server connection failed"
         })
@@ -57,6 +63,6 @@
                 />
             </label>
         </div>
-        <PrimaryButton className="my-3 px-8" text="Login" type="submit"/>
+        <PrimaryButton className="my-3 px-8" text="{loading ? 'Loading' : 'Login'}" type="submit"/>
     </form>
 </main>

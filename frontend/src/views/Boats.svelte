@@ -8,7 +8,11 @@
     let boats = getBoats();
 
     async function getBoats() {
-        return await axios.get(process.env.APIURL + "/user/boats?username=" + localStorage.getItem("username") + "&jwt=" + localStorage.getItem("token"))
+        return await axios.get(process.env.APIURL + "/v1/boats", {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}})
+    }
+
+    $: {
+        console.log(boats)
     }
 </script>
 
@@ -26,12 +30,18 @@
         <hr class="opacity-0 my-4">
         {#each result.data as boat, index}
             <div class="my-3">
-                <Link to={"/boats/"+boat.id}>
+                <Link to={"/boats/"+boat.BoatEmblem}>
                     <div class="rounded-lg shadow-sm hover:shadow-lg transition duration-200 flex bg-white dark:bg-gray-900 p-4 w-full">
-                        <div class="my-auto {boat.online ? 'bg-green-600' : 'bg-red-600'} rounded-full h-4 w-4 ml-2 mr-4"></div>
+                        <div class="my-auto {boat.Online ? 'bg-green-600' : 'bg-red-600'} rounded-full h-4 w-4 ml-2 mr-4"></div>
                         <div>
-                            <p class="text-sm font-medium text-gray-500">{boat.model} • {boat.id}</p>
-                            <h1 class="text-xl font-bold">{boat.name}</h1>
+                            <p class="text-sm font-medium text-gray-500">Last
+                                online: {new Date(Date.parse(boat.LastOnline)).getHours() +
+                                ":" + new Date(Date.parse(boat.LastOnline)).getMinutes() +
+                                ", " + new Date(Date.parse(boat.LastOnline)).getDate() +
+                                "." + new Date(Date.parse(boat.LastOnline)).getMonth() +
+                                "." + new Date(Date.parse(boat.LastOnline)).getFullYear()}</p>
+                            <h1 class="mt-1 text-xl font-bold leading-tight">{boat.Name}</h1>
+                            <p>{boat.Series} • {boat.Make} ({boat.BoatEmblem})</p>
                         </div>
                     </div>
                 </Link>

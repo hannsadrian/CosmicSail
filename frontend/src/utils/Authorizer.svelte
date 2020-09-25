@@ -14,13 +14,14 @@
             return;
         }
 
-        axios.post(process.env.APIURL + "/auth/status?jwt=" + localStorage.getItem("token")).catch(err => {
+        axios.post(process.env.APIURL + "/v1/status", {}, {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}}).catch(err => {
+            console.log(err.response)
             if (err.response)
                 console.log(err.response.data)
 
             navigate("/login")
         }).then(res => {
-            if (res.data.payload.username !== localStorage.getItem("username"))
+            if (res.data.payload.Username !== localStorage.getItem("username"))
                 navigate("/login")
         })
     });
