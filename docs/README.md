@@ -8,14 +8,15 @@ over the protocols and communitcation methods that CosmicSail utilizes.
 Our backend is written in Golang with the help of two amazing frameworks,
 [Gorm](https://gorm.io) and [Fiber](https://gofiber.io).
 
-- [Authentication](): To use the CosmicSail API, a user has to authenticate over these endpoints
-- [v1 User Endpoints](): Endpoints that a user can access to manage their boats
-- [v1 Boat Endpoints](): Endpoints which are made for the boat (telemetry updating or data loading)
+- [Authentication](https://github.com/Adwirawien/CosmicSail/blob/feature/docs/docs/backend/Authentication.md): To use the CosmicSail API, a user has to authenticate over these endpoints
+- WIP [v1 User Endpoints](): Endpoints that a user can access to manage their boats
+- WIP [v1 Boat Endpoints](): Endpoints which are made for the boat (telemetry updating or data loading)
 
 ## Socket Protocol
 
 We are communicating over [Socket.io](https://socket.io) for realtime scenarios,
 as it's much more stable and reliable compared to traditional WebSockets.
 
-- [User communication](): Events a user can send/receive to control boats and get data
-- [Boat communication](): Events a boat client should implement to work properly
+- WIP [Socket connection](): Documentation on how to establish an authenticated connection to the server
+- WIP [User communication](): Events a user can send/receive to control boats and get data
+- WIP [Boat communication](): Events a boat client should implement to work properly
