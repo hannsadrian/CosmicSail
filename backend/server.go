@@ -17,6 +17,7 @@ import (
 )
 
 var hs = jwt.NewHS256([]byte(os.Getenv("JWT_SECRET")))
+
 func main() {
 	// Load .env file
 	envErr := godotenv.Load()
@@ -26,13 +27,12 @@ func main() {
 		log.Println("-> Loaded env file")
 	}
 
-
 	// Connect to postgres
-	_, dbErr := database.ConnectDb("host="+os.Getenv("POSTGRES_HOST")+
-			" port="+os.Getenv("POSTGRES_PORT")+
-			" user="+os.Getenv("POSTGRES_USER")+
-			" dbname="+os.Getenv("POSTGRES_DB")+
-			" password="+os.Getenv("POSTGRES_PSWD"))
+	_, dbErr := database.ConnectDb("host=" + os.Getenv("POSTGRES_HOST") +
+		" port=" + os.Getenv("POSTGRES_PORT") +
+		" user=" + os.Getenv("POSTGRES_USER") +
+		" dbname=" + os.Getenv("POSTGRES_DB") +
+		" password=" + os.Getenv("POSTGRES_PSWD"))
 	if dbErr != nil {
 		panic(dbErr)
 	} else {
@@ -41,7 +41,7 @@ func main() {
 	go func() {
 		for {
 			database.Db.DB().Ping()
-			time.Sleep(10 * time.Minute)
+			time.Sleep(30 * time.Second)
 		}
 	}()
 	defer database.Db.Close()
@@ -57,13 +57,11 @@ func main() {
 	database.Db.AutoMigrate(&models.Datapoint{})
 	log.Println("-> Migrated Models")
 
-
 	// Init webserver
 	app := fiber.New()
 	app.Use(cors.New())
 	app.Use(middleware.Recover())
 	app.Use(middleware.Logger("${time} | ${status} ${method} from ${ip} -> ${path} \n"))
-
 
 	// Register Routes
 	auth := app.Group("/auth")
@@ -89,6 +87,10 @@ func main() {
 		c.Locals("user", user)
 
 		c.Next()
+	})
+	apiV1.Post("/status", func(c *fiber.Ctx) {
+		user := c.Locals("user").(models.User)
+		c.JSON(fiber.Map{"payload": fiber.Map{"Username": user.Username, "FullName": user.FullName, "Email": user.Email, "IsAdmin": user.IsAdmin}})
 	})
 	apiV1.Post("/boats", v1.RegisterBoatForUser)
 	apiV1.Get("/boats", v1.GetAllBoats)

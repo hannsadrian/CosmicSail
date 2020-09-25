@@ -2,6 +2,7 @@ package socket
 
 import (
 	v1 "CosmicSailBackend/controllers/v1"
+	"CosmicSailBackend/models"
 	"errors"
 	"github.com/googollee/go-socket.io"
 	"log"
@@ -11,6 +12,8 @@ import (
 
 const boatSuffix = "-boat"
 const userSuffix = "-user"
+
+var boatRooms = make(map[string]string)
 
 func StartSocket(port string) {
 	server, err := socketio.NewServer(nil)
@@ -33,11 +36,12 @@ func registerMethods(server *socketio.Server) {
 		s.SetContext("")
 
 		url := s.URL()
+		boatEmblem := url.Query().Get("boatEmblem")
 
 		err := ""
 
 		// check connection parameters
-		if url.Query().Get("boatEmblem") == "" {
+		if boatEmblem == "" {
 			err = "Boat Emblem Empty"
 		} else if url.Query().Get("token") == "" {
 			err = "Token Empty"
@@ -47,7 +51,7 @@ func registerMethods(server *socketio.Server) {
 		if jwtErr != nil {
 			err = "Token invalid"
 		}
-		if payload.Type == "boat" && payload.Identifier != url.Query().Get("boatEmblem") {
+		if payload.Type == "boat" && payload.Identifier != boatEmblem {
 			err = "Data invalid"
 		}
 
@@ -57,9 +61,13 @@ func registerMethods(server *socketio.Server) {
 			return errors.New(err)
 		} else {
 			// join right room
-			roomName := url.Query().Get("boatEmblem")
+			roomName := boatEmblem
 			if payload.Type == "boat" {
 				roomName += boatSuffix
+
+				models.SetOnline(boatEmblem)
+				boatRooms[s.ID()] = boatEmblem
+				log.Println("| " + boatEmblem + " connected")
 			} else if payload.Type == "user" {
 				roomName += userSuffix
 			}
@@ -70,6 +78,16 @@ func registerMethods(server *socketio.Server) {
 	})
 
 	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
+		emblem := boatRooms[s.ID()]
+
+		if emblem == "" {
+			return
+		}
+
+		models.SetOffline(emblem)
+		log.Println("| " + emblem + " disconnected")
+
+		delete(boatRooms, s.ID())
 	})
 
 	// ---------------------

@@ -41,6 +41,19 @@ func CreateBoat(owner User, name string, series string, make string) (Boat, erro
 	return boat, nil
 }
 
+func SetOnline(boatEmblem string) {
+	boat := Boat{}
+	database.Db.Where("boat_emblem = ?", boatEmblem).First(&boat)
+	boat.Online = true
+	database.Db.Model(&boat).Updates(boat)
+}
+
+func SetOffline(boatEmblem string) {
+	boat := Boat{}
+	database.Db.Where("boat_emblem = ?", boatEmblem).First(&boat)
+	database.Db.Model(&boat).Updates(map[string]interface{}{"online": false, "last_online": time.Now()})
+}
+
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
 func randSeq(n int) string {
