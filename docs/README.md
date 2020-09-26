@@ -9,7 +9,7 @@ Our backend is written in Golang with the help of two amazing frameworks,
 [Gorm](https://gorm.io) and [Fiber](https://gofiber.io).
 
 - [Authentication](./backend/Authentication.md): To use the CosmicSail API, a user has to authenticate over these endpoints
-- WIP [v1 User Endpoints](): Endpoints that a user can access to manage their boats
+- WIP [v1 User Endpoints](./backend/v1%20User%20Endpoints.md): Endpoints that a user can access to manage their boats
 - WIP [v1 Boat Endpoints](): Endpoints which are made for the boat (telemetry updating or data loading)
 
 ## Socket Protocol
