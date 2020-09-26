@@ -35,6 +35,7 @@ POST `/auth/login`<br>
 ### Response
 
 `200` - Success<br>
+The token is valid for 24h.
 ```json
 {
   "Token": ...,
