@@ -5,38 +5,39 @@
     export let socket;
     export let boatConfig;
 
-    let setup = false;
-    let settingUp = false;
+    let bandwidth = 0
 
-    let bandwidth = 0;
-    let lat = 0;
-    let lng = 0;
-    let rotation = 0;
-    let sats = 0;
-    let mode = 0;
-    let speed = 0;
-    let precision = [0, 0];
-    let error = {}
+    let gpsData = {
+        lat: 0,
+        lng: 0,
+        rotation: 0,
+        sats: 0,
+        mode: 0,
+        speed: 0,
+        precision: [0, 0],
+        error: {},
+        agpsSetupYet: false
+    }
 
-    socket.on("meta", data => {
+    socket.on("data", data => {
         bandwidth = data.network
 
         if (data.gps !== null) {
-            sats = data.gps.sats;
-            mode = data.gps.mode;
-            error = data.gps.error;
+            gpsData.sats = data.gps.sats;
+            gpsData.mode = data.gps.mode;
+            gpsData.error = data.gps.error;
             if (data.gps.position != null) {
-                lat = data.gps.position[0]
-                lng = data.gps.position[1]
-                rotation = data.gps.heading
-                speed = data.gps.speed
-                precision = data.gps.precision
+                gpsData.lat = data.gps.position[0]
+                gpsData.lng = data.gps.position[1]
+                gpsData.rotation = data.gps.heading
+                gpsData.speed = data.gps.speed
+                gpsData.precision = data.gps.precision
             } else {
-                speed = 0;
-                precision = 0;
+                gpsData.speed = 0;
+                gpsData.precision = 0;
             }
         } else {
-            error = undefined;
+            gpsData.error = undefined;
         }
     })
 
@@ -51,8 +52,8 @@
                 lat: location.coords.latitude,
                 lon: location.coords.longitude
             })
-            setup = false;
-            error = null;
+            gpsData.agpsSetupYet = true;
+            gpsData.error = null;
         })
     }
 </script>
@@ -60,18 +61,18 @@
 <div class="sm:flex mt-4">
     <div style="max-width: 430px" class="w-full">
         <div id="mapbox" class="sm:w-full">
-            <Map {lng} {lat} {rotation}/>
+            <Map lng={gpsData.lng} lat={gpsData.lat} rotation={gpsData.rotation}/>
         </div>
-        {#if setup}
+        {#if !gpsData.agpsSetupYet}
             <button on:click={setupAGPS} class="text-blue-600 w-full text-center mt-2">Setup AGPS</button>
-        {:else}
-            <p>🌍 M{mode} {"<->"} {sats} Sats {"<->"} {parseFloat(speed * 3.6).toFixed(1)} km/h {"<->"}
-                {parseFloat(rotation).toFixed(1)}°<br/>
-                {error ? "🚧 ± " + (error.s || 0.00) + " km/h | ± " + ((error.x || 0+error.y || 0)/2).toFixed(1) + " m" : "📍 Locating..."}
-                <br/>
-                🤖 {parseFloat(bandwidth).toFixed(2)} MB
-            </p>
         {/if}
+        <p>🌍 M{gpsData.mode} {"<->"} {gpsData.sats} Sats {"<->"} {parseFloat(gpsData.speed * 3.6).toFixed(1)}
+            km/h {"<->"}
+            {parseFloat(gpsData.rotation).toFixed(1)}°<br/>
+            {gpsData.error ? "🚧 ± " + (gpsData.error.s || 0.00) + " km/h | ± " + ((gpsData.error.x || 0 + gpsData.error.y || 0) / 2).toFixed(1) + " m" : "📍 Locating..."}
+            <br/>
+            🤖 {parseFloat(bandwidth).toFixed(2)} MB
+        </p>
     </div>
     <div class="mt-4">
         {#each boatConfig.Motors as motor, i}
