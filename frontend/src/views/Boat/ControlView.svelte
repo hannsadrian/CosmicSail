@@ -1,10 +1,9 @@
 <script>
     import Map from "./ControlView/Map.svelte";
-    import Rudder from "./ControlView/Rudder.svelte";
-    import Sail from "./ControlView/Sail.svelte";
-    import Esc from "./ControlView/Esc.svelte";
+    import GenericMotorControl from "./ControlView/GenericMotorControl.svelte";
 
     export let socket;
+    export let boatConfig;
 
     let setup = false;
     let settingUp = false;
@@ -42,10 +41,7 @@
     })
 
     socket.on("exception", data => {
-        if (data.name === "setup" && !settingUp) {
-            setup = true;
-            settingUp = true;
-        }
+        console.log(data)
     })
 
     function setupAGPS() {
@@ -78,9 +74,9 @@
         {/if}
     </div>
     <div class="mt-4">
-        <Rudder {socket}/>
-        <Sail {socket}/>
-        <Esc {socket}/>
+        {#each boatConfig.Motors as motor, i}
+            <GenericMotorControl {socket} motorConfig={motor} useOrientation={i === 0}/>
+        {/each}
     </div>
 </div>
 

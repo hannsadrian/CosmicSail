@@ -1,31 +1,36 @@
 <script>
-    import {onMount} from "svelte"
+    import {onMount} from "svelte";
     import InformationModal from "../../../components/InformationModal.svelte";
 
     export let socket;
+    export let motorConfig;
+    export let useOrientation = false;
 
-    let supportsOrientation = false;
-    let hasPermissionForOrientation = true;
-
-    let rudder = 0;
+    let value = 0;
     let previousValue = 0;
     $: {
         // ☢️ ATTENTION ☣️
         //
-        // AUTOMATIC VALUE BINDING WHICH EMITS EVERY TIME THE RUDDER VALUE CHANGES
+        // AUTOMATIC VALUE BINDING WHICH EMITS EVERY TIME THE VALUE CHANGES
         // TAKE CAUTION (may cause bugs)
         //
         // ☢️ ATTENTION ☣️
-        let value = Math.floor((rudder * 30) / 6) / 5
-        if (value !== previousValue) {
-            previousValue = value;
-            socket.emit("instruction", {name: "rudder", value: value})
+        let t = Math.floor((value * 30) / 6) / 5
+        if (t !== previousValue) {
+            previousValue = t;
+            console.log("Send!")
+            socket.emit("command", JSON.stringify({type: "motor", name: motorConfig.Name, value: t}))
         }
     }
 
-    let previousRudder = 0;
+    let supportsOrientation = false;
+    let hasPermissionForOrientation = true;
+    let previousOrientation = 0;
     onMount(() => {
-        if ("DeviceOrientationEvent" in window) {
+        if (!useOrientation)
+            return;
+
+        if ("DeviceOrientationEvent" in window && DeviceOrientationEvent.requestPermission) {
             console.log("Supports Orientation! 🎉")
             supportsOrientation = true;
 
@@ -38,10 +43,10 @@
                 } else if (orientation < -30) {
                     orientation = -30;
                 }
-                let value = Math.round(orientation*10) / 300;
-                if (value !== previousRudder) {
-                    previousRudder = value;
-                    rudder = value;
+                let t = Math.round(orientation * 10) / 300;
+                if (t !== previousOrientation) {
+                    previousOrientation = t;
+                    value = t;
                 }
             });
         } else {
@@ -50,6 +55,9 @@
     })
 
     function requestPermission() {
+        if (!useOrientation)
+            return
+
         DeviceOrientationEvent.requestPermission().then(value => {
             hasPermissionForOrientation = value === "granted";
         }).catch(err => {
@@ -58,13 +66,12 @@
     }
 </script>
 
-<InformationModal shown={!hasPermissionForOrientation} title="Device Orientation">
+<InformationModal shown={!hasPermissionForOrientation && useOrientation} title="Device Orientation">
     <div>
         In order to fully use the boat controls,
         you have to give the webpage permission for the orientation of your device.
     </div>
     <button class='text-blue-600 mt-4' on:click={requestPermission}>Allow</button>
 </InformationModal>
-<ion-icon name="caret-up-circle"></ion-icon>
-<p class="text-sm uppercase text-gray-500 font-semibold tracking-wide mt-2 -mb-2">Rudder</p>
-<input type="range" min="-1" max="1" step="0.0005" class="w-full" bind:value={rudder}>
+<p class="text-sm uppercase text-gray-500 font-semibold tracking-wide mt-2 -mb-2">{motorConfig.Name}</p>
+<input type="range" min="-1" max="1" step="0.0005" class="w-full" bind:value={value}>

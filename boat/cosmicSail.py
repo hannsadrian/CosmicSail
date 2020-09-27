@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from board import SCL, SDA
 import busio
 import adafruit_pca9685 as pca_driver
+import json
 
 from hardware.motors.servo import ServoMotor
 from hardware.sensors.gps import GpsSensor
@@ -36,6 +37,7 @@ motors = {}
 
 @sio.event
 def connect():
+    print("Connected")
     set_all_motors(1)
     time.sleep(0.7)
     set_all_motors(0)
@@ -43,7 +45,6 @@ def connect():
     set_all_motors(-1)
     time.sleep(0.7)
     set_all_motors(0)
-    print("I'm connected!")
 
 
 @sio.event
@@ -54,13 +55,15 @@ def connect_error(data):
 
 @sio.event
 def disconnect():
+    print("Disconnected")
     set_all_motors(0)
-    print("I'm disconnected!")
 
 
 @sio.event
 def command(data):
-    print(data)
+    command = json.loads(data)
+    if command["type"] == "motor":
+        motors[command["name"]].set_state(command["value"])
 
 
 # @sio.event
@@ -127,10 +130,17 @@ def init():
     # connect to socket
     connect_socket()
 
+    counter = 0
     while True:
         try:
-            send_meta()
-            time.sleep(1)
+            if counter == 0:
+                send_meta(True)
+                counter = 40
+            else:
+                send_meta(False)
+            time.sleep(0.5)
+
+            counter -= 1
         except KeyboardInterrupt:
             pca.deinit()
             quit()
@@ -138,9 +148,7 @@ def init():
 
 def connect_socket():
     try:
-        print("connection to socket!")
         sio.connect(os.getenv("SOCKET") + "?token=" + os.getenv("TOKEN") + "&boatEmblem=" + os.getenv("BOAT_EMBLEM"))
-        print("connected!")
     except socketio.exceptions.ConnectionError:
         time.sleep(2)
         print("Reconnecting...")
@@ -153,7 +161,13 @@ def set_all_motors(to):
         motors[motor].set_state(to)
 
 
-def send_meta():
+previous_motor_data = []
+previous_sensor_data = []
+
+
+def send_meta(entire_meta):
+    global previous_motor_data, previous_sensor_data
+
     # check if connected!
 
     motor_data = []
@@ -165,15 +179,19 @@ def send_meta():
     for sensor in sensors:
         sensor_data.append({'Name': sensors[sensor].get_name(), 'State': sensors[sensor].get_meta()})
 
-    print()
-    print(motor_data)
-    print(sensor_data)
-    print()
+    if previous_motor_data != motor_data or entire_meta:
+        previous_motor_data = motor_data
+        print(motor_data)
+        sio.emit("data", json.dumps({
+            'motors': motor_data
+        }, separators=(',', ':')))
 
-    sio.emit("meta", {
-        'motors': motor_data,
-        'sensors': sensor_data
-    })
+    if previous_sensor_data != sensor_data or entire_meta:
+        previous_sensor_data = sensor_data
+        print(sensor_data)
+        sio.emit("data", sio.emit("data", json.dumps({
+            'sensors': sensor_data
+        }, separators=(',', ':'))))
 
 
 init()
