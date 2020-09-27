@@ -3,7 +3,6 @@ package v1
 import (
 	"CosmicSailBackend/logic"
 	"github.com/gofiber/fiber"
-	_ "github.com/joho/godotenv/autoload"
 )
 
 // Register function

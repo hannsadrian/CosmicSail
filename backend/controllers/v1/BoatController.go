@@ -28,7 +28,7 @@ func RegisterBoatForUser(c *fiber.Ctx) {
 	}
 
 	// Get Token for Boat
-	token, err := GetJWTForBoat(boat.BoatEmblem)
+	token, err := logic.GetJWTForBoat(boat.BoatEmblem)
 	if err != nil {
 		panic(fiber.NewError(fiber.StatusInternalServerError, err.Error()))
 	}
@@ -42,7 +42,7 @@ func GetBoatTrips(c *fiber.Ctx) {
 		panic(fiber.NewError(fiber.StatusForbidden, err.Error()))
 	}
 
-	trips, tripErr := models.GetAllTrips(result.ID)
+	trips, tripErr := logic.GetAllTrips(result.ID)
 	if tripErr != nil {
 		panic(fiber.NewError(fiber.StatusNotFound, tripErr.Error()))
 	}

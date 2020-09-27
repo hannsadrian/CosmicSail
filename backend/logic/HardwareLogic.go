@@ -1,15 +1,31 @@
 package logic
 
 import (
-	v1 "CosmicSailBackend/controllers/v1"
 	"CosmicSailBackend/models"
 	"CosmicSailBackend/models/database"
 	"github.com/gofiber/fiber"
 	"strconv"
 )
 
+//
+// Hardware Management
+//
+type motorBody struct {
+	Name    string  `json:"name" xml:"name" form:"name"`
+	Channel int     `json:"channel" xml:"channel" form:"channel"`
+	Min     float32 `json:"min" xml:"min" form:"min"`
+	Max     float32 `json:"max" xml:"max" form:"max"`
+	Default float32 `json:"default" xml:"default" form:"default"`
+	Cycle   int     `json:"cycle" xml:"cycle" form:"cycle"`
+}
+type sensorBody struct {
+	Name    string `json:"name" xml:"name" form:"name"`
+	Channel string `json:"channel" xml:"channel" form:"channel"`
+	Type    string `json:"type" xml:"type" form:"type"`
+}
+
 func RegisterBoatMotor(c *fiber.Ctx) {
-	body := v1.MotorBody{}
+	body := motorBody{}
 
 	if err := c.BodyParser(&body); err != nil {
 		panic(fiber.NewError(fiber.StatusBadRequest, "Could not parse request!"))
@@ -36,7 +52,7 @@ func RegisterBoatMotor(c *fiber.Ctx) {
 }
 
 func RegisterBoatSensor(c *fiber.Ctx) {
-	body := v1.SensorBody{}
+	body := sensorBody{}
 
 	if err := c.BodyParser(&body); err != nil {
 		panic(fiber.NewError(fiber.StatusBadRequest, "Could not parse request!"))
@@ -60,7 +76,7 @@ func RegisterBoatSensor(c *fiber.Ctx) {
 }
 
 func UpdateBoatMotor(c *fiber.Ctx) {
-	body := v1.MotorBody{}
+	body := motorBody{}
 	if err := c.BodyParser(&body); err != nil {
 		panic(fiber.NewError(fiber.StatusBadRequest, "Could not parse request!"))
 	}
@@ -78,7 +94,7 @@ func UpdateBoatMotor(c *fiber.Ctx) {
 }
 
 func UpdateBoatSensor(c *fiber.Ctx) {
-	body := v1.SensorBody{}
+	body := sensorBody{}
 	if err := c.BodyParser(&body); err != nil {
 		panic(fiber.NewError(fiber.StatusBadRequest, "Could not parse request!"))
 	}

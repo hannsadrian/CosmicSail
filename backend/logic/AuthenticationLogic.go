@@ -5,6 +5,7 @@ import (
 	"CosmicSailBackend/models/database"
 	"errors"
 	"github.com/gbrlsnchs/jwt/v3"
+	_ "github.com/joho/godotenv/autoload"
 	"golang.org/x/crypto/bcrypt"
 	"os"
 	"time"

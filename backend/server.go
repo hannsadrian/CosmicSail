@@ -2,6 +2,7 @@ package main
 
 import (
 	v1 "CosmicSailBackend/controllers/v1"
+	"CosmicSailBackend/logic"
 	"CosmicSailBackend/models"
 	"CosmicSailBackend/models/database"
 	"CosmicSailBackend/socket"
@@ -76,7 +77,7 @@ func main() {
 		}
 
 		// Verify JWT
-		payload, err := v1.VerifyUserJWT(strings.ReplaceAll(bearer, "Bearer ", ""))
+		payload, err := logic.VerifyUserJWT(strings.ReplaceAll(bearer, "Bearer ", ""))
 		if err != nil {
 			panic(fiber.NewError(fiber.StatusForbidden, err.Error()))
 		}
@@ -111,7 +112,7 @@ func main() {
 		}
 
 		// Verify JWT
-		payload, err := v1.VerifyBoatJWT(strings.ReplaceAll(bearer, "Bearer ", ""))
+		payload, err := logic.VerifyBoatJWT(strings.ReplaceAll(bearer, "Bearer ", ""))
 		if err != nil {
 			panic(fiber.NewError(fiber.StatusForbidden, err.Error()))
 		}
@@ -127,7 +128,7 @@ func main() {
 		c.Next()
 	})
 	boatV1.Get("/", func(c *fiber.Ctx) {
-		c.JSON(v1.SerializeBoat(c.Locals("boat").(models.Boat)))
+		c.JSON(logic.SerializeBoat(c.Locals("boat").(models.Boat)))
 	})
 
 	// Deliver static files
