@@ -32,7 +32,7 @@
         <ion-icon style="font-size: 40px;" class="-mb-2 dark:text-white" name="lock-open"></ion-icon>
         <h1 class="text-5xl font-dosis font-bold dark:text-white">Login</h1>
         <p class="text-gray-700 dark:text-gray-500">
-            In order to use <span class="font-semibold">CosmicSail</span>,<br/>
+            In order to use <span class="font-semibold">CosmicSail</span>,
             you have to log in.
         </p>
         {#if loginError !== ""}
