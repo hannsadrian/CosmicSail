@@ -26,7 +26,7 @@ func StartSocket(port string) {
 	go server.Serve()
 	defer server.Close()
 
-	http.Handle("/", server)
+	http.Handle("/", corsMiddleware(server))
 	log.Println("-> Serving socket at port " + port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
@@ -68,8 +68,14 @@ func registerMethods(server *socketio.Server) {
 				models.SetOnline(boatEmblem)
 				boatRooms[s.ID()] = boatEmblem
 				log.Println("| " + boatEmblem + " connected")
+				server.BroadcastToRoom("/", boatEmblem + userSuffix, "online", "true")
 			} else if payload.Type == "user" {
 				roomName += userSuffix
+				log.Println("User connected!")
+
+				if server.RoomLen("/", boatEmblem + boatEmblem) > 0 {
+					server.BroadcastToRoom("/", roomName, "online", "true")
+				}
 			}
 			s.Join(roomName)
 
@@ -86,6 +92,7 @@ func registerMethods(server *socketio.Server) {
 
 		models.SetOffline(emblem)
 		log.Println("| " + emblem + " disconnected")
+		server.BroadcastToRoom("/", emblem + userSuffix, "online", "false")
 
 		delete(boatRooms, s.ID())
 	})
@@ -96,6 +103,7 @@ func registerMethods(server *socketio.Server) {
 		emblem, isBoat, err := getBoatEmblemFromRooms(s.Rooms())
 
 		if err != nil {
+			log.Println(err)
 			log.Println("Error while executing command event")
 			return
 		}
@@ -138,4 +146,31 @@ func getBoatEmblemFromRooms(rooms []string) (boatEmblem string, isBoat bool, err
 	}
 
 	return
+}
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		allowHeaders := "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization"
+		allowedOrigins := []string{"localhost:5000", "waterway.cosmicsail.online"}
+
+		if contains(allowedOrigins, r.Header.Get("Origin")) {
+			w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+		}
+		r.Header.Del("Origin")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, PUT, PATCH, GET, DELETE")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Access-Control-Allow-Headers", allowHeaders)
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func contains(s []string, search string) bool {
+	contains := false
+	for entry := range s {
+		if strings.Contains(search, s[entry]) {
+			contains = true
+		}
+	}
+	return contains
 }
