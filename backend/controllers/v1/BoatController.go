@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"CosmicSailBackend/logic"
 	"CosmicSailBackend/models"
 	"CosmicSailBackend/models/database"
 	"github.com/gofiber/fiber"
@@ -21,7 +22,7 @@ func RegisterBoatForUser(c *fiber.Ctx) {
 	if err := c.BodyParser(&body); err != nil {
 		panic(fiber.NewError(fiber.StatusBadRequest, "Could not parse request!"))
 	}
-	boat, err := models.CreateBoat(c.Locals("user").(models.User), body.Name, body.Series, body.Make)
+	boat, err := logic.CreateBoat(c.Locals("user").(models.User), body.Name, body.Series, body.Make)
 	if err != nil {
 		panic(fiber.NewError(fiber.StatusBadRequest, err.Error()))
 	}
@@ -36,7 +37,7 @@ func RegisterBoatForUser(c *fiber.Ctx) {
 }
 
 func GetBoatTrips(c *fiber.Ctx) {
-	result, err := GetBoatForUser(c.Locals("user").(models.User), c.Params("emblem"))
+	result, err := logic.GetBoatForUser(c.Locals("user").(models.User), c.Params("emblem"))
 	if err != nil {
 		panic(fiber.NewError(fiber.StatusForbidden, err.Error()))
 	}
@@ -60,7 +61,7 @@ func GetAllBoats(c *fiber.Ctx) {
 			database.Db.Model(&boat).Association("Motors").Find(&boat.Motors)
 			database.Db.Model(&boat).Association("Sensors").Find(&boat.Sensors)
 			database.Db.Model(&boat).Association("Trips").Find(&boat.Trips)
-			output = append(output, SerializeBoat(boat))
+			output = append(output, logic.SerializeBoat(boat))
 		}
 		c.JSON(output)
 	} else {
@@ -69,12 +70,8 @@ func GetAllBoats(c *fiber.Ctx) {
 
 		var output []fiber.Map
 		for _, boat := range boats {
-			output = append(output, SerializeBoat(boat))
+			output = append(output, logic.SerializeBoat(boat))
 		}
 		c.JSON(output)
 	}
-}
-
-func SerializeBoat(boat models.Boat) fiber.Map {
-	return fiber.Map{"BoatEmblem": boat.BoatEmblem, "Name": boat.Name, "Series": boat.Series, "Make": boat.Make, "Online": boat.Online, "LastOnline": boat.LastOnline, "Motors": boat.Motors, "Sensors": boat.Sensors}
 }

@@ -1,15 +1,14 @@
 package v1
 
 import (
-	"CosmicSailBackend/models"
+	"CosmicSailBackend/logic"
 	"github.com/gofiber/fiber"
-	"strconv"
 )
 
 //
 // Hardware Management
 //
-type motorBody struct {
+type MotorBody struct {
 	Name    string  `json:"name" xml:"name" form:"name"`
 	Channel int     `json:"channel" xml:"channel" form:"channel"`
 	Min     float32 `json:"min" xml:"min" form:"min"`
@@ -17,7 +16,7 @@ type motorBody struct {
 	Default float32 `json:"default" xml:"default" form:"default"`
 	Cycle   int     `json:"cycle" xml:"cycle" form:"cycle"`
 }
-type sensorBody struct {
+type SensorBody struct {
 	Name    string `json:"name" xml:"name" form:"name"`
 	Channel string `json:"channel" xml:"channel" form:"channel"`
 	Type    string `json:"type" xml:"type" form:"type"`
@@ -25,147 +24,39 @@ type sensorBody struct {
 
 //    Registration
 func RegisterBoatHardware(c *fiber.Ctx) {
+	body := MotorBody{}
+
+	if err := c.BodyParser(&body); err != nil {
+		panic(fiber.NewError(fiber.StatusBadRequest, "Could not parse request!"))
+	}
+
 	if c.Params("hardware") == "motor" {
-		registerBoatMotor(c)
+		logic.RegisterBoatMotor(c)
 	} else if c.Params("hardware") == "sensor" {
-		registerBoatSensor(c)
+		logic.RegisterBoatSensor(c)
 	} else {
 		c.Status(400).Send(c.Params("hardware") + " not found")
 	}
-}
-
-func registerBoatMotor(c *fiber.Ctx) {
-	body := motorBody{}
-
-	if err := c.BodyParser(&body); err != nil {
-		panic(fiber.NewError(fiber.StatusBadRequest, "Could not parse request!"))
-	}
-
-	entity, err := GetBoatForUser(c.Locals("user").(models.User), c.Params("emblem"))
-	if err != nil {
-		panic(fiber.NewError(fiber.StatusForbidden, "You don't have access to "+c.Params("emblem")))
-	}
-
-	if body.Name == "" {
-		panic(fiber.NewError(fiber.StatusBadRequest, "Invalid request body"))
-	}
-
-	models.AddMotor(models.Motor{
-		Name:    body.Name,
-		Channel: body.Channel,
-		Min:     body.Min,
-		Max:     body.Max,
-		Default: body.Default,
-		Cycle:   body.Cycle,
-	}, entity)
-	c.Send("Motor added!")
-}
-
-func registerBoatSensor(c *fiber.Ctx) {
-	body := sensorBody{}
-
-	if err := c.BodyParser(&body); err != nil {
-		panic(fiber.NewError(fiber.StatusBadRequest, "Could not parse request!"))
-	}
-
-	entity, err := GetBoatForUser(c.Locals("user").(models.User), c.Params("emblem"))
-	if err != nil {
-		panic(fiber.NewError(fiber.StatusForbidden, "You don't have access to "+c.Params("emblem")))
-	}
-
-	if body.Name == "" || body.Type == "" || body.Channel == "" {
-		panic(fiber.NewError(fiber.StatusBadRequest, "Invalid request body"))
-	}
-
-	models.AddSensor(models.Sensor{
-		Name:    body.Name,
-		Channel: body.Channel,
-		Type:    body.Type,
-	}, entity)
-	c.Send("Sensor added!")
 }
 
 //    Updating
 func UpdateBoatHardware(c *fiber.Ctx) {
 	if c.Params("hardware") == "motor" {
-		updateBoatMotor(c)
+		logic.UpdateBoatMotor(c)
 	} else if c.Params("hardware") == "sensor" {
-		updateBoatSensor(c)
+		logic.UpdateBoatSensor(c)
 	} else {
 		c.Status(400).Send(c.Params("hardware") + " not found")
 	}
-}
-
-func updateBoatMotor(c *fiber.Ctx) {
-	body := motorBody{}
-	if err := c.BodyParser(&body); err != nil {
-		panic(fiber.NewError(fiber.StatusBadRequest, "Could not parse request!"))
-	}
-
-	id := validateHardwareAccess(c.Locals("user").(models.User), c.Params("emblem"), c.Params("id"))
-	models.UpdateMotor(id, models.Motor{
-		Name:    body.Name,
-		Channel: body.Channel,
-		Min:     body.Min,
-		Max:     body.Max,
-		Default: body.Default,
-		Cycle:   body.Cycle,
-	})
-	c.Send("Motor updated!")
-}
-
-func updateBoatSensor(c *fiber.Ctx) {
-	body := sensorBody{}
-	if err := c.BodyParser(&body); err != nil {
-		panic(fiber.NewError(fiber.StatusBadRequest, "Could not parse request!"))
-	}
-
-	id := validateHardwareAccess(c.Locals("user").(models.User), c.Params("emblem"), c.Params("id"))
-	models.UpdateSensor(id, models.Sensor{
-		Name:    body.Name,
-		Channel: body.Channel,
-		Type:    body.Type,
-	})
-	c.Send("Sensor updated!")
 }
 
 //    Deleting
 func DeleteBoatHardware(c *fiber.Ctx) {
 	if c.Params("hardware") == "motor" {
-		deleteBoatMotor(c)
+		logic.DeleteBoatMotor(c)
 	} else if c.Params("hardware") == "sensor" {
-		deleteBoatSensor(c)
+		logic.DeleteBoatSensor(c)
 	} else {
 		c.Status(400).Send(c.Params("hardware") + " not found")
 	}
-}
-
-func deleteBoatMotor(c *fiber.Ctx) {
-	id := validateHardwareAccess(c.Locals("user").(models.User), c.Params("emblem"), c.Params("id"))
-
-	models.RemoveMotor(id)
-	c.Send("Motor deleted!")
-}
-
-func deleteBoatSensor(c *fiber.Ctx) {
-	id := validateHardwareAccess(c.Locals("user").(models.User), c.Params("emblem"), c.Params("id"))
-
-	models.RemoveSensor(id)
-	c.Send("Sensor deleted!")
-}
-
-// validateHardwareAccess checks whether a user is allowed to access certain hardware parts by id.
-// It returns the hardware id when access is allowed and panics with a GoFiber error when denied.
-func validateHardwareAccess(user models.User, boatEmblem string, hardwareID string) uint {
-	_, boatErr := GetBoatForUser(user, boatEmblem)
-	if boatErr != nil {
-		panic(fiber.NewError(fiber.StatusForbidden, "You don't have access to "+boatEmblem))
-	}
-
-	id, parseErr := strconv.ParseUint(hardwareID, 10, 0)
-	if parseErr != nil {
-		panic(fiber.NewError(fiber.StatusBadRequest, "Id invalid"))
-	}
-
-	return uint(id)
 }
