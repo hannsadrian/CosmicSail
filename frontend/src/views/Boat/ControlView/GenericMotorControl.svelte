@@ -3,6 +3,7 @@
     import InformationModal from "../../../components/InformationModal.svelte";
 
     export let socket;
+    export let metaState = 0;
     export let motorConfig;
     export let useOrientation = false;
 
@@ -15,10 +16,9 @@
         // TAKE CAUTION (may cause bugs)
         //
         // ☢️ ATTENTION ☣️
-        let t = Math.floor((value * 30) / 6) / 5
+        let t = Math.floor((value * 30) / 1.5) / 20
         if (t !== previousValue) {
             previousValue = t;
-            console.log("Send!")
             socket.emit("command", JSON.stringify({type: "motor", name: motorConfig.Name, value: t}))
         }
     }
@@ -73,5 +73,5 @@
     </div>
     <button class='text-blue-600 mt-4' on:click={requestPermission}>Allow</button>
 </InformationModal>
-<p class="text-sm uppercase text-gray-500 font-semibold tracking-wide mt-2 -mb-2">{motorConfig.Name}</p>
+<p class="text-sm uppercase text-gray-500 font-semibold tracking-wide mt-2 -mb-2">{motorConfig.Name} ({metaState.toFixed(2)})</p>
 <input type="range" min="-1" max="1" step="0.0005" class="w-full" bind:value={value}>

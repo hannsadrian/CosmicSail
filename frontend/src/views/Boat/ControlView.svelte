@@ -5,39 +5,31 @@
     export let socket;
     export let boatConfig;
 
-    let bandwidth = 0
+    let motorData = {}
+    let sensorData = {}
 
-    let gpsData = {
-        lat: 0,
-        lng: 0,
-        rotation: 0,
-        sats: 0,
-        mode: 0,
-        speed: 0,
-        precision: [0, 0],
-        error: {},
-        agpsSetupYet: false
-    }
+    socket.on("data", event => {
+        let data = null;
+        try {
+            data = JSON.parse(event)
+        } catch (e) {
+        }
 
-    socket.on("data", data => {
-        bandwidth = data.network
+        if (data == null)
+            return;
 
-        if (data.gps !== null) {
-            gpsData.sats = data.gps.sats;
-            gpsData.mode = data.gps.mode;
-            gpsData.error = data.gps.error;
-            if (data.gps.position != null) {
-                gpsData.lat = data.gps.position[0]
-                gpsData.lng = data.gps.position[1]
-                gpsData.rotation = data.gps.heading
-                gpsData.speed = data.gps.speed
-                gpsData.precision = data.gps.precision
-            } else {
-                gpsData.speed = 0;
-                gpsData.precision = 0;
-            }
-        } else {
-            gpsData.error = undefined;
+        if (data.motors != null) {
+            data.motors.forEach(motor => {
+                motorData[motor.Name] = motor.State
+            })
+            console.log(motorData)
+        }
+
+        if (data.sensors != null) {
+            data.sensors.forEach(sensor => {
+                sensorData[sensor.Name] = sensor.State
+            })
+            console.log(sensorData)
         }
     })
 
@@ -45,38 +37,58 @@
         console.log(data)
     })
 
+    let agpsSetupYet = false
+
     function setupAGPS() {
         navigator.geolocation.getCurrentPosition(function (location) {
+            // TODO:
             socket.emit("instruction", {
                 name: "setup_agps",
                 lat: location.coords.latitude,
                 lon: location.coords.longitude
             })
-            gpsData.agpsSetupYet = true;
-            gpsData.error = null;
+
+
+            agpsSetupYet = true
         })
     }
 </script>
 
 <div class="sm:flex mt-4">
     <div style="max-width: 430px" class="w-full">
-        <div id="mapbox" class="sm:w-full">
-            <Map lng={gpsData.lng} lat={gpsData.lat} rotation={gpsData.rotation}/>
-        </div>
-        {#if !gpsData.agpsSetupYet}
-            <button on:click={setupAGPS} class="text-blue-600 w-full text-center mt-2">Setup AGPS</button>
-        {/if}
-        <p>🌍 M{gpsData.mode} {"<->"} {gpsData.sats} Sats {"<->"} {parseFloat(gpsData.speed * 3.6).toFixed(1)}
-            km/h {"<->"}
-            {parseFloat(gpsData.rotation).toFixed(1)}°<br/>
-            {gpsData.error ? "🚧 ± " + (gpsData.error.s || 0.00) + " km/h | ± " + ((gpsData.error.x || 0 + gpsData.error.y || 0) / 2).toFixed(1) + " m" : "📍 Locating..."}
-            <br/>
-            🤖 {parseFloat(bandwidth).toFixed(2)} MB
-        </p>
+        {#each boatConfig.Sensors as sensor, index}
+            {#if sensor.Type === "gps"}
+                <div id="mapbox" class="sm:w-full">
+                    {#if sensorData[sensor.Name] && sensorData[sensor.Name].position != null}
+                        <Map lng={sensorData[sensor.Name].position[1]} lat={sensorData[sensor.Name].position[0]}
+                             rotation={sensorData[sensor.Name].rotation}/>
+                    {:else}
+                        <div class="rounded-lg w-full h-full bg-gray-300">
+                            <p></p>
+                        </div>
+                    {/if}
+                </div>
+                {#if agpsSetupYet}
+                    <button on:click={setupAGPS} class="text-blue-600 w-full text-center mt-2">Setup AGPS</button>
+                {/if}
+                {#if sensorData[sensor.Name]}
+                    <p>🌍 M{sensorData[sensor.Name].mode || "-"} {"<->"} {sensorData[sensor.Name].sats || "--"}
+                        Sats {"<->"} {parseFloat((sensorData[sensor.Name].speed || 0) * 3.6).toFixed(1)}
+                        km/h {"<->"} {parseFloat(sensorData[sensor.Name].heading || 0).toFixed(1)}°<br/>
+                        {sensorData[sensor.Name].error != null ? "🚧 ± " + (sensorData[sensor.Name].error.s || 0.00) + " km/h | ± " + ((sensorData[sensor.Name].error.x || 0 + sensorData[sensor.Name].error.y || 0) / 2).toFixed(1) + " m" : "🧭 Locating..."}
+                    </p>
+                {:else}
+                    <p>🌍 M- {"<->"} -- Sats {"<->"} -- km/h {"<->"} --°<br/>🧭 Locating...</p>
+                {/if}
+            {:else if sensor.Type === "bandwidth"}
+                <p>🤖 {parseFloat(sensorData[sensor.Name]).toFixed(2)} MB</p>
+            {/if}
+        {/each}
     </div>
     <div class="mt-4">
         {#each boatConfig.Motors as motor, i}
-            <GenericMotorControl {socket} motorConfig={motor} useOrientation={i === 0}/>
+            <GenericMotorControl {socket} metaState={motorData[motor.Name]} motorConfig={motor}
+                                 useOrientation={i === 0}/>
         {/each}
     </div>
 </div>
