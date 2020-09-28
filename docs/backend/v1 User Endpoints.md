@@ -9,15 +9,15 @@ enabling users to manage their boats, view telemetry data and configure boat har
 ## General information
 
 **Content:**
-- [Status]()
+- [Status](#status)
 - Boats
-  - [Register Boats]()
-  - [Get Boats]()
-- [Trips]()
+  - [Register Boats](#register-boat)
+  - [Get Boats](#get-boats)
+- [Trips](#trips)
 - Hardware
-  - [Add]()
-  - [Change]()
-  - [Delete]()
+  - [Add](#register-new-hardware)
+  - [Change](#update-hardware)
+  - [Delete](#delete-hardware)
 
 To use user endpoints, every request has to have an
 Authorization header including a bearer token. (see [Authentication](./Authentication.md))
