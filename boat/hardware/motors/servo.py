@@ -7,7 +7,6 @@ class ServoMotor:
     name = ""
 
     def __init__(self, name, channel, minimum, maximum, default):
-        print(f"Name: {name}, Chan: {channel}, Min: {minimum}, Max {maximum}, Default {default}")
         self.name = name
         self.channel = channel
         self.max = maximum

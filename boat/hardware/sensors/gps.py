@@ -16,7 +16,7 @@ class GpsSensor():
         #self.get_agps(lat, lon)
         gpsd.connect()
 
-    def get_agps(self, lat, lon):
+    def init_agps(self, lat, lon):
         print("Stopping GPSD for AGPS")
         subprocess.run("sudo service gpsd stop", shell=True, check=True)
         time.sleep(2)

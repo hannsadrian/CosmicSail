@@ -1,3 +1,4 @@
+import asyncio
 import socketio
 import socketio.exceptions
 import requests
@@ -130,20 +131,16 @@ def init():
     # connect to socket
     connect_socket()
 
-    counter = 0
-    while True:
-        try:
-            if counter == 0:
-                send_meta(True)
-                counter = 40
-            else:
-                send_meta(False)
-            time.sleep(0.5)
+    loop = asyncio.get_event_loop()
+    try:
+        loop.create_task(meta_loop())
+        loop.run_forever()
+    except asyncio.CancelledError:
+        pass
 
-            counter -= 1
-        except KeyboardInterrupt:
-            pca.deinit()
-            quit()
+    except KeyboardInterrupt:
+        pca.deinit()
+        quit()
 
 
 def connect_socket():
@@ -159,6 +156,19 @@ def connect_socket():
 def set_all_motors(to):
     for motor in motors:
         motors[motor].set_state(to)
+
+
+async def meta_loop():
+    counter = 4  # weird counter logic counting down; starting at 4 to give some time to setup
+    while True:
+        if counter == 0:
+            send_meta(True)
+            counter = 100
+        else:
+            send_meta(False)
+        time.sleep(0.2)
+
+        counter -= 1
 
 
 previous_motor_data = []
@@ -184,14 +194,14 @@ def send_meta(entire_meta):
         print(motor_data)
         sio.emit("data", json.dumps({
             'motors': motor_data
-        }, separators=(',', ':')))
+        }))
 
     if previous_sensor_data != sensor_data or entire_meta:
         previous_sensor_data = sensor_data
         print(sensor_data)
         sio.emit("data", sio.emit("data", json.dumps({
             'sensors': sensor_data
-        }, separators=(',', ':'))))
+        })))
 
 
 init()
