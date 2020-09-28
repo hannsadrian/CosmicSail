@@ -8,6 +8,17 @@ enabling users to manage their boats, view telemetry data and configure boat har
 
 ## General information
 
+**Content:**
+- [Status]()
+- Boats
+  - [Register Boats]()
+  - [Get Boats]()
+- [Trips]()
+- Hardware
+  - [Add]()
+  - [Change]()
+  - [Delete]()
+
 To use user endpoints, every request has to have an
 Authorization header including a bearer token. (see [Authentication](./Authentication.md))
 
@@ -64,9 +75,9 @@ POST `/boats`
 **Body:**
 | Name    | Description     | Type       | Required |
 | ------- | --------------- | ---------- | -------- |
-| Name    | Name of boat    | String     | Yes      |
-| Series  | Production line | String     | Yes      |
-| Make    | Manufacturer    | String     | Yes      |
+| name    | Name of boat    | String     | Yes      |
+| series  | Production line | String     | Yes      |
+| make    | Manufacturer    | String     | Yes      |
 
 ### Response
 
@@ -179,5 +190,148 @@ User has no access to the requested boat
 `404` - Not found<br>
 Error while loading trips
 
+# Hardware
 
-TODO: Hardware(Post, Put, Delete)
+Following endpoints are used to add, change or remove hardware configuration, that is then automatically loaded by the boat.
+
+## Register new Hardware
+
+Add new hardware to the config
+
+### Request
+
+POST `/boats/:emblem/hardware`
+
+**Authorization:** Bearer Token<br>
+**Query Params:**
+| Name     | Description        | Type           | Required |
+| -------- | ------------------ | -------------- | -------- |
+| hardware | Kind of hardware   | String(*motor* or *sensor*) | Yes |
+
+**Body:** 
+- Motor
+
+| Name     | Description          | Type           | Required |
+| -------- | -------------------- | -------------- | -------- |
+| name     | Name of motor        | String         | Yes      |
+| channel  | PWM Channel of motor | Integer        | Yes      |
+| min      | Minimum PWM cycle    | Float          | Yes      |
+| max      | Maximum PWM cycle    | Float          | Yes      |
+| default  | Default motor state  | Float(-1 to 1) | Yes      |
+| cycle    | Dutycycle (currently not used by boat) | Integer | Yes |
+
+- Sensor
+
+| Name     | Description          | Type           | Required |
+| -------- | -------------------- | -------------- | -------- |
+| name     | Name of motor        | String         | Yes      |
+| channel  | Where is the sensor connected? | String | Yes      |
+| type     | Type of sensor       | String          | Yes      |
+
+### Response
+
+`200` - Success<br>
+```text
+Motor added!
+```
+```text
+Sensor added!
+```
+
+`400` - Bad Request<br>
+1. The hardware query parameter could not resolve to *motor* or *sensor*.
+2. Body could not be parsed
+3. Field name or fields name, type and channel are empty
+
+`403` - Forbidden<br>
+No access to requested boat
+
+
+## Update Hardware
+
+Change existing hardware to match a new configuration.
+
+### Request
+
+PUT `/boats/:emblem/hardware/:id`
+
+**Authorization:** Bearer Token<br>
+**Query Params:**
+| Name     | Description        | Type           | Required |
+| -------- | ------------------ | -------------- | -------- |
+| hardware | Kind of hardware   | String(*motor* or *sensor*) | Yes |
+
+**Body:** 
+- Motor
+
+| Name     | Description          | Type           | Required |
+| -------- | -------------------- | -------------- | -------- |
+| name     | Name of motor        | String         | No       |
+| channel  | PWM Channel of motor | Integer        | No       |
+| min      | Minimum PWM cycle    | Float          | No       |
+| max      | Maximum PWM cycle    | Float          | No       |
+| default  | Default motor state  | Float(-1 to 1) | No       |
+| cycle    | Dutycycle (currently not used by boat) | Integer | No |
+
+- Sensor
+
+| Name     | Description          | Type           | Required |
+| -------- | -------------------- | -------------- | -------- |
+| name     | Name of motor        | String         | No       |
+| channel  | Where is the sensor connected? | String | No     |
+| type     | Type of sensor       | String         | No       |
+
+### Response
+
+`200` - Success<br>
+```text
+Motor updated!
+```
+```text
+Sensor updated!
+```
+
+`400` - Bad Request<br>
+1. The hardware query parameter could not resolve to *motor* or *sensor*.
+2. Body could not be parsed
+3. Hardware with requested ID for boat not found
+
+`403` - Forbidden<br>
+No access to requested boat
+
+
+## Delete Hardware
+
+Delete obsolete hardware.
+
+### Request
+
+Delete `/boats/:emblem/hardware/:id`
+
+**Authorization:** Bearer Token<br>
+**Query Params:**
+| Name     | Description        | Type           | Required |
+| -------- | ------------------ | -------------- | -------- |
+| hardware | Kind of hardware   | String(*motor* or *sensor*) | Yes |
+
+**Body:** None
+
+### Response
+
+`200` - Success<br>
+```text
+Motor deleted!
+```
+```text
+Sensor deleted!
+```
+
+`400` - Bad Request<br>
+1. The hardware query parameter could not resolve to *motor* or *sensor*.
+3. Hardware with requested ID for boat not found
+
+`403` - Forbidden<br>
+No access to requested boat
+
+
+
