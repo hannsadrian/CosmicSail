@@ -138,4 +138,46 @@ GET `/boats`
 ]
 ```
 
-TODO: Trips(Get), Hardware(Post, Put, Delete)
+# Trips
+
+Get all trips a boat has made.
+
+### Request
+
+GET `/boats/:emblem/trips`
+
+**Authorization:** Bearer Token<br>
+**Query Params:** None<br>
+**Body:** None
+
+### Response
+
+`200` - Success<br>
+```json
+[
+  {
+    "ID": 1,
+    "BoatID": 1,
+    "Name": "16:24 25.9.2020",
+    "StartDate": ...,
+    "EndDate": ...,
+    "Datapoints": [
+      {
+        "TripID": 1,
+        "Timestamp": ...,
+        "Data": ...
+      }
+    ]
+  },
+  ...
+]
+```
+
+`403` - Forbidden<br>
+User has no access to the requested boat
+
+`404` - Not found<br>
+Error while loading trips
+
+
+TODO: Hardware(Post, Put, Delete)
