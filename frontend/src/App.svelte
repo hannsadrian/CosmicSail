@@ -4,7 +4,6 @@
     import {fade} from "svelte/transition";
     import PageAnimator from "./utils/PageAnimator.svelte";
     import Button from "./components/Button.svelte";
-    import PrimaryButton from "./components/PrimaryButton.svelte";
 
     import Home from "./views/Home.svelte";
     import Login from "./views/Login.svelte";
@@ -66,7 +65,7 @@
             <div class={(open ? "opacity-100 mt-5" : "opacity-0") + " transition-all duration-200 flex flex-wrap justify-center whitespace-normal sm:hidden"}
                  style={!open ? "max-height: 0px" : "max-height: 140px"}>
                 <Link to="boats">
-                    <PrimaryButton className="mx-1 my-1 px-8 dark-hover:bg-black" text="Boats"/>
+                    <Button isPrimary={true} className="mx-1 my-1 px-8 dark-hover:bg-black" text="Boats"/>
                 </Link>
             </div>
 

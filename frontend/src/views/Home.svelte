@@ -1,6 +1,6 @@
 <script>
-    import PrimaryButton from "../components/PrimaryButton.svelte";
     import {Link} from "svelte-routing";
+    import Button from "../components/Button.svelte";
 </script>
 
 <main class="mt-12 pb-10 md:mt-20 mx-10 md:flex md:justify-center">
@@ -13,7 +13,7 @@
         </p>
         <div class="select-none">
             <Link to="login">
-                <PrimaryButton className="px-8 mt-6 dark:bg-gray-900 dark-hover:bg-black" text="Login"/>
+                <Button isPrimary={true} className="px-8 mt-6 dark:bg-gray-900 dark-hover:bg-black" text="Login"/>
             </Link>
         </div>
     </div>

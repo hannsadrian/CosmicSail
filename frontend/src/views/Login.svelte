@@ -1,7 +1,7 @@
 <script>
-    import PrimaryButton from "../components/PrimaryButton.svelte";
     import {navigate} from "svelte-routing";
     import axios from "axios";
+    import Button from "../components/Button.svelte";
 
     let loginError = ""
     let loading = false
@@ -10,7 +10,10 @@
         event.preventDefault();
         const formdata = new FormData(event.target);
         loading = true
-        axios.post(process.env.APIURL + "/auth/login", {username: formdata.get("username"), password: formdata.get("password")}).then(res => {
+        axios.post(process.env.APIURL + "/auth/login", {
+            username: formdata.get("username"),
+            password: formdata.get("password")
+        }).then(res => {
             loading = false
             console.log(res)
             localStorage.setItem("username", res.data.Username)
@@ -63,6 +66,6 @@
                 />
             </label>
         </div>
-        <PrimaryButton className="my-3 px-8" text="{loading ? 'Loading' : 'Login'}" type="submit"/>
+        <Button isPrimary={true} className="my-3 px-8" text="{loading ? 'Loading' : 'Login'}" type="submit"/>
     </form>
 </main>
