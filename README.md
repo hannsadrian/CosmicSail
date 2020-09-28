@@ -24,7 +24,10 @@ instead of a direct connection to the boat.
 All the realtime transmission happens over Socket.io which is adopted by frameworks for many different languages.
 Here is a simple connection diagram:
 
-`🎮 Client/Phone` ↔️ `📟 Proxy/Server` ↔️ `⛵️ Boat`
+```markdown
+**🎮 Client/Phone** ↔️ **📟 Proxy/Server** ↔️ **⛵️ Boat**
+      Svelte                 Golang             Python
+```
 
 ## 🎚 Hardware
 
