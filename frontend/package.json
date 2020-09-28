@@ -21,6 +21,7 @@
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "gyronorm": "^2.0.6",
+    "moment": "^2.29.0",
     "sirv-cli": "^0.4.4",
     "socket.io-client": "^2.3.0",
     "svelte-gamepad": "^0.1.1",
