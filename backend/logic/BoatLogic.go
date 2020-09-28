@@ -60,8 +60,7 @@ func SerializeBoat(boat models.Boat) fiber.Map {
 func SetOnline(boatEmblem string) {
 	boat := models.Boat{}
 	database.Db.Where("boat_emblem = ?", boatEmblem).First(&boat)
-	boat.Online = true
-	database.Db.Model(&boat).Updates(boat)
+	database.Db.Model(&boat).Updates(map[string]interface{}{"online": true})
 }
 
 func SetOffline(boatEmblem string) {

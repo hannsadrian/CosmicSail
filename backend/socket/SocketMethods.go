@@ -43,18 +43,19 @@ func registerMethods(server *socketio.Server) {
 				roomName += boatSuffix
 
 				logic.SetOnline(boatEmblem)
+				s.Join(roomName)
 				boatRooms[s.ID()] = boatEmblem
 				log.Println("| " + boatEmblem + " connected")
 				server.BroadcastToRoom("/", boatEmblem + userSuffix, "online", "true")
 			} else if payload.Type == "user" {
 				roomName += userSuffix
-				log.Println("User connected!")
+				s.Join(roomName)
+				log.Println("| User connected")
 
-				if server.RoomLen("/", boatEmblem + boatEmblem) > 0 {
-					server.BroadcastToRoom("/", roomName, "online", "true")
+				if server.RoomLen("/", boatEmblem + boatSuffix) != 0 {
+					server.BroadcastToRoom("/", boatEmblem + userSuffix, "online", "true")
 				}
 			}
-			s.Join(roomName)
 
 			return nil
 		}
@@ -81,7 +82,6 @@ func registerMethods(server *socketio.Server) {
 
 		if err != nil {
 			log.Println(err)
-			log.Println("Error while executing command event")
 			return
 		}
 
