@@ -113,7 +113,7 @@ GET `/boats`
     "Series": "Model 3000",
     "Make": "Selfmade",
     "Online": false,
-    "LastOnline": ...,
+    "LastOnline": "2020-09-27T15:07:29.618628+02:00",
     "Motors": [
       {
         "Name": "Rudder",
@@ -159,12 +159,12 @@ GET `/boats/:emblem/trips`
     "ID": 1,
     "BoatID": 1,
     "Name": "16:24 25.9.2020",
-    "StartDate": ...,
-    "EndDate": ...,
+    "StartDate": "2020-09-25T16:24:00.000000+02:00",
+    "EndDate": "2020-09-25T17:10:46.629442+02:00",
     "Datapoints": [
       {
         "TripID": 1,
-        "Timestamp": ...,
+        "Timestamp": "2020-09-25T16:24:00.000000+02:00",
         "Data": ...
       }
     ]
