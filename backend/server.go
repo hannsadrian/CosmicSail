@@ -42,7 +42,7 @@ func main() {
 	go func() {
 		for {
 			database.Db.DB().Ping()
-			time.Sleep(30 * time.Second)
+			time.Sleep(5 * time.Second)
 		}
 	}()
 	defer database.Db.Close()
