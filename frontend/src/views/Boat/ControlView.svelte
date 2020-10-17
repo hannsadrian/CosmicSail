@@ -55,7 +55,7 @@
 </script>
 
 <div class="sm:grid grid-cols-2 mt-4">
-    <div style="max-width: 430px" class="w-full">
+    <div class="w-full">
         {#each boatConfig.Sensors as sensor, index}
             {#if sensor.Type === "gps"}
                 <GpsSensorDisplay {agpsSetupYet} gpsData="{sensorData[sensor.Name]}"/>

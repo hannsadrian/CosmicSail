@@ -4,7 +4,7 @@
     export let gpsData
 </script>
 
-<div id="mapbox" class="sm:w-full" style="height: 250px">
+<div id="mapbox" class="sm:w-full h-map">
     {#if gpsData && gpsData.position != null}
         <Map lng={gpsData.position[1]} lat={gpsData.position[0]}
              rotation={gpsData.rotation}/>

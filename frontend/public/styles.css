@@ -26,3 +26,14 @@ html { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Sego
 *:focus {
     outline: none;
 }
+
+
+.h-map {
+    height: 250px
+}
+
+@media (min-width: 768px) {
+    .h-map {
+        height: 350px
+    }
+}
