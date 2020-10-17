@@ -17,6 +17,7 @@ type motorBody struct {
 	Max     float32 `json:"max" xml:"max" form:"max"`
 	Default float32 `json:"default" xml:"default" form:"default"`
 	Cycle   int     `json:"cycle" xml:"cycle" form:"cycle"`
+	Type    string  `json:"type" xml:"type" form:"type"`
 }
 type sensorBody struct {
 	Name    string `json:"name" xml:"name" form:"name"`
@@ -47,6 +48,7 @@ func RegisterBoatMotor(c *fiber.Ctx) {
 		Max:     body.Max,
 		Default: body.Default,
 		Cycle:   body.Cycle,
+		Type:    body.Type,
 	}, entity)
 	c.Send("Motor added!")
 }
@@ -89,6 +91,7 @@ func UpdateBoatMotor(c *fiber.Ctx) {
 		Max:     body.Max,
 		Default: body.Default,
 		Cycle:   body.Cycle,
+		Type:    body.Type,
 	})
 	c.Send("Motor updated!")
 }

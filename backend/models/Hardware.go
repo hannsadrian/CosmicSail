@@ -13,6 +13,7 @@ type Motor struct {
 	Max     float32
 	Default float32
 	Cycle   int
+	Type    string
 }
 
 type Sensor struct {
