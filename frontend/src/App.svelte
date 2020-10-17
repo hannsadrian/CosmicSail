@@ -29,7 +29,7 @@
 
 </script>
 
-<main class="bg-gray-100 dark:bg-gray-800 transition-bg duration-200 sm:pt-6">
+<main class="bg-gray-200 dark:bg-gray-800 transition-bg duration-200 sm:pt-6">
     <Tailwindcss/>
     <Router {url}>
         <div class="sm:mx-10 p-6 bg-white shadow-lg sm:rounded-lg transition-all duration-200 dark:bg-gray-900">

@@ -1,0 +1,28 @@
+<script>
+    import {onMount} from "svelte"
+
+    export let hardwareType;
+    let emoji = "";
+
+    onMount(() => {
+        switch (hardwareType) {
+            case "rudder":
+                emoji = "🛶"
+                break
+            case "sail":
+                emoji = "⛵"
+                break
+            case "engine":
+                emoji = "🔌"
+                break
+            case "gps":
+                emoji = "🛰"
+                break
+            case "bandwith":
+                emoji = "📡"
+                break
+        }
+    })
+</script>
+
+{emoji}

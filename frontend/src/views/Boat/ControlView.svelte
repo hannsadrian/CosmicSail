@@ -1,6 +1,6 @@
 <script>
-    import Map from "./ControlView/Map.svelte";
     import GenericMotorControl from "./ControlView/GenericMotorControl.svelte";
+    import GpsSensorDisplay from "./ControlView/GpsSensorDisplay.svelte";
 
     export let socket;
     export let boatConfig;
@@ -54,43 +54,29 @@
     }
 </script>
 
-<div class="sm:flex mt-4">
+<div class="sm:grid grid-cols-2 mt-4">
     <div style="max-width: 430px" class="w-full">
         {#each boatConfig.Sensors as sensor, index}
             {#if sensor.Type === "gps"}
-                <div id="mapbox" class="sm:w-full">
-                    {#if sensorData[sensor.Name] && sensorData[sensor.Name].position != null}
-                        <Map lng={sensorData[sensor.Name].position[1]} lat={sensorData[sensor.Name].position[0]}
-                             rotation={sensorData[sensor.Name].rotation}/>
-                    {:else}
-                        <div class="rounded-lg w-full h-full bg-gray-300">
-                            <p></p>
-                        </div>
-                    {/if}
-                </div>
+                <GpsSensorDisplay {agpsSetupYet} gpsData="{sensorData[sensor.Name]}"/>
                 {#if agpsSetupYet}
                     <button on:click={setupAGPS} class="text-blue-600 w-full text-center mt-2">Setup AGPS</button>
-                {/if}
-                {#if sensorData[sensor.Name]}
-                    <p>🌍 M{sensorData[sensor.Name].mode || "-"} {"<->"} {sensorData[sensor.Name].sats || "--"}
-                        Sats {"<->"} {parseFloat((sensorData[sensor.Name].speed || 0) * 3.6).toFixed(1)}
-                        km/h {"<->"} {parseFloat(sensorData[sensor.Name].heading || 0).toFixed(1)}°<br/>
-                        {sensorData[sensor.Name].error != null ? "🚧 ± " + (sensorData[sensor.Name].error.s || 0.00) + " km/h | ± " + ((sensorData[sensor.Name].error.x || 0 + sensorData[sensor.Name].error.y || 0) / 2).toFixed(1) + " m" : "🧭 Locating..."}
-                    </p>
-                {:else}
-                    <p>🌍 M- {"<->"} -- Sats {"<->"} -- km/h {"<->"} --°<br/>🧭 Locating...</p>
                 {/if}
             {:else if sensor.Type === "bandwidth"}
                 <p>🤖 {parseFloat(sensorData[sensor.Name]).toFixed(2)} MB</p>
             {/if}
         {/each}
     </div>
-    <div class="mt-4">
+    <div class="mt-4 sm:mt-0 sm:mx-2 sm:mt-2 mb-auto grid grid-cols-2 items-start">
         {#each boatConfig.Motors as motor, i}
             <GenericMotorControl {socket} metaState={motorData[motor.Name]} motorConfig={motor}
                                  useOrientation={i === 0}/>
         {/each}
     </div>
+    <button class="flex mx-auto text-center mt-5 text-gray-500">
+        <ion-icon class="mt-1 mr-1" name="build"></ion-icon>
+        <p>Edit hardware</p>
+    </button>
 </div>
 
 <style>

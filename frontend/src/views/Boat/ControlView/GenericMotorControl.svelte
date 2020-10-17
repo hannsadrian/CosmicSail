@@ -1,9 +1,10 @@
 <script>
     import {onMount} from "svelte";
     import InformationModal from "../../../components/InformationModal.svelte";
+    import HardwareTypeEmoji from "./HardwareTypeEmoji.svelte";
 
     export let socket;
-    export let metaState = 0;
+    export let metaState = null;
     export let motorConfig;
     export let useOrientation = false;
 
@@ -69,9 +70,13 @@
 <InformationModal shown={!hasPermissionForOrientation && useOrientation} title="Device Orientation">
     <div>
         In order to fully use the boat controls,
-        you have to give the webpage permission for the orientation of your device.
+        you have to give the webpage permission for accessing orientation of your device.
     </div>
     <button class='text-blue-600 mt-4' on:click={requestPermission}>Allow</button>
 </InformationModal>
-<p class="text-sm uppercase text-gray-500 font-semibold tracking-wide mt-2 -mb-2">{motorConfig.Name} ({metaState.toFixed(2)})</p>
-<input type="range" min="-1" max="1" step="0.0005" class="w-full" bind:value={value}>
+<div class="bg-white dark:bg-gray-900 mx-1 my-1 shadow-xl px-4 pt-4 pb-2 rounded-lg {useOrientation ? 'col-span-2' : 'col-span-2 md:col-span-1'}">
+    <input type="range" min="-1" max="1" step="0.0005" class="w-full shadow-lg" bind:value={value}>
+    <p class="text-sm text-gray-800 dark:text-gray-300 text-center">
+        <HardwareTypeEmoji hardwareType="{motorConfig.Type}"/> {motorConfig.Name} {metaState != null ? "-> " + metaState.toFixed(1) : ""}
+    </p>
+</div>
