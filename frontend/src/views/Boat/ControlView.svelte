@@ -1,6 +1,8 @@
 <script>
     import GenericMotorControl from "./ControlView/GenericMotorControl.svelte";
     import GpsSensorDisplay from "./ControlView/GpsSensorDisplay.svelte";
+    import InformationModal from "../../components/InformationModal.svelte";
+    import ConfiguratorOverview from "./ControlView/hardware/ConfiguratorOverview.svelte";
 
     export let socket;
     export let boatConfig;
@@ -52,8 +54,25 @@
             agpsSetupYet = true
         })
     }
+
+    function reloadBoatConfig() {
+        // TODO
+    }
+
+    let hardwareOpen = false;
+    function openHardware() {
+        hardwareOpen = false;
+        hardwareOpen = true;
+    }
 </script>
 
+<InformationModal shown="{hardwareOpen}" title="🛠 Hardware config">
+    <div class="mb-4">
+        <button on:click={reloadBoatConfig} class="px-4 py-1 bg-gray-200 dark:bg-gray-700 rounded">Reload boat</button>
+        <button on:click={() => location.reload()} class="px-4 py-1 bg-gray-200 dark:bg-gray-700 rounded">Reload page</button>
+    </div>
+    <ConfiguratorOverview {boatConfig} motors="{boatConfig.Motors}" sensors="{boatConfig.Sensors}"/>
+</InformationModal>
 <div class="sm:grid grid-cols-2 mt-4">
     <div class="w-full">
         {#each boatConfig.Sensors as sensor, index}
@@ -73,9 +92,9 @@
                                  useOrientation={i === 0}/>
         {/each}
     </div>
-    <button class="flex mx-auto text-center mt-5 text-gray-500">
+    <button on:click={openHardware} class="flex mx-auto text-center mt-5 text-gray-500">
         <ion-icon class="mt-1 mr-1" name="build"></ion-icon>
-        <p>Edit hardware</p>
+        <span>Edit hardware</span>
     </button>
 </div>
 
