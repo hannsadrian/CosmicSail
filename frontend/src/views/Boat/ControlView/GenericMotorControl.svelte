@@ -8,7 +8,7 @@
     export let motorConfig;
     export let useOrientation = false;
 
-    let value = 0;
+    let value = motorConfig.Default;
     let previousValue = 0;
     $: {
         // ☢️ ATTENTION ☣️
@@ -74,9 +74,9 @@
     </div>
     <button class='text-blue-600 mt-4' on:click={requestPermission}>Allow</button>
 </InformationModal>
-<div class="bg-white dark:bg-gray-900 mx-1 my-1 shadow-xl px-4 pt-4 pb-2 rounded-lg {useOrientation ? 'col-span-2' : 'col-span-2 md:col-span-1'}">
+<div class="bg-white dark:bg-gray-900 mx-1 my-1 shadow hover:shadow-lg transition duration-150 px-4 pt-4 pb-2 rounded-lg {useOrientation ? 'col-span-2' : 'col-span-2 md:col-span-1'}">
     <input type="range" min="-1" max="1" step="0.0005" class="w-full shadow-lg" bind:value={value}>
-    <p class="text-sm text-gray-800 dark:text-gray-300 text-center">
+    <p on:click={() => value = motorConfig.Default} class="cursor-pointer text-sm text-gray-800 dark:text-gray-300 text-center">
         <HardwareTypeEmoji hardwareType="{motorConfig.Type}"/> {motorConfig.Name} {metaState != null ? "-> " + metaState.toFixed(1) : ""}
     </p>
 </div>
