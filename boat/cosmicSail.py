@@ -10,6 +10,7 @@ from board import SCL, SDA
 import busio
 import adafruit_pca9685 as pca_driver
 import json
+import subprocess
 
 from hardware.motors.servo import ServoMotor
 from hardware.sensors.gps import GpsSensor
@@ -82,6 +83,9 @@ def setup(data):
         loop.stop()
         sio.disconnect()
         init()
+
+    if setup['type'] == 'shutdown':
+        subprocess.run("sudo shutdown now", shell=True, check=True)
 
 
 # @sio.event

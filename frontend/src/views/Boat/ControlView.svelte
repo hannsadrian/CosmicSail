@@ -65,9 +65,28 @@
         location.reload()
     }
 
+    let wantsShutdown = false;
+    let isSureToShutdown = false;
+    function shutdownBoat() {
+        if (!wantsShutdown) {
+            wantsShutdown = true;
+            return;
+        }
+        if (!isSureToShutdown) {
+            isSureToShutdown = true;
+            return;
+        }
+
+        console.log("SHUTDOWN")
+        socket.emit("setup", JSON.stringify({type: "shutdown"}))
+        location.reload()
+    }
+
     let hardwareOpen = false;
 
     function openHardware() {
+        wantsShutdown = false;
+        isSureToShutdown = false;
         hardwareOpen = false;
         hardwareOpen = true;
     }
@@ -79,9 +98,16 @@
                 class="px-4 py-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-400 dark-hover:bg-gray-900 rounded">
             Reload boat
         </button>
-        <button on:click={() => location.reload()}
-                class="px-4 py-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-400 dark-hover:bg-gray-900 rounded">
-            Reload page
+        <button on:click={shutdownBoat}
+                class="px-4 py-1 bg-red-700 hover:bg-red-800 text-white rounded">
+            {#if !wantsShutdown}
+                <span>Shutdown boat</span>
+            {:else if !isSureToShutdown}
+                <span>Sure?</span>
+            {:else}
+                <span>Really?</span>
+            {/if}
+
         </button>
     </div>
     <ConfiguratorOverview {boatConfig} motors="{boatConfig.Motors}" sensors="{boatConfig.Sensors}"/>
