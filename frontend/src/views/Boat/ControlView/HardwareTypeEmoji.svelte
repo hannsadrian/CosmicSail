@@ -18,7 +18,7 @@
             case "gps":
                 emoji = "🛰"
                 break
-            case "bandwith":
+            case "bandwidth":
                 emoji = "📡"
                 break
         }

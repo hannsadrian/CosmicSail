@@ -18,7 +18,7 @@
         //
         // ☢️ ATTENTION ☣️
         let t = Math.floor((value * 30) / 1.5) / 20
-        if (t !== previousValue) {
+        if (t !== previousValue && t !== metaState) {
             previousValue = t;
             socket.emit("command", JSON.stringify({type: "motor", name: motorConfig.Name, value: t}))
         }
@@ -77,6 +77,6 @@
 <div class="bg-white dark:bg-gray-900 mx-1 my-1 shadow hover:shadow-lg transition duration-150 px-4 pt-4 pb-2 rounded-lg {useOrientation ? 'col-span-2' : 'col-span-2 md:col-span-1'}">
     <input type="range" min="-1" max="1" step="0.0005" class="w-full shadow-lg" bind:value={value}>
     <p on:click={() => value = motorConfig.Default} class="cursor-pointer text-sm text-gray-800 dark:text-gray-300 text-center">
-        <HardwareTypeEmoji hardwareType="{motorConfig.Type}"/> {motorConfig.Name} {metaState != null ? "-> " + metaState.toFixed(1) : ""}
+        <HardwareTypeEmoji hardwareType="{motorConfig.Type}"/> <span class="{useOrientation ? 'font-bold' : ''}">{motorConfig.Name}</span> {metaState != null ? "-> " + metaState.toFixed(1) : ""}
     </p>
 </div>

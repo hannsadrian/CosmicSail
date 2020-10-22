@@ -53,7 +53,7 @@
                 </div>
                 <div class="my-auto hidden sm:block">
                     <Link to="boats">
-                        <Button className="dark:bg-gray-900 dark-hover:bg-black" text="Boats"/>
+                        <Button isPrimary={true} className="mx-1 my-1 px-8 dark-hover:bg-black" text="Boats"/>
                     </Link>
                 </div>
                 <Button

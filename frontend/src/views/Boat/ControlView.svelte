@@ -60,6 +60,7 @@
     }
 
     let hardwareOpen = false;
+
     function openHardware() {
         hardwareOpen = false;
         hardwareOpen = true;
@@ -68,8 +69,14 @@
 
 <InformationModal shown="{hardwareOpen}" title="🛠 Hardware config">
     <div class="mb-4">
-        <button on:click={reloadBoatConfig} class="px-4 py-1 bg-gray-200 dark:bg-gray-700 rounded">Reload boat</button>
-        <button on:click={() => location.reload()} class="px-4 py-1 bg-gray-200 dark:bg-gray-700 rounded">Reload page</button>
+        <button on:click={reloadBoatConfig}
+                class="px-4 py-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-400 dark-hover:bg-gray-900 rounded">
+            Reload boat
+        </button>
+        <button on:click={() => location.reload()}
+                class="px-4 py-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-400 dark-hover:bg-gray-900 rounded">
+            Reload page
+        </button>
     </div>
     <ConfiguratorOverview {boatConfig} motors="{boatConfig.Motors}" sensors="{boatConfig.Sensors}"/>
 </InformationModal>
@@ -78,24 +85,29 @@
         {#each boatConfig.Sensors as sensor, index}
             {#if sensor.Type === "gps"}
                 <GpsSensorDisplay {agpsSetupYet} gpsData="{sensorData[sensor.Name]}"/>
-                {#if agpsSetupYet}
-                    <button on:click={setupAGPS} class="text-blue-600 w-full text-center mt-2">Setup AGPS</button>
-                {/if}
             {:else if sensor.Type === "bandwidth"}
-                <p>🤖 {parseFloat(sensorData[sensor.Name]).toFixed(2)} MB</p>
+                <p>🤖 {sensorData[sensor.Name] ? parseFloat(sensorData[sensor.Name]).toFixed(1) : "--"} MB</p>
             {/if}
         {/each}
     </div>
     <div class="mt-4 sm:mt-0 sm:mx-2 sm:mt-2 mb-auto grid grid-cols-2 items-start">
         {#each boatConfig.Motors as motor, i}
             <GenericMotorControl {socket} metaState={motorData[motor.Name]} motorConfig={motor}
-                                 useOrientation={i === 0}/>
+                                 useOrientation={motor.Type === "rudder"}/>
         {/each}
     </div>
-    <button on:click={openHardware} class="flex mx-auto text-center mt-5 text-gray-500">
-        <ion-icon class="mt-1 mr-1" name="build"></ion-icon>
-        <span>Edit hardware</span>
-    </button>
+    <div class="flex">
+        <button on:click={openHardware} class="flex mx-auto text-center mt-5 text-gray-500">
+            <ion-icon class="mt-1 mr-1" name="build"></ion-icon>
+            <span>Edit hardware</span>
+        </button>
+        {#if !agpsSetupYet}
+            <button on:click={setupAGPS} class="flex mx-auto text-center mt-5 text-gray-500">
+                <ion-icon class="mt-1 mr-1" name="compass"></ion-icon>
+                <span>Setup AGPS</span>
+            </button>
+        {/if}
+    </div>
 </div>
 
 <style>

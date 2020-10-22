@@ -7,7 +7,7 @@
 <div id="mapbox" class="sm:w-full h-map">
     {#if gpsData && gpsData.position != null}
         <Map lng={gpsData.position[1]} lat={gpsData.position[0]}
-             rotation={gpsData.rotation}/>
+             rotation={gpsData.heading}/>
     {:else}
         <div class="rounded-lg w-full h-full bg-gray-400">
             <p></p>
