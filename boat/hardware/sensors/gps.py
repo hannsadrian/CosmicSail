@@ -37,7 +37,9 @@ class GpsSensor():
 
         ser.close()
         subprocess.run("sudo service gpsd start", shell=True, check=True)
+        time.sleep(2)
         print("Uploaded AGPS Data!")
+        gpsd.connect()
 
     def get_value(self):
         try:

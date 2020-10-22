@@ -35,6 +35,7 @@ boatData = {}
 sensors = {}
 motors = {}
 
+loop = asyncio.get_event_loop()
 
 @sio.event
 def connect():
@@ -67,6 +68,22 @@ def command(data):
         motors[command["name"]].set_state(command["value"])
 
 
+@sio.event
+def setup(data):
+    setup = json.loads(data)
+    print("Setup!")
+    print(data)
+
+    # type=agps name=from config lat=51 lon=13
+    if setup['type'] == 'agps':
+        sensors[setup['name']].init_agps(setup['lat'], setup['lon'])
+
+    if setup['type'] == 'reload':
+        loop.stop()
+        sio.disconnect()
+        init()
+
+
 # @sio.event
 # def instruction(data):
 #     if "setup_" in data['name']:
@@ -82,7 +99,7 @@ def command(data):
 
 
 def init():
-    global boatData
+    global boatData, loop
     print("Retrieving data from " + os.getenv("BACKEND"))
 
     # call golang api for hardware loading!
@@ -127,6 +144,9 @@ def init():
             sensors.__setitem__(sensor['Name'], GpsSensor(sensor['Name'], os.getenv("UBLOX_TOKEN"), sensor['Channel']))
         if sensor['Type'] == "bandwidth":
             sensors.__setitem__(sensor['Name'], Bandwidth(sensor['Name']))
+
+    print(motors)
+    print(sensors)
 
     # connect to socket
     connect_socket()
