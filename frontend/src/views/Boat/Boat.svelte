@@ -36,6 +36,7 @@
 
     async function getBoats() {
         let boats = await axios.get(process.env.APIURL + "/v1/boats", {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}})
+        console.log(boats.data)
         let toReturn = []
         boats.data.forEach((b) => {
             if (b.BoatEmblem === id) {
@@ -43,6 +44,17 @@
             }
         })
         boat = toReturn
+
+        // order rudder to first position
+        let rudders = []
+        boat.Motors.forEach((m,i) => {
+            if (m.Type === "rudder") {
+                boat.Motors.splice(i, 1)
+                rudders.push(m)
+            }
+        })
+
+        boat.Motors = [...rudders, ...boat.Motors]
     }
 </script>
 
