@@ -61,7 +61,8 @@
     }
 
     function reloadBoatConfig() {
-        // TODO
+        socket.emit("setup", JSON.stringify({type: "reload"}))
+        location.reload()
     }
 
     let hardwareOpen = false;
