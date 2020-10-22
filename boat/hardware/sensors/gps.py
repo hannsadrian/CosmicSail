@@ -10,10 +10,11 @@ class GpsSensor():
 
     def __init__(self, name, token, port):
         self.name = name
-        #subprocess.run("sudo service gpsd start", shell=True, check=True)
         self.token = token
         self.port = port
         #self.get_agps(lat, lon)
+        subprocess.run("sudo service gpsd start", shell=True, check=True)
+        time.sleep(2)
         gpsd.connect()
 
     def init_agps(self, lat, lon):
