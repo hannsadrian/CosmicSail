@@ -4,6 +4,7 @@
 
     export let boatConfig;
     export let motor;
+    export let creationMode = false;
 
     let modifiedMotor = Object.assign({}, motor)
 
@@ -28,9 +29,33 @@
             modifiedMotor.Min = 1
     }
 
-    let updated = false;
-    let error = false;
+    let created = false;
+    let creationError = false;
+    function addMotor() {
 
+        let defaultSetting = modifiedMotor.Default
+        if (defaultSetting === 0)
+            defaultSetting = 0.00001
+
+        axios.post(process.env.APIURL + "/v1/boats/" + boatConfig.BoatEmblem + "/motor", {
+            name: modifiedMotor.Name,
+            channel: Math.round(modifiedMotor.Channel),
+            default: defaultSetting,
+            min: modifiedMotor.Min,
+            max: modifiedMotor.Max,
+            type: modifiedMotor.Type
+        }, {
+            headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+        }).then(res => {
+            creationError = false;
+            created = true;
+        }).catch(err => {
+            creationError = true;
+        })
+    }
+
+    let updated = false;
+    let updateError = false;
     function updateMotor() {
         let defaultSetting = modifiedMotor.Default
         if (defaultSetting === 0)
@@ -46,24 +71,48 @@
         }, {
             headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
         }).then(res => {
-            error = false;
+            updateError = false;
             updated = true;
             setTimeout(() => updated = false, 3000)
         }).catch(err => {
-            error = true;
+            updateError = true;
         })
     }
 
-    let expanded = false;
+    export let open;
+    export let setOpen;
+
+    let wantsDeletion = false;
+    let deletionError = false;
+
+    function deleteMotor() {
+        if (wantsDeletion === false) {
+            wantsDeletion = true;
+            return;
+        }
+
+        axios.delete(process.env.APIURL + "/v1/boats/" + boatConfig.BoatEmblem + "/motor/" + motor.ID, {
+            headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+        }).then(res => {
+            deletionError = false;
+            location.reload();
+        }).catch(err => {
+            deletionError = true;
+        })
+    }
 </script>
 
 <div class="my-1 py-1 px-2 bg-gray-200 dark:bg-gray-700 rounded">
-    <div on:click={() => expanded = !expanded} class="cursor-pointer">
+    <div on:click={() => setOpen("motor"+motor.ID)} class="cursor-pointer">
         <h4 class="font-semibold">
-            <HardwareTypeEmoji hardwareType="{motor.Type}"/> {motor.Name}
+            {#if !creationMode}
+                <HardwareTypeEmoji hardwareType="{motor.Type}"/> {motor.Name}
+            {:else}
+                ➕ Add Motor
+            {/if}
         </h4>
     </div>
-    {#if expanded}
+    {#if open === "motor" + motor.ID}
         <div class="my-1">
             <div class="flex space-x-1">
                 <div>
@@ -123,10 +172,28 @@
                     />
                 </div>
             </div>
-            <button on:click={updateMotor} class="px-2 py-1 w-full mt-4 rounded bg-gray-800 text-white">
-                {#if error}❌{/if} Update
-                {#if updated}✅{/if}
-            </button>
+            <div class="mt-4 flex">
+                {#if !creationMode}
+                    <button on:click={updateMotor} class="px-2 w-full py-1 rounded bg-gray-800 text-white">
+                        {#if updateError}❌{/if} Update
+                        {#if updated}✅{/if}
+                    </button>
+                    <button on:click={deleteMotor} class="px-2 py-1 ml-1 rounded bg-red-600 text-white">
+                        {#if deletionError}
+                            Error
+                        {:else if wantsDeletion}
+                            Sure?
+                        {:else}
+                            Delete
+                        {/if}
+                    </button>
+                {:else}
+                    <button on:click={addMotor} class="px-2 w-full py-1 rounded bg-green-800 text-white">
+                        {#if creationError}❌{/if} Add
+                        {#if created}✅{/if}
+                    </button>
+                {/if}
+            </div>
         </div>
     {/if}
 </div>
