@@ -15,6 +15,7 @@ import subprocess
 from hardware.motors.servo import ServoMotor
 from hardware.sensors.gps import GpsSensor
 from hardware.sensors.bandwidth import Bandwidth
+from hardware.sensors.ip import IP
 
 # For later compass implementation see: https://dev.to/welldone2094/use-gps-and-magnetometer-for-accurate-heading-4hbi
 
@@ -148,6 +149,8 @@ def init():
             sensors.__setitem__(sensor['Name'], GpsSensor(sensor['Name'], os.getenv("UBLOX_TOKEN"), sensor['Channel']))
         if sensor['Type'] == "bandwidth":
             sensors.__setitem__(sensor['Name'], Bandwidth(sensor['Name']))
+        if sensor['Type'] == "ip":
+            sensors.__setitem__(sensor['Name'], IP(sensor['Name']))
 
     print(motors)
     print(sensors)

@@ -117,10 +117,17 @@
         {#each boatConfig.Sensors as sensor, index}
             {#if sensor.Type === "gps"}
                 <GpsSensorDisplay {agpsSetupYet} gpsData="{sensorData[sensor.Name]}"/>
-            {:else if sensor.Type === "bandwidth"}
-                <p>🤖 {sensorData[sensor.Name] ? parseFloat(sensorData[sensor.Name]).toFixed(1) : "--"} MB</p>
             {/if}
         {/each}
+        <div class="flex space-x-1">
+            {#each boatConfig.Sensors as sensor, index}
+                {#if sensor.Type === "bandwidth"}
+                    <p>🤖 {sensorData[sensor.Name] ? parseFloat(sensorData[sensor.Name]).toFixed(1) : "--"} MB</p>
+                {:else if sensor.Type === "ip"}
+                    <p>{"<->"} {sensorData[sensor.Name] ? sensorData[sensor.Name] : "---.---.--.---"}</p>
+                {/if}
+            {/each}
+        </div>
     </div>
     <div class="mt-4 sm:mt-0 sm:mx-2 sm:mt-2 mb-auto grid grid-cols-2 items-start">
         {#each boatConfig.Motors as motor, i}
