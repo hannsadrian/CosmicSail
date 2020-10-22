@@ -2,10 +2,12 @@ package socket
 
 import (
 	"CosmicSailBackend/logic"
+	"CosmicSailBackend/models"
 	"errors"
 	socketio "github.com/googollee/go-socket.io"
 	"log"
 	"strings"
+	"time"
 )
 
 func registerMethods(server *socketio.Server) {
@@ -90,6 +92,19 @@ func registerMethods(server *socketio.Server) {
 		}
 	})
 
+	server.OnEvent("/", "setup", func(s socketio.Conn, msg string) {
+		emblem, isBoat, err := getBoatEmblemFromRooms(s.Rooms())
+
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		if !isBoat {
+			server.BroadcastToRoom("/", emblem + boatSuffix, "setup", msg)
+		}
+	})
+
 	server.OnEvent("/", "data", func(s socketio.Conn, msg string) {
 		emblem, isBoat, err := getBoatEmblemFromRooms(s.Rooms())
 
@@ -100,6 +115,14 @@ func registerMethods(server *socketio.Server) {
 
 		if isBoat {
 			server.BroadcastToRoom("/", emblem + userSuffix, "data", msg)
+
+			boat, err := logic.GetBoatByEmblem(emblem)
+			if err == nil && len(msg) > 0 {
+				go logic.SaveDatapoint(boat.ID, models.Datapoint{
+					Timestamp: time.Now(),
+					Data:      msg,
+				})
+			}
 		}
 	})
 }

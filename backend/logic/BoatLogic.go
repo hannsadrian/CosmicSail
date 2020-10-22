@@ -52,6 +52,23 @@ func GetBoatForUser(user models.User, emblem string) (models.Boat, error) {
 	return entity, nil
 }
 
+func GetBoatByEmblem(emblem string) (models.Boat, error) {
+	var boats []models.Boat
+	database.Db.Find(&boats)
+
+	var entity models.Boat
+	for _, value := range boats {
+		if value.BoatEmblem == emblem {
+			entity = value
+		}
+	}
+	if entity.BoatEmblem == "" {
+		return models.Boat{}, errors.New("No Boat found!")
+	}
+
+	return entity, nil
+}
+
 
 func SerializeBoat(boat models.Boat) fiber.Map {
 	return fiber.Map{"BoatEmblem": boat.BoatEmblem, "Name": boat.Name, "Series": boat.Series, "Make": boat.Make, "Online": boat.Online, "LastOnline": boat.LastOnline, "Motors": boat.Motors, "Sensors": boat.Sensors}
