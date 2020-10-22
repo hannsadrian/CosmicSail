@@ -43,15 +43,20 @@
 
     function setupAGPS() {
         navigator.geolocation.getCurrentPosition(function (location) {
-            // TODO:
-            socket.emit("instruction", {
-                name: "setup_agps",
-                lat: location.coords.latitude,
-                lon: location.coords.longitude
+            agpsSetupYet = true
+
+            let gpsSensorName = "";
+            boatConfig.Sensors.forEach(s => {
+                if (s.Type === "gps")
+                    gpsSensorName = s.Name
             })
 
-
-            agpsSetupYet = true
+            socket.emit("setup", JSON.stringify({
+                type: "agps",
+                name: gpsSensorName,
+                lat: location.coords.latitude,
+                lon: location.coords.longitude
+            }))
         })
     }
 
