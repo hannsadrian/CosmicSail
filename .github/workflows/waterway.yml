@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: frontend
+        working-directory: ./frontend
 
     steps:
     - name: Getting short version sha
@@ -27,20 +27,24 @@ jobs:
       with:
         key: 'APIURL'
         value: 'https://rudder.cosmicsail.online'
+        envPath: 'frontend/.env'
     - uses: TickX/var-to-dotenv@v1.1.1
       with:
         key: 'SOCKETURL'
         value: 'https://live.rudder.cosmicsail.online'
+        envPath: 'frontend/.env'
     - uses: TickX/var-to-dotenv@v1.1.1
       with:
         key: 'MAPBOX_TOKEN'
         value: ${{ secrets.MAPBOX_TOKEN }}
+        envPath: 'frontend/.env'
     
     - name: Build and push Docker images
       # You may pin to the exact commit or the version.
       # uses: docker/build-push-action@ab83648e2e224cfeeab899e23b639660765c3a89
       uses: docker/build-push-action@v1.1.1
       with:
+        path: frontend
         # Username used to log in to a Docker registry. If not set then no login will occur
         username: ${{ secrets.DOCKER_USER }}
         # Password or personal access token used to log in to a Docker registry. If not set then no login will occur
