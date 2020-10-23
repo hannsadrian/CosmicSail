@@ -41,6 +41,7 @@ jobs:
       # uses: docker/build-push-action@ab83648e2e224cfeeab899e23b639660765c3a89
       uses: docker/build-push-action@v1.1.1
       with:
+        context: frontend
         # Username used to log in to a Docker registry. If not set then no login will occur
         username: ${{ secrets.DOCKER_USER }}
         # Password or personal access token used to log in to a Docker registry. If not set then no login will occur
