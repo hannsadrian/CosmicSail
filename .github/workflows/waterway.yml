@@ -2,10 +2,10 @@
 
 name: Build and Deploy Waterway
 
-on:
-  push:
-    branches:
-      - master
+#on:
+#  push:
+#    branches:
+#      - master
 
 jobs:
   buildPushAndDeploy:
