@@ -80,7 +80,7 @@
             {#if !creationMode}
                 <HardwareTypeEmoji hardwareType="{sensor.Type}"/> {sensor.Name}
             {:else}
-                ➕ Add Sensor
+                Add Sensor
             {/if}
         </h4>
     </div>

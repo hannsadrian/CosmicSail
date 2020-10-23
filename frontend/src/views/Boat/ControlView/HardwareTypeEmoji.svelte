@@ -21,6 +21,9 @@
             case "bandwidth":
                 emoji = "📡"
                 break
+            case "ip":
+                emoji = "👾"
+                break
         }
     })
 </script>

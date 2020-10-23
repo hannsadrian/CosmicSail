@@ -108,7 +108,7 @@
             {#if !creationMode}
                 <HardwareTypeEmoji hardwareType="{motor.Type}"/> {motor.Name}
             {:else}
-                ➕ Add Motor
+                Add Motor
             {/if}
         </h4>
     </div>
