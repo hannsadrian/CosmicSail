@@ -36,8 +36,8 @@ export default {
 		  // 2 level deep object should be stringify
 		  process: JSON.stringify({
 			env: {
-			  APIURL: process.env.APIURL,
-			  SOCKETURL: process.env.SOCKETURL,
+			  APIURL: process.env.APIURL || "https://rudder.cosmicsail.online",
+			  SOCKETURL: process.env.SOCKETURL || "https://live.rudder.cosmicsail.online",
 			  MAPBOX_TOKEN: process.env.MAPBOX_TOKEN
 			}
 		  }),
