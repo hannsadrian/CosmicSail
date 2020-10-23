@@ -1,0 +1,63 @@
+# This will trigger updating kubernetes to specified container version
+
+name: Build and Deploy Waterway
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  buildPushAndDeploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+    - name: Getting short version sha
+      uses: benjlevesque/short-sha@v1.1
+      id: short-sha
+      with:
+        length: 7
+    - name: Checkout master
+      uses: actions/checkout@master
+      
+    - uses: TickX/var-to-dotenv@v1.1.1
+      with:
+        key: 'APIURL'
+        value: 'https://rudder.cosmicsail.online'
+    - uses: TickX/var-to-dotenv@v1.1.1
+      with:
+        key: 'SOCKETURL'
+        value: 'https://live.rudder.cosmicsail.online'
+    - uses: TickX/var-to-dotenv@v1.1.1
+      with:
+        key: 'MAPBOX_TOKEN'
+        value: ${{ secrets.MAPBOX_TOKEN }}
+    
+    - name: Build and push Docker images
+      # You may pin to the exact commit or the version.
+      # uses: docker/build-push-action@ab83648e2e224cfeeab899e23b639660765c3a89
+      uses: docker/build-push-action@v1.1.1
+      with:
+        # Username used to log in to a Docker registry. If not set then no login will occur
+        username: ${{ secrets.DOCKER_USER }}
+        # Password or personal access token used to log in to a Docker registry. If not set then no login will occur
+        password: ${{ secrets.GITHUB_TOKEN }}
+        # Server address of Docker registry. If not set then will default to Docker Hub
+        registry: docker.pkg.github.com
+        # Docker repository to tag the image with
+        repository: adwirawien/cosmicsail/waterway
+        # Comma-delimited list of tags. These will be added to the registry/repository to form the image's tags
+        tags: ${{ env.SHA }}
+        # Whether to push the image
+        push: true
+    - name: Install doctl
+      uses: digitalocean/action-doctl@v2
+      with:
+        token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+    - name: Save DigitalOcean kubeconfig
+      run: doctl kubernetes cluster kubeconfig save k8s-1-16-6-do-2-fra1-1584545136798
+    - name: Update deployment
+      run: kubectl set image deployments/waterway waterway=docker.pkg.github.com/adwirawien/cosmicsail/waterway:${{ env.SHA }} -n cosmicsail
