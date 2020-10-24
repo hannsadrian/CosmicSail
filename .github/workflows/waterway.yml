@@ -2,17 +2,17 @@
 
 name: Build and Deploy Waterway
 
-on:
-  push:
-    branches:
-      - master
+#on:
+#  push:
+#    branches:
+#      - master
 
 jobs:
   buildPushAndDeploy:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./frontend
+        working-directory: frontend
 
     steps:
     - name: Getting short version sha
