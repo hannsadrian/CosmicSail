@@ -5,14 +5,20 @@ import math
 class ServoMotor:
     state = 0
     name = ""
+    type = ""
 
-    def __init__(self, name, channel, minimum, maximum, default):
+    def __init__(self, name, channel, minimum, maximum, default, servo_type):
         self.name = name
         self.channel = channel
         self.max = maximum
         self.min = minimum
         self.default = default
-        self.set_raw_state(default)
+        self.type = servo_type
+        self.reset()
+
+    def reset(self):
+        #print(self.name + " resetting to " + str(self.default))
+        self.set_state(self.default)
 
     def set_raw_state(self, raw):
         self.set_state(remap(raw, self.min, self.max, -1, 1))

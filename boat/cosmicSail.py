@@ -11,6 +11,7 @@ import busio
 import adafruit_pca9685 as pca_driver
 import json
 import subprocess
+import sys
 
 from hardware.motors.servo import ServoMotor
 from hardware.sensors.gps import GpsSensor
@@ -25,7 +26,7 @@ dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
 # socket
-sio = socketio.Client()
+sio = socketio.Client(request_timeout=1, reconnection_delay=0.5, reconnection_delay_max=1)
 
 # PWM Control
 i2c_bus = busio.I2C(SCL, SDA)
@@ -37,7 +38,21 @@ boatData = {}
 sensors = {}
 motors = {}
 
-loop = asyncio.get_event_loop()
+
+async def internet_check():
+    try:
+        t = requests.get('https://rudder.cosmicsail.online', timeout=1).text
+    except requests.exceptions.Timeout:
+        print("timeout!")
+        reset_all_motors()
+        return False
+    except requests.exceptions.ConnectionError:
+        print("connection error!")
+        reset_all_motors()
+        return False
+    finally:
+        return True
+
 
 @sio.event
 def connect():
@@ -49,18 +64,20 @@ def connect():
     set_all_motors(-1)
     time.sleep(0.7)
     set_all_motors(0)
+    time.sleep(0.7)
+    reset_all_motors()
 
 
 @sio.event
 def connect_error(data):
-    set_all_motors(0)
+    reset_all_motors()
     print(data)
 
 
 @sio.event
 def disconnect():
     print("Disconnected")
-    set_all_motors(0)
+    reset_all_motors()
 
 
 @sio.event
@@ -81,9 +98,8 @@ def setup(data):
         sensors[setup['name']].init_agps(setup['lat'], setup['lon'])
 
     if setup['type'] == 'reload':
-        loop.stop()
         sio.disconnect()
-        init()
+        os.execv(sys.executable, ['python'] + sys.argv)
 
     if setup['type'] == 'shutdown':
         subprocess.run("sudo shutdown now", shell=True, check=True)
@@ -104,7 +120,7 @@ def setup(data):
 
 
 def init():
-    global boatData, loop
+    global boatData
     print("Retrieving data from " + os.getenv("BACKEND"))
 
     # call golang api for hardware loading!
@@ -142,7 +158,7 @@ def init():
     for motor in boatData['Motors']:
         motors.__setitem__(motor['Name'],
                            ServoMotor(motor['Name'], pca.channels[int(motor['Channel']) - 1], float(motor['Min']),
-                                      float(motor['Max']), float(motor['Default'])))
+                                      float(motor['Max']), float(motor['Default']), motor['Type']))
 
     for sensor in boatData['Sensors']:
         if sensor['Type'] == "gps":
@@ -158,10 +174,8 @@ def init():
     # connect to socket
     connect_socket()
 
-    loop = asyncio.get_event_loop()
     try:
-        loop.create_task(meta_loop())
-        loop.run_forever()
+        asyncio.run(main_loops())
     except asyncio.CancelledError:
         pass
 
@@ -172,7 +186,7 @@ def init():
 
 def connect_socket():
     try:
-        sio.connect(os.getenv("SOCKET") + "?token=" + os.getenv("TOKEN") + "&boatEmblem=" + os.getenv("BOAT_EMBLEM"))
+        sio.connect(os.getenv("SOCKET") + "?token=" + os.getenv("TOKEN") + "&boatEmblem=" + os.getenv("BOAT_EMBLEM"), )
     except socketio.exceptions.ConnectionError:
         time.sleep(2)
         print("Reconnecting...")
@@ -185,6 +199,21 @@ def set_all_motors(to):
         motors[motor].set_state(to)
 
 
+def reset_all_motors():
+    for motor in motors:
+        motors[motor].reset()
+
+
+async def main_loops():
+    await asyncio.gather(internet_loop(), meta_loop())
+
+
+async def internet_loop():
+    while True:
+        await internet_check()
+        await asyncio.sleep(2)
+
+
 async def meta_loop():
     counter = 4  # weird counter logic counting down; starting at 4 to give some time to setup
     while True:
@@ -193,7 +222,7 @@ async def meta_loop():
             counter = 100
         else:
             send_meta(False)
-        time.sleep(0.2)
+        await asyncio.sleep(0.2)
 
         counter -= 1
 
@@ -218,14 +247,14 @@ def send_meta(entire_meta):
 
     if previous_motor_data != motor_data or entire_meta:
         previous_motor_data = motor_data
-        print(motor_data)
+        # print(motor_data)
         sio.emit("data", json.dumps({
             'motors': motor_data
         }))
 
     if previous_sensor_data != sensor_data or entire_meta:
         previous_sensor_data = sensor_data
-        print(sensor_data)
+        # print(sensor_data)
         sio.emit("data", sio.emit("data", json.dumps({
             'sensors': sensor_data
         })))
