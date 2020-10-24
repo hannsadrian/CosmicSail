@@ -13,9 +13,6 @@ class GpsSensor():
         self.token = token
         self.port = port
         #self.get_agps(lat, lon)
-        subprocess.run("sudo service gpsd start", shell=True, check=True)
-        time.sleep(2)
-        gpsd.connect()
 
     def init_agps(self, lat, lon):
         print("Stopping GPSD for AGPS")
@@ -46,6 +43,12 @@ class GpsSensor():
         try:
             return gpsd.get_current()
         except Exception:
+            try:
+                subprocess.run("sudo service gpsd start", shell=True, check=True)
+                time.sleep(2)
+                gpsd.connect()
+            except Exception:
+                print("starting gpsd failed!")
             return None
 
     def get_device(self):
