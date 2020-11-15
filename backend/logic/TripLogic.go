@@ -28,7 +28,7 @@ func GetAllTrips(boatID uint) ([]fiber.Map, error) {
 	var out []fiber.Map
 
 	for _, trip := range boatTrips {
-		database.Db.Model(trip).Related(&trip.Datapoints)
+		database.Db.Model(trip) //.Related(&trip.Datapoints)
 
 		var datapoints []fiber.Map
 		// Prettify Datapoints
@@ -49,6 +49,37 @@ func GetAllTrips(boatID uint) ([]fiber.Map, error) {
 			"Datapoints": datapoints,
 		})
 	}
+
+	return out, nil
+}
+
+func GetTripDetail(boatID uint, tripID uint) ([]fiber.Map, error) {
+	var boatTrip models.Trip
+	database.Db.Where("boat_id = ?", boatID).Order("start_date desc").Find(&boatTrip)
+
+	// We output everything as fiber.Map to remove unnecessary info like CreatedAt or UpdatedAt
+	var out []fiber.Map
+
+	database.Db.Model(boatTrip).Related(&boatTrip.Datapoints)
+
+	var datapoints []fiber.Map
+	// Prettify Datapoints
+	for _, datapoint := range boatTrip.Datapoints {
+		datapoints = append(datapoints, fiber.Map{
+			"TripID":    datapoint.TripID,
+			"Timestamp": datapoint.Timestamp,
+			"Data":      datapoint.Data,
+		})
+	}
+
+	out = append(out, fiber.Map{
+		"ID":         boatTrip.ID,
+		"BoatID":     boatTrip.BoatID,
+		"Name":       boatTrip.Name,
+		"StartDate":  boatTrip.StartDate,
+		"EndDate":    boatTrip.EndDate,
+		"Datapoints": datapoints,
+	})
 
 	return out, nil
 }
