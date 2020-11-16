@@ -17,7 +17,7 @@ namespace Crest
     {
         [Header("Forces")]
         [Tooltip("Override RB center of mass, in local space."), SerializeField]
-        Vector3 _centerOfMass = Vector3.zero;
+        public Vector3 _centerOfMass = Vector3.zero;
         [SerializeField, FormerlySerializedAs("ForcePoints")]
         FloaterForcePoints[] _forcePoints = new FloaterForcePoints[] { };
 
