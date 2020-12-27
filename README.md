@@ -57,8 +57,8 @@ providing enough power for hours of sailing. The motor, is powered by a [LiPo 2S
 
 ## 🤖 Autopilot
 
-For the fun and exciting part I have to disappoint you because the autopilot conecpt is still in its early stages,
-but will be discussed and explained soon. Stay tuned 📻
+I am currently working on a simulation in Unity, that's why there is so much C# code :)<br>
+The simulation will be able to generate input for the autopilot and show its output too. Stay tuned 📻
 
 ## 🚧 Going further
 
