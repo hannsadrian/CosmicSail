@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Crest;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using SocketIOSharp.Server;
 
 public class SailboatController : MonoBehaviour
 {
@@ -18,12 +19,24 @@ public class SailboatController : MonoBehaviour
     public Transform engine;
     private float _engine;
 
-    private float _yGravityCenter = 0; 
+    private float _yGravityCenter = 0;
+
+    private SocketIOServer server;
     
     // Start is called before the first frame update
     void Start()
     {
-        
+        server = new SocketIOServer(new SocketIOServerOption(9001));
+        server.Start();
+        InvokeRepeating(nameof(BroadcastData), 1, 1);
+    }
+
+    void BroadcastData()
+    {
+        foreach (var connection in server.Clients)
+        {
+            connection.Emit("bearing_update", transform.rotation.y);
+        }
     }
 
     // Update is called once per frame
