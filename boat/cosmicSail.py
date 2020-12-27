@@ -14,11 +14,15 @@ import subprocess
 import sys
 
 from hardware.motors.servo import ServoMotor
+from hardware.motors.dummy_servo import DummyServoMotor
 from hardware.sensors.gps import GpsSensor
 from hardware.sensors.bandwidth import Bandwidth
 from hardware.sensors.ip import IP
+from hardware.autopilot import AutoPilot
 
 # For later compass implementation see: https://dev.to/welldone2094/use-gps-and-magnetometer-for-accurate-heading-4hbi
+
+DEBUG = True
 
 
 # environment
@@ -27,6 +31,7 @@ load_dotenv(dotenv_path)
 
 # socket
 sio = socketio.Client(request_timeout=1, reconnection_delay=0.5, reconnection_delay_max=1)
+simulation = socketio.Client(request_timeout=1, reconnection_delay=0.5, reconnection_delay_max=1)
 
 # PWM Control
 i2c_bus = busio.I2C(SCL, SDA)
@@ -36,7 +41,12 @@ pca.frequency = 24
 # boat data
 boatData = {}
 sensors = {}
+sensorTypes = {}
 motors = {}
+motorTypes = {}
+
+# autopilot
+autopilot = AutoPilot(0, None, None, None, None)
 
 
 async def internet_check():
@@ -120,7 +130,7 @@ def setup(data):
 
 
 def init():
-    global boatData
+    global boatData, autopilot
     print("Retrieving data from " + os.getenv("BACKEND"))
 
     # call golang api for hardware loading!
@@ -153,26 +163,45 @@ def init():
     print(f" | {len(boatData['Sensors'])} Sensor(s)")
     print()
 
-    # load hardware
-    # ⚠ We are currently ignoring per-motor-pwm-cycle from config ⚠
-    for motor in boatData['Motors']:
-        motors.__setitem__(motor['Name'],
-                           ServoMotor(motor['Name'], pca.channels[int(motor['Channel']) - 1], float(motor['Min']),
-                                      float(motor['Max']), float(motor['Default']), motor['Type']))
+    if DEBUG is True:
+        simulation.connect('192.168.1.8:9002')
+        motorTypes.__setitem__('rudder', 'DummyRudder')
+        motors.__setitem__('DummyRudder', DummyServoMotor("DummyRudder", simulation))
+        motorTypes.__setitem__('sail', 'DummySail')
+        motors.__setitem__('DummySail', DummyServoMotor("DummySail", simulation))
+        motorTypes.__setitem__('engine', 'DummyEngine')
+        motors.__setitem__('DummyEngine', DummyServoMotor("DummyEngine", simulation))
+    else:
+        # load hardware
+        # ⚠ We are currently ignoring per-motor-pwm-cycle from config ⚠
+        for motor in boatData['Motors']:
+            motorTypes.__setitem__(motor['Type'], motor['Name'])
+            motors.__setitem__(motor['Name'],
+                               ServoMotor(motor['Name'], pca.channels[int(motor['Channel']) - 1], float(motor['Min']),
+                                          float(motor['Max']), float(motor['Default']), motor['Type']))
 
-    for sensor in boatData['Sensors']:
-        if sensor['Type'] == "gps":
-            sensors.__setitem__(sensor['Name'], GpsSensor(sensor['Name'], os.getenv("UBLOX_TOKEN"), sensor['Channel']))
-        if sensor['Type'] == "bandwidth":
-            sensors.__setitem__(sensor['Name'], Bandwidth(sensor['Name']))
-        if sensor['Type'] == "ip":
-            sensors.__setitem__(sensor['Name'], IP(sensor['Name']))
+        for sensor in boatData['Sensors']:
+            sensorTypes.__setitem__(sensor['Type'], sensor['Name'])
+            if sensor['Type'] == "gps":
+                sensors.__setitem__(sensor['Name'], GpsSensor(sensor['Name'], os.getenv("UBLOX_TOKEN"), sensor['Channel']))
+            if sensor['Type'] == "bandwidth":
+                sensors.__setitem__(sensor['Name'], Bandwidth(sensor['Name']))
+            if sensor['Type'] == "ip":
+                sensors.__setitem__(sensor['Name'], IP(sensor['Name']))
 
-    print(motors)
-    print(sensors)
+        print(motors)
+        print(sensors)
 
-    # connect to socket
-    connect_socket()
+    # load autopilot
+    autopilot = AutoPilot(0,
+                          motors.__getitem__(motorTypes.__getitem__('rudder')),
+                          motors.__getitem__(motorTypes.__getitem__('sail')),
+                          motors.__getitem__(motorTypes.__getitem__('engine')),
+                          sensors.__getitem__(sensorTypes.__getitem__('gps')))
+
+    if DEBUG is False:
+        # connect to socket
+        connect_socket()
 
     try:
         asyncio.run(main_loops())
@@ -205,13 +234,20 @@ def reset_all_motors():
 
 
 async def main_loops():
-    await asyncio.gather(internet_loop(), meta_loop())
+    await asyncio.gather(internet_loop(), meta_loop(), autopilot_loop())
 
 
 async def internet_loop():
     while True:
         await internet_check()
         await asyncio.sleep(2)
+
+
+async def autopilot_loop():
+    while True:
+        if autopilot.running:
+            autopilot.cycle()
+        await asyncio.sleep(0.5)
 
 
 async def meta_loop():

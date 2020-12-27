@@ -57,6 +57,30 @@ class GpsSensor():
     def get_name(self):
         return self.name
 
+    def get_bearing(self):
+        data = self.get_value()
+        if data is None:
+            return None
+        if data.mode < 1:
+            return None
+        return data.track
+
+    def get_lat(self):
+        data = self.get_value()
+        if data is None:
+            return None
+        if data.mode < 1:
+            return None
+        return data.position()[0]
+
+    def get_lng(self):
+        data = self.get_value()
+        if data is None:
+            return None
+        if data.mode < 1:
+            return None
+        return data.position()[1]
+
     def get_meta(self):
         current_gps_data = self.get_value()
         if current_gps_data is None:
