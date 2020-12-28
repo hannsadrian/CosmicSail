@@ -1,5 +1,6 @@
 import math
 
+
 # motor mode
 
 # determine direction & distance from current pos to target
@@ -35,6 +36,7 @@ class AutoPilot:
         self.running = True
 
     def stop_autopilot(self):
+        # TODO: Cancel all running data fetches!
         self.running = False
 
     def cycle(self):
@@ -42,9 +44,9 @@ class AutoPilot:
                                get_dest_bearing(self.gps.get_lat(), self.gps.get_lng(), self.destLat, self.destLng))
         dist = get_distance(self.gps.get_lat(), self.gps.get_lng(), self.destLat, self.destLng)
 
-        self.rudder.set_state(math.sin(0.5*ta))
+        self.rudder.set_state(math.sin(math.pi / 360 * ta))
 
-        speed = dist/40-1/4
+        speed = dist / 40 - 1 / 4
         if dist >= 50:
             speed = 1
         if dist <= 10:
@@ -53,9 +55,8 @@ class AutoPilot:
         self.engine.set_state(speed)
 
 
-
 def get_turning_angle(heading, bearing):
-    return -(heading-bearing)
+    return -(heading - bearing)
 
 
 def get_dest_bearing(lat1, lng1, lat2, lng2):

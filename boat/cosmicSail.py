@@ -109,7 +109,10 @@ def setup(data):
 
     if setup['type'] == 'reload':
         sio.disconnect()
-        os.execv(sys.executable, ['python'] + sys.argv)
+        autopilot.stop_autopilot()
+        # TODO: test reloading
+        os.execv(sys.executable, ['python3'] + sys.argv)
+        quit()
 
     if setup['type'] == 'shutdown':
         subprocess.run("sudo shutdown now", shell=True, check=True)
@@ -164,7 +167,8 @@ def init():
     print()
 
     if DEBUG is True:
-        simulation.connect('192.168.1.8:9002')
+        # TODO: simulation
+        #simulation.connect('192.168.1.8:9002')
         motorTypes.__setitem__('rudder', 'DummyRudder')
         motors.__setitem__('DummyRudder', DummyServoMotor("DummyRudder", simulation))
         motorTypes.__setitem__('sail', 'DummySail')
