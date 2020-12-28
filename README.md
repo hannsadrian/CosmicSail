@@ -1,4 +1,4 @@
-*work in progress*
+![My boat in action](https://cosmicsail.online/bg.JPG)
 
 # ⛵️ CosmicSail
 
