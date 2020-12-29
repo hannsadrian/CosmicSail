@@ -3,40 +3,49 @@
     import axios from "axios";
     import Loading from "../../components/Loading.svelte";
     import ControlView from "./ControlView.svelte";
-    import {onMount} from "svelte"
+    import {onMount, onDestroy} from "svelte"
+    import AutopilotView from "./AutopilotView.svelte";
 
     export let id;
 
     let connected = false;
-    const socket = io(process.env.SOCKETURL + "?boatEmblem=" + id + "&token=" + localStorage.getItem("token"));
-    socket.on("connect", () => {
-        connected = true;
-        console.log("connected")
-    })
-    socket.on("exception", data => {
-        console.log(data)
-    })
-    socket.on("disconnect", () => {
-        connected = false;
-        console.log("disconnect")
-    })
-
-    socket.on("online", data => {
-        online = data === "true";
-    })
+    let socket;
 
     let online = false;
     let selected = "Control"
-
     let boat = null
 
     onMount(() => {
+        socket = io(process.env.SOCKETURL + "?boatEmblem=" + id + "&token=" + localStorage.getItem("token"));
+        registerEvents(socket)
         getBoats();
     })
 
+    onDestroy(() => {
+        console.log("disconnect")
+        socket.disconnect()
+    })
+
+    function registerEvents(socket) {
+        socket.on("connect", () => {
+            connected = true;
+            console.log("connected")
+        })
+        socket.on("exception", data => {
+            console.log(data)
+        })
+        socket.on("disconnect", () => {
+            connected = false;
+            console.log("disconnect")
+        })
+        socket.on("online", data => {
+            console.log(data)
+            online = data === "true";
+        })
+    }
+
     async function getBoats() {
         let boats = await axios.get(process.env.APIURL + "/v1/boats", {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}})
-        console.log(boats.data)
         let toReturn = []
         boats.data.forEach((b) => {
             if (b.BoatEmblem === id) {
@@ -44,10 +53,11 @@
             }
         })
         boat = toReturn
+        online = boat.Online
 
         // order rudder to first position
         let rudders = []
-        boat.Motors.forEach((m,i) => {
+        boat.Motors.forEach((m, i) => {
             if (m.Type === "rudder") {
                 boat.Motors.splice(i, 1)
                 rudders.push(m)
@@ -71,9 +81,11 @@
         <div class="{selected !== 'Control' ? 'hidden': ''}">
             <ControlView {socket} boatConfig={boat}/>
         </div>
-        <div class="{selected !== 'Autopilot' ? 'hidden': ''}">
-            <p>Work in progress (Autopilot)</p>
-        </div>
+        {#if selected === 'Autopilot'}
+            <div>
+                <AutopilotView {socket} boatConfig="{boat}"/>
+            </div>
+        {/if}
         <div class="{selected !== 'Tracker' ? 'hidden': ''}">
             <p>Tracker in progress</p>
         </div>

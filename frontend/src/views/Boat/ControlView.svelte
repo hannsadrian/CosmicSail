@@ -116,7 +116,7 @@
     <div class="w-full">
         {#each boatConfig.Sensors as sensor, index}
             {#if sensor.Type === "gps"}
-                <GpsSensorDisplay {agpsSetupYet} gpsData="{sensorData[sensor.Name]}"/>
+                <GpsSensorDisplay gpsData="{sensorData[sensor.Name]}"/>
             {/if}
         {/each}
         <div class="flex space-x-1">
