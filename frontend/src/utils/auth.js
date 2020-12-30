@@ -6,7 +6,7 @@ function isAuthorized() {
             reject()
 
         axios.post(process.env.REACT_APP_APIURL + "/v1/status", {}, {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}}).catch(err => {
-            reject()
+            reject(err.message)
         }).then(res => {
             if (res == null) {
                 reject()
