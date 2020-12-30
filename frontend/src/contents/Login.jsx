@@ -51,17 +51,17 @@ function Login() {
                     <div className="space-y-1">
                         <div>
                             <input name="username" required
-                                   className="rounded px-1 shadow-sm hover:shadow w-full dark:bg-gray-800 dark:text-gray-200 focus:outline-none hover:ring ring-blue-400 dark:ring-blue-700 transition duration-150"
+                                   className="rounded px-1 shadow-sm hover:shadow w-full dark:bg-gray-800 dark:text-gray-200 focus:outline-none focus:ring ring-blue-400 dark:ring-blue-700 transition duration-150"
                                    type="name"/>
                         </div>
                         <div>
                             <input name="password" required
-                                   className="rounded px-1 shadow-sm hover:shadow w-full dark:bg-gray-800 dark:text-gray-200 focus:outline-none hover:ring ring-blue-400 dark:ring-blue-700 transition duration-150"
+                                   className="rounded px-1 shadow-sm hover:shadow w-full dark:bg-gray-800 dark:text-gray-200 focus:outline-none focus:ring ring-blue-400 dark:ring-blue-700 transition duration-150"
                                    type="password"/>
                         </div>
                     </div>
                     <button type="submit"
-                            className="rounded px-1 mt-2 bg-blue-500 w-full text-white focus:outline-none hover:ring focus:ring ring-blue-400 dark:ring-blue-600 transition-all duration-150"
+                            className="rounded px-1 py-0.5 mt-2 bg-blue-500 w-full text-white focus:outline-none hover:ring focus:ring ring-blue-400 dark:ring-blue-600 transition-all duration-150"
                     >
                         Login
                     </button>

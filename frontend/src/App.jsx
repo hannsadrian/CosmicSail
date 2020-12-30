@@ -35,9 +35,9 @@ function App() {
                 :
                 <div className={"min-w-screen min-h-screen flex bg-gray-100 dark:bg-black"}>
                 <div
-                    className={"m-auto rounded-full h-4 w-4 bg-gray-500"}
+                    className={"m-auto rounded-full h-4 w-4 bg-gray-500 dark:bg-gray-700"}
                 >
-                    <div className={"h-4 w-4 animate-ping rounded-full bg-gray-400"}/>
+                    <div className={"h-4 w-4 animate-ping rounded-full bg-gray-400 dark:bg-gray-600"}/>
                 </div>
                 </div>
             }
