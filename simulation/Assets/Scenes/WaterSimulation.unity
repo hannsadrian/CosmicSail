@@ -881,11 +881,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 657a04ebca4bbfe4db3143ca4eac129e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 0}
-  distance: 10
-  height: 5
+  target: {fileID: 919132149408088978}
+  distance: 60
+  height: 20
   heightDamping: 2
-  rotationDamping: 3
+  rotationDamping: 1
 --- !u!114 &488404437
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3297,9 +3297,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boatSim: {fileID: 919132149408088979}
   boat: {fileID: 1320417713}
-  rudderForceMultiplier: 0.5
+  rudderForceMultiplier: 0.25
   rudder: {fileID: 300946469}
-  mainEngingePower: 4
+  mainEngingePower: 60
   engine: {fileID: 2105108258}
 --- !u!4 &919132149408088978 stripped
 Transform:
