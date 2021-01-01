@@ -1,3 +1,12 @@
+**Scientific value:**
+This project is subject to a thesis I wrote in 10th grade of my school career.
+You can find the thesis relevant documents under `science/`.
+The paper is as of now still work in progress and addresses the possibility
+of replacing global container shipment with autonomous sailing vessels,
+which would only transport small amounts of freight but though could be environmentally friendly. 
+Since I go to school in germany the thesis is also written in german.
+Hopefully I am able to write an english translation soon.
+
 ![My boat in action](https://cosmicsail.online/bg.JPG)
 
 # ⛵️ CosmicSail
@@ -63,5 +72,5 @@ The simulation will be able to generate input for the autopilot and show its out
 ## 🚧 Going further
 
 I am grateful for any type of feedback, inspiration or question regarding CosmicSail.<br>
-Feel free to create an Issue to get in touch.
+Feel free to create an issue or mail me to get in touch.
 
