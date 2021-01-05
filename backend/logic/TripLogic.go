@@ -11,9 +11,27 @@ import (
 func SaveDatapoint(boatID uint, datapoint models.Datapoint) {
 	trip := GetLatestTripOrCreateNew(boatID, 20)
 
-	datapoint.TripID = trip.ID
-	database.Db.NewRecord(datapoint)
-	database.Db.Save(&datapoint)
+	saveDatapoint := true
+
+	if len(trip.Datapoints) != 0 {
+		var latestStamp int64 = 0
+		for _, datapoint := range trip.Datapoints {
+			if latestStamp < datapoint.Timestamp.Unix() {
+				latestStamp = datapoint.Timestamp.Unix()
+			}
+		}
+
+		// Check whether latest timestamp was this second to prevent potentially endless amount of datapoints
+		if latestStamp == time.Now().Unix() {
+			saveDatapoint = false
+		}
+	}
+
+	if saveDatapoint {
+		datapoint.TripID = trip.ID
+		database.Db.NewRecord(datapoint)
+		database.Db.Save(&datapoint)
+	}
 }
 
 func GetAllTrips(boatID uint) ([]fiber.Map, error) {
