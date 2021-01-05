@@ -18,11 +18,12 @@ from hardware.motors.dummy_servo import DummyServoMotor
 from hardware.sensors.gps import GpsSensor
 from hardware.sensors.bandwidth import Bandwidth
 from hardware.sensors.ip import IP
+from hardware.sensors.imu import IMU
 from hardware.autopilot import AutoPilot
 
 # For later compass implementation see: https://dev.to/welldone2094/use-gps-and-magnetometer-for-accurate-heading-4hbi
 
-DEBUG = True
+DEBUG = False
 
 
 # environment
@@ -192,6 +193,8 @@ def init():
                 sensors.__setitem__(sensor['Name'], Bandwidth(sensor['Name']))
             if sensor['Type'] == "ip":
                 sensors.__setitem__(sensor['Name'], IP(sensor['Name']))
+            if sensor['Type'] == "imu":
+                sensors.__setitem__(sensor['Name'], IMU(sensor['Name']))
 
         print(motors)
         print(sensors)
@@ -249,9 +252,14 @@ async def internet_loop():
 
 async def autopilot_loop():
     while True:
+        try:
+            sensors.__getitem__(sensorTypes.__getitem__('imu')).loop()
+        except KeyError:
+            pass
+
         if autopilot.running:
             autopilot.cycle()
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(0.1)
 
 
 async def meta_loop():
@@ -259,10 +267,10 @@ async def meta_loop():
     while True:
         if counter == 0:
             send_meta(True)
-            counter = 100
+            counter = 50
         else:
             send_meta(False)
-        await asyncio.sleep(0.2)
+        await asyncio.sleep(0.5)
 
         counter -= 1
 
