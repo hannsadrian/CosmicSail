@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {useParams} from 'react-router-dom';
 import ReactMapboxGl, {Layer, Feature} from 'react-mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import Compass from "../components/Compass";
+import SensorDeck from "../components/SensorDeck";
 
 const Map = ReactMapboxGl({
     accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
@@ -11,7 +11,6 @@ const Map = ReactMapboxGl({
 
 function BoatDetail(props) {
     let {emblem} = useParams();
-
 
     return (
         <div className="grid grid-cols-2 md:grid-cols-5 md:grid-rows-6 grid-flow-row md:grid-flow-col-dense p-2">
@@ -34,14 +33,9 @@ function BoatDetail(props) {
                     <p>{true ? "🚧 ± " + (0.00) + " km/h | ± " + (0 / 2).toFixed(1) + " m" : "🧭 Locating..."}</p>
                 </div>
             </div>
-            <div className="row-span-2 col-span-2 md:col-span-3 m-1 rounded-lg flex">
-                <div className="w-full md:w-1/3 flex">
-                    <div className="my-auto mx-auto select-none cursor-default">
-                        <Compass directionNames={['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']} direction={0}/>
-                    </div>
-                </div>
-                <div className="">
-                </div>
+            <div
+                className="row-span-2 col-span-2 md:col-span-3 m-1 p-2 rounded-lg flex flex-wrap justify-center select-none bg-gray-900 rounded">
+                <SensorDeck heading={0} pitch={0} roll={0} speed={0}/>
             </div>
             <div className="row-span-1 col-span-2 md:col-span-1 m-1 bg-red-500 rounded-lg flex">
                 <p className="m-auto text-white">Start</p>
