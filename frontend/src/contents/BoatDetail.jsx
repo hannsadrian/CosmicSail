@@ -22,13 +22,16 @@ function BoatDetail(props) {
             <div className="row-span-1 col-span-2 m-1 bg-amber-500 rounded-lg flex">
                 <p className="m-auto text-white">Boat overview</p>
             </div>
-            <div className="h-96 row-span-3 col-span-2 m-1 bg-blue-500 rounded-lg flex">
+            <div className="row-span-3 col-span-2 m-1 bg-blue-500 rounded-lg flex">
                 <p className="m-auto text-white">Controls</p>
             </div>
-            <div className="h-96 row-span-3 col-span-2 md:col-span-3 m-1 rounded-lg flex-row">
-                <Map style={`mapbox://styles/mapbox/outdoors-v10`} center={[13.652844, 50.919446]}
-                     containerStyle={{height: "20.5rem", width: "100%"}}/>
-                <div className={"flex-row mt-1 dark:text-gray-300"}>
+            <div style={{height: "400px"}}
+                 className="row-span-3 col-span-2 md:col-span-3 m-1 pb-2 rounded-lg flex flex-wrap">
+                <div style={{height: "90%"}} className="flex w-full">
+                    <Map style={`mapbox://styles/mapbox/outdoors-v10`} center={[13.652844, 50.919446]}
+                         containerStyle={{height: "100%", width: "100%"}}/>
+                </div>
+                <div style={{height: "10%"}} className={"flex-row mt-1 dark:text-gray-300"}>
                     <p>🌍 M{"1"} {"<->"}{"11"} Sats {"<->"}{((2) * 3.6).toFixed(1)} km/h {"<->"}{(73.4).toFixed(1)}°</p>
                     <p>{true ? "🚧 ± " + (0.00) + " km/h | ± " + (0 / 2).toFixed(1) + " m" : "🧭 Locating..."}</p>
                 </div>
