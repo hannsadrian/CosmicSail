@@ -118,7 +118,7 @@ var HeadingIndicator = function HeadingIndicator(params) {
         className: "box",
         style: box,
         alt: ""
-    })), React.createElement("div", {className: "flex absolute h-full w-full"}, React.createElement("p", {
+    })), React.createElement("div", {className: "hidden md:flex absolute h-full w-full"}, React.createElement("p", {
         className: "text-gray-400 pb-4 m-auto",
     }, (params.heading ? params.heading % 360 : 0) + "°")));
 };

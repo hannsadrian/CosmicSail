@@ -60,12 +60,12 @@ const SensorDeck = (props) => {
     const cal = () => {
         setLocked(true);
         setHeading(360)
-        setPitch(20)
+        setPitch(10)
         setRoll(90)
         setSpeed(16)
         setTimeout(() => {
             setHeading(0)
-            setPitch(-20)
+            setPitch(-10)
             setRoll(-90)
             setSpeed(0)
             setTimeout(() => {
@@ -77,12 +77,12 @@ const SensorDeck = (props) => {
     }
 
     return (
-        <>
+        <div className="flex -space-x-5 md:-space-x-7 -mx-2 -my-9 sm:my-0">
             <HeadingIndicator heading={Math.round(heading)} showBox={false} animate={animateHeading}/>
             <AttitudeIndicator roll={roll} pitch={pitch} showBox={false}/>
             <Airspeed speed={speed * 10}
                       showBox={false}/> {/* airspeed is made for up to 160 units so instead of giving 16, give 160 */}
-        </>
+        </div>
     );
 };
 
