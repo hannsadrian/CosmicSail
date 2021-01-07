@@ -3,6 +3,7 @@ import {useParams} from 'react-router-dom';
 import ReactMapboxGl, {Layer, Feature} from 'react-mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import SensorDeck from "../components/SensorDeck";
+import StrengthIndicator from "../components/StrengthIndicator";
 
 const Map = ReactMapboxGl({
     accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
@@ -37,8 +38,19 @@ function BoatDetail(props) {
                 </div>
             </div>
             <div
-                className="row-span-2 col-span-2 md:col-span-3 m-1 p-2 rounded-lg flex flex-wrap justify-center select-none bg-gray-900 rounded">
+                className="row-span-2 col-span-2 md:col-span-3 m-1 p-2 rounded-lg flex-wrap lg:flex justify-center align-top select-none bg-gray-900 rounded">
                 <SensorDeck heading={0} pitch={0} roll={0} speed={0}/>
+                <div className="flex justify-between md:block space-x-2 md:space-x-0 md:space-y-2 text-gray-400 text-center font-mono flex-1 h-auto my-auto md:pl-1 md:pr-2">
+                    <div className="bg-gray-800 h-8 rounded shadow-md flex justify-center items-center p-1 w-full">
+                        <StrengthIndicator val={0}/>
+                    </div>
+                    <div className="bg-gray-800 h-8 rounded shadow-md p-1">
+                        STP
+                    </div>
+                    <div className="bg-gray-800 h-8 rounded shadow-md p-1">
+                        AGPS
+                    </div>
+                </div>
             </div>
             <div className="row-span-1 col-span-2 md:col-span-1 m-1 bg-red-500 rounded-lg flex">
                 <p className="m-auto text-white">Start</p>
