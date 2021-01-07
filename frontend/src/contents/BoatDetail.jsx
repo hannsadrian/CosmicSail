@@ -1,13 +1,17 @@
 import React, {useState} from 'react';
 import {useParams} from 'react-router-dom';
-import ReactMapboxGl, {Layer, Feature} from 'react-mapbox-gl';
+import ReactMapboxGl, { MapContext } from 'react-mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import SensorDeck from "../components/SensorDeck";
 import StrengthIndicator from "../components/StrengthIndicator";
 
 const Map = ReactMapboxGl({
     accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
-    logoPosition: "bottom-left"
+    logoPosition: "bottom-left",
+    dragPan: true,
+    dragRotate: false,
+    pitchWithRotate: false,
+    bearingSnap: 180
 });
 
 function BoatDetail(props) {
@@ -26,16 +30,17 @@ function BoatDetail(props) {
             <div className="row-span-3 col-span-2 m-1 bg-blue-500 rounded-lg flex">
                 <p className="m-auto text-white">Controls</p>
             </div>
-            <div style={{height: "400px"}}
-                 className="row-span-3 col-span-2 md:col-span-3 m-1 pb-2 rounded-lg flex flex-wrap">
-                <div style={{height: "90%"}} className="flex w-full">
-                    <Map style={`mapbox://styles/mapbox/outdoors-v10`} center={[13.652844, 50.919446]}
-                         containerStyle={{height: "100%", width: "100%"}}/>
-                </div>
-                <div style={{height: "10%"}} className={"flex-row mt-1 dark:text-gray-300"}>
-                    <p>🌍 M{"1"} {"<->"}{"11"} Sats {"<->"}{((2) * 3.6).toFixed(1)} km/h {"<->"}{(73.4).toFixed(1)}°</p>
-                    <p>{true ? "🚧 ± " + (0.00) + " km/h | ± " + (0 / 2).toFixed(1) + " m" : "🧭 Locating..."}</p>
-                </div>
+            <div style={{height: "400px", zIndex: 300}}
+                 className="row-span-3 col-span-2 md:col-span-3 m-1 rounded-lg overflow-hidden h-full w-full">
+                    <Map onTouchStart={(map, event) => {
+                        if (event.originalEvent.touches.length < 2) {
+                            map.dragPan.disable()
+                        } else {
+                            map.dragPan.enable()
+                        }
+                    }} style={`mapbox://styles/mapbox/outdoors-v10`} center={[13.652844, 50.919446]}
+                         containerStyle={{height: "100%", width: "100%"}}>
+                    </Map>
             </div>
             <div
                 className="row-span-2 col-span-2 md:col-span-3 m-1 p-2 rounded-lg flex-wrap lg:flex justify-center align-top select-none bg-gray-900 rounded">
