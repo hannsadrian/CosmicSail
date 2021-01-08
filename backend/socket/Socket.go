@@ -31,7 +31,7 @@ func StartSocket(port string) {
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		allowHeaders := "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization"
-		allowedOrigins := []string{"localhost:5000", "waterway.cosmicsail.online", "192.168.1.8:5000"}
+		allowedOrigins := []string{"localhost:5000", "localhost:3000", "waterway.cosmicsail.online", "192.168.1.3:3000", "192.168.1.8:5000"}
 
 		if contains(allowedOrigins, r.Header.Get("Origin")) {
 			w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
