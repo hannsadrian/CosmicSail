@@ -1,5 +1,6 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
+import io from 'socket.io-client';
 import ReactMapboxGl from 'react-mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import SensorDeck from "../components/SensorDeck";
@@ -16,6 +17,69 @@ const Map = ReactMapboxGl({
 
 function BoatDetail(props) {
     let {emblem} = useParams();
+    let [socket, setSocket] = useState(null);
+
+    let [connected, setConnected] = useState(false);
+    let [online, setOnline] = useState(false);
+
+
+    let [motorData, setMotorData] = useState({});
+    let [sensorData, setSensorData] = useState({});
+
+
+    useEffect(() => {
+        if (socket != null) socket.disconnect()
+
+        console.log(emblem)
+        let s = io(process.env.REACT_APP_SOCKET + "/?boatEmblem=" + emblem + "&token=" + localStorage.getItem("token"), {transports: ["websocket"]});
+
+        s.on("connect", () => {
+            setConnected(true)
+            console.log("connected")
+        })
+        s.on("connect_error", (data) => {
+            console.log(data)
+        })
+        s.on("exception", data => {
+            console.log(data)
+        })
+        s.on("disconnect", () => {
+            setConnected(false)
+            console.log("disconnect")
+        })
+        s.on("online", data => {
+            setOnline(data === "true");
+        })
+
+        s.on("data", event => {
+            let data = null;
+            try {
+                data = JSON.parse(event)
+            } catch (e) {
+            }
+            if (data == null)
+                return;
+            if (data.motors != null) {
+                let md = {}
+                data.motors.forEach(motor => {
+                    md[motor.Name] = motor.State
+                })
+                setMotorData(md)
+                console.log(motorData)
+            }
+            if (data.sensors != null) {
+                let sd = {}
+                data.sensors.forEach(sensor => {
+                    sd[sensor.Name] = sensor.State
+                })
+                setSensorData(sd)
+                console.log(sd.BNO)
+            }
+        })
+
+        console.log(s)
+        setSocket(s)
+    }, [emblem])
 
     return (
         <div className="grid grid-cols-2 md:grid-cols-5 md:grid-rows-6 grid-flow-row md:grid-flow-col-dense p-2">
@@ -27,14 +91,14 @@ function BoatDetail(props) {
             <div className="row-span-1 col-span-2 m-1 py-2 px-4">
                 <div className="hidden font-mono dark:text-white text-2xl font-bold sm:flex w-full justify-center">
                     <div className="-ml-6 flex">
-                        <div className={"rounded-full bg-green-600 h-4 w-4 mt-2 mr-2"}/> Berlin
+                        <div className={"rounded-full h-4 w-4 mt-2 mr-2 " + (connected && online ? "bg-green-600" : connected && !online ? "bg-red-600" : "bg-gray-500")}/> Berlin
                     </div>
                 </div>
                 <div className="sm:mt-1 flex dark:text-gray-300">
                     <div className="mx-auto sm:mx-0 sm:flex-1 sm:flex sm:space-x-3">
                     <div className="sm:text-right flex-1">
                         <div className="dark:text-white text-2xl font-bold ml-0.5 font-mono flex sm:hidden">
-                            <div className={"rounded-full bg-green-600 h-4 w-4 mt-2 mr-1.5"}/> Berlin
+                            <div className={"rounded-full h-4 w-4 mt-2 mr-1.5 " + (connected && online ? "bg-green-600" : connected && !online ? "bg-red-600" : "bg-gray-500")}/> Berlin
                         </div>
                         <p>🌍 <span className="font-mono">M1</span> {"<->"}<span className="font-mono">11</span> Sats {"<->"}<span className="font-mono">3.3km/h</span></p>
                         <p>📡 <span className="font-mono">3.1mb</span> {"<->"} 177.32.655.1</p>
@@ -65,11 +129,17 @@ function BoatDetail(props) {
             </div>
             <div
                 className="row-span-2 col-span-2 md:col-span-3 m-1 p-2 rounded-lg flex-wrap lg:flex justify-center align-top select-none bg-gray-900 rounded">
-                <SensorDeck heading={0} pitch={0} roll={0} speed={0}/>
+                {sensorData.BNO ?
+                    <SensorDeck heading={Math.round(sensorData.BNO.heading) || 0}
+                                pitch={Math.round(sensorData.BNO.pitch) || 0}
+                                roll={Math.round(sensorData.BNO.roll) || 0} speed={0}/>
+                    :
+                    <></>
+                }
                 <div
                     className="flex justify-between md:block space-x-2 md:space-x-0 md:space-y-2 text-gray-400 text-center font-mono flex-1 h-auto my-auto md:pl-1 md:pr-2">
                     <div className="bg-gray-800 h-8 rounded shadow-md flex justify-center items-center p-1 w-full">
-                        <StrengthIndicator val={0}/>
+                        <StrengthIndicator val={sensorData.BNO ? (sensorData.BNO.cal_status[1] + sensorData.BNO.cal_status[2] + sensorData.BNO.cal_status[3])/9 : 0}/>
                     </div>
                     <div className="bg-gray-800 h-8 rounded shadow-md p-1">
                         STP
