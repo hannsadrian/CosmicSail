@@ -19,6 +19,7 @@ from hardware.sensors.gps import GpsSensor
 from hardware.sensors.bandwidth import Bandwidth
 from hardware.sensors.ip import IP
 from hardware.sensors.imu import IMU
+from hardware.sensors.bno import BNO
 from hardware.autopilot import AutoPilot
 
 # For later compass implementation see: https://dev.to/welldone2094/use-gps-and-magnetometer-for-accurate-heading-4hbi
@@ -195,6 +196,8 @@ def init():
                 sensors.__setitem__(sensor['Name'], IP(sensor['Name']))
             if sensor['Type'] == "imu":
                 sensors.__setitem__(sensor['Name'], IMU(sensor['Name']))
+            if sensor['Type'] == "bno":
+                sensors.__setitem__(sensor['Name'], BNO(sensor['Name']))
 
         print(motors)
         print(sensors)
