@@ -15,8 +15,7 @@ class BNO:
     def get_value(self):
         euler = self.sensor.euler
         return {"pitch": euler[2], "roll": euler[1], "heading": euler[0],
-                "cal_status": self.sensor.calibration_status,
-                "calibrated": self.sensor.calibrated, "mode": self.sensor.mode}
+                "cal_status": self.sensor.calibration_status}
 
     # TODO
     def get_pitch(self):
@@ -35,6 +34,11 @@ class BNO:
         return self.name
 
     def get_meta(self):
-        euler = self.sensor.euler
+        elr = self.sensor.euler
+        euler = [0, 0, 0]
+        if not any(map(lambda x: x is None, elr)):
+            euler[0] = round(elr[0])
+            euler[1] = round(elr[1])
+            euler[2] = round(elr[2])
         return {"pitch": euler[2], "roll": euler[1], "heading": euler[0],
-                "cal_status": self.sensor.calibration_status, "calibrated": self.sensor.calibrated}
+                "cal_status": self.sensor.calibration_status, "temp": self.sensor.temperature}
