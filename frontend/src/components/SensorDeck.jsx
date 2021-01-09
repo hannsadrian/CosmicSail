@@ -58,6 +58,11 @@ const SensorDeck = (props) => {
     }
 
     const cal = () => {
+        if (!props.startup) {
+            setLocked(false)
+            return
+        }
+
         setLocked(true);
         setHeading(360)
         setPitch(10)

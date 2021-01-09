@@ -6,6 +6,8 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import SensorDeck from "../components/SensorDeck";
 import StrengthIndicator from "../components/StrengthIndicator";
 
+const axios = require("axios").default
+
 const Map = ReactMapboxGl({
     accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
     logoPosition: "bottom-left",
@@ -22,15 +24,46 @@ function BoatDetail(props) {
     let [connected, setConnected] = useState(false);
     let [online, setOnline] = useState(false);
 
-
+    // error blocks the entire screen with either the option to reload the page or go to boat overview
+    let [error, setError] = useState("");
+    let [boat, setBoat] = useState({});
     let [motorData, setMotorData] = useState({});
     let [sensorData, setSensorData] = useState({});
 
 
     useEffect(() => {
+        async function fetchBoats() {
+            let boats = await axios.get(process.env.REACT_APP_APIURL + "/v1/boats", {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}})
+
+            let b = boats.data.find(t => t.BoatEmblem === emblem)
+            if (!b) {
+                setError(emblem + " not found")
+                return
+            }
+
+            setOnline(b.Online)
+
+            // order rudder to first position
+            let r = []
+            b.Motors.forEach((m, i) => {
+                if (m.Type === "rudder") {
+                    b.Motors.splice(i, 1)
+                    r.push(m)
+                }
+            })
+
+            b.Motors = [...r, ...b.Motors]
+            console.log(b)
+            setBoat(b)
+        }
+
+        fetchBoats()
+    }, [emblem])
+
+
+    useEffect(() => {
         if (socket != null) socket.disconnect()
 
-        console.log(emblem)
         let s = io(process.env.REACT_APP_SOCKET + "/?boatEmblem=" + emblem + "&token=" + localStorage.getItem("token"), {transports: ["websocket"]});
 
         s.on("connect", () => {
@@ -65,7 +98,7 @@ function BoatDetail(props) {
                     md[motor.Name] = motor.State
                 })
                 setMotorData(md)
-                console.log(motorData)
+                console.log(md)
             }
             if (data.sensors != null) {
                 let sd = {}
@@ -73,13 +106,32 @@ function BoatDetail(props) {
                     sd[sensor.Name] = sensor.State
                 })
                 setSensorData(sd)
-                console.log(sd.BNO)
+                console.log(sd)
             }
         })
 
-        console.log(s)
         setSocket(s)
     }, [emblem])
+
+    if (error) {
+        return (
+            <div className="w-screen h-screen flex justify-center align-center">
+                <div className="my-auto text-center">
+                    <div
+                        className={"my-3 mx-auto rounded-full h-4 w-4 bg-red-600"}
+                    >
+                        <div className={"h-4 w-4 animate-ping rounded-full bg-red-500"}/>
+                    </div>
+                    <p className="mx-auto my-4 font-mono dark:text-white">{error}</p>
+                    <button onClick={() => window.location.reload()}
+                            className="mx-auto w-40 py-1 rounded-lg bg-gray-600 hover:ring ring-gray-400 dark:ring-gray-800 text-gray-200 transition duration-200">
+                        Reload page
+                    </button>
+                    <Link to={"/boats"}><p className="text-gray-400 dark:text-gray-600">Go to boats</p></Link>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="grid grid-cols-2 md:grid-cols-5 md:grid-rows-6 grid-flow-row md:grid-flow-col-dense p-2">
@@ -93,7 +145,7 @@ function BoatDetail(props) {
                     <div className="-ml-6 flex">
                         <div
                             className={"rounded-full h-4 w-4 mt-2 mr-2 " + (connected && online ? "bg-green-600" : connected && !online ? "bg-red-600" : "bg-gray-500")}/>
-                        Berlin
+                        {boat.Name}
                     </div>
                 </div>
                 <div className="sm:mt-1 flex dark:text-gray-300">
@@ -102,12 +154,12 @@ function BoatDetail(props) {
                             <div className="dark:text-white text-2xl font-bold ml-0.5 font-mono flex sm:hidden">
                                 <div
                                     className={"rounded-full h-4 w-4 mt-2 mr-1.5 " + (connected && online ? "bg-green-600" : connected && !online ? "bg-red-600" : "bg-gray-500")}/>
-                                Berlin
+                                {boat.Name}
                             </div>
                             <p>🌍 <span className="font-mono">M1</span> {"<->"}<span
                                 className="font-mono">11</span> Sats {"<->"}<span className="font-mono">3.3km/h</span>
                             </p>
-                            <p>📡 <span className="font-mono">3.1mb</span> {"<->"} 177.32.655.1</p>
+                            <p>📡 <span className="font-mono">3.1mb</span> {"<->"}177.32.655.1</p>
                             <p>🚧 ± <span className="font-mono">1.2km/h</span> {"<->"}± <span
                                 className="font-mono">9.3m</span></p>
                         </div>
@@ -145,7 +197,7 @@ function BoatDetail(props) {
                                 pitch={Math.round(-sensorData.BNO.pitch) || 0}
                                 roll={Math.round(sensorData.BNO.roll) || 0} speed={0}/>
                     :
-                    <></>
+                    <SensorDeck startup={true}/>
                 }
                 <div
                     className="flex justify-between md:block space-x-2 md:space-x-0 md:space-y-2 text-gray-400 text-center font-mono flex-1 h-auto my-auto md:pl-1 md:pr-2">
