@@ -17,19 +17,15 @@ class BNO:
         return {"pitch": euler[2], "roll": euler[1], "heading": euler[0],
                 "cal_status": self.sensor.calibration_status}
 
-    # TODO
     def get_pitch(self):
-        return 0
+        return self.sensor.euler[2]
 
-    # TODO
     def get_roll(self):
-        return 0
+        return self.sensor.euler[1]
 
-    # TODO
-    def get_yaw(self):
-        return 0
+    def get_heading(self):
+        return self.sensor.euler[0]
 
-    # TODO
     def get_name(self):
         return self.name
 
