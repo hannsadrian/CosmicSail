@@ -1,57 +1,41 @@
 import React, {useEffect, useState} from 'react';
 
-const gray = "bg-gray-500"
-const colors = ["bg-red-500", "bg-amber-500", "bg-green-500"]
+const colors = ["bg-gray-500", "bg-red-500", "bg-amber-500", "bg-green-500"]
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
-const StrengthIndicator = ({val}) => {
-    let [locked, setLocked] = useState(true)
-    let [strength, setStrength] = useState(0);
+const StrengthIndicator = ({sys, gyro, acc, mag}) => {
+    let [sysStrength, setSysStrength] = useState(0);
+    let [gyroStrength, setGyroStrength] = useState(0);
+    let [accStrength, setAccStrength] = useState(0);
+    let [magStrength, setMagStrength] = useState(0);
     let [dots, setDots] = useState([])
 
     useEffect(() => {
-        async function executeFancyStartup() {
-            for (let i = 0; i <= 10; i++) {
-                setStrength(i / 10)
-                await sleep(60)
-            }
-            await sleep(600)
-            for (let i = 10; i >= 0; i--) {
-                setStrength(i / 10)
-                await sleep(45)
-            }
-            setLocked(false)
-        }
-        executeFancyStartup()
-    }, [])
-
-    useEffect(() => {
-        if (locked)
-            return
-
-        let v = 1
-
-        if (val <= 1 && val >= -1)
-            v = Math.abs(val)
-
-        setStrength(v)
-    }, [val, locked])
+        setSysStrength(Math.abs(sys))
+        setGyroStrength(Math.abs(gyro))
+        setAccStrength(Math.abs(acc))
+        setMagStrength(Math.abs(mag))
+    }, [sys, gyro, acc, mag])
 
     useEffect(() => {
         let d = []
-        for (let i = 0; i < 9; i++) {
-            let useColor = strength * 9 >= i+1
-            if (useColor) {
-                d.push(<div key={i} className={"h-2 w-2 rounded-full " + colors[Math.floor(i / 3)]}/>)
-            } else {
-                d.push(<div key={i} className={"h-2 w-2 rounded-full " + gray}/>)
+        for (let i = 1; i < 9; i++) {
+            let color = 0
+
+            if (i <= 2) {
+                color = Math.round(sysStrength)
+            } else if (i <= 4) {
+                color = Math.round(gyroStrength)
+            } else if (i <= 6) {
+                color = Math.round(accStrength)
+            } else if (i <= 8) {
+                color = Math.round(magStrength)
             }
+
+            d.push(<div key={i} className={"h-2 w-2 rounded-full " + colors[color]}/>)
         }
         setDots(d)
-    }, [strength])
+    }, [sysStrength, gyroStrength, accStrength, magStrength])
 
     return (
         <div className="flex space-x-1">
