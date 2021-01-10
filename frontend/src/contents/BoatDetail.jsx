@@ -5,6 +5,7 @@ import ReactMapboxGl from 'react-mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import SensorDeck from "../components/SensorDeck";
 import StrengthIndicator from "../components/StrengthIndicator";
+import StatusOverview from "./boatDetail/StatusOverview";
 
 const axios = require("axios").default
 
@@ -27,11 +28,70 @@ function BoatDetail(props) {
     // error blocks the entire screen with either the option to reload the page or go to boat overview
     let [error, setError] = useState("");
     let [boat, setBoat] = useState({});
-    let [motorData, setMotorData] = useState({});
-    let [sensorData, setSensorData] = useState({});
+    let [boatSensors, setBoatSensors] = useState({});
+    let [motorData, setMotorData] = useState(null);
+    let [sensorData, setSensorData] = useState(null);
 
 
     useEffect(() => {
+        /**
+         *
+         BoatEmblem: "asdef"
+         LastOnline: "2021-01-09T16:53:51.035643+01:00"
+         Make: "Robbe"
+         Motors:
+         0
+         Channel: 1
+         Cycle: 24
+         Default: 1
+         Max: 3000
+         Min: 1250
+         Name: "Ruder"
+         Type: "rudder"
+         --
+         1
+         Channel: 2
+         Cycle: 24
+         Default: 1
+         Max: 2200
+         Min: 3500
+         Name: "Segel"
+         Type: "sail"
+         --
+         2
+         Channel: 3
+         Cycle: 24
+         Default: 0.00001
+         Max: 3000
+         Min: 2000
+         Name: "Diesel"
+         Type: "engine"
+         Name: "Berlin"
+         Online: false
+         Sensors:
+         0
+         Channel: "/dev/ttyAMA0"
+         Name: "Position"
+         Type: "gps"
+         --
+         1
+         Channel: "internet"
+         Name: "Data"
+         Type: "bandwidth"
+         --
+         2
+         Channel: "internet"
+         Name: "IP"
+         Type: "ip"
+         --
+         3
+         Channel: "0"
+         Name: "BNO"
+         Type: "bno"
+
+         Series: "Topas"
+         *
+         */
         async function fetchBoats() {
             let boats = await axios.get(process.env.REACT_APP_APIURL + "/v1/boats", {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}})
 
@@ -41,7 +101,12 @@ function BoatDetail(props) {
                 return
             }
 
-            setOnline(b.Online)
+            // create sensor map by types
+            let s = {}
+            b.Sensors.forEach(n => {
+                s[n.Type] = n
+            })
+            setBoatSensors(s)
 
             // order rudder to first position
             let r = []
@@ -67,6 +132,7 @@ function BoatDetail(props) {
         let s = io(process.env.REACT_APP_SOCKET + "/?boatEmblem=" + emblem + "&token=" + localStorage.getItem("token"), {transports: ["websocket"]});
 
         s.on("connect", () => {
+            s.emit("command", JSON.stringify({type: "full_meta"}))
             setConnected(true)
             console.log("connected")
         })
@@ -97,21 +163,31 @@ function BoatDetail(props) {
                 data.motors.forEach(motor => {
                     md[motor.Name] = motor.State
                 })
-                setMotorData(md)
-                console.log(md)
+                setMotorData(m => {
+                    return {...m, ...md}
+                })
             }
             if (data.sensors != null) {
                 let sd = {}
                 data.sensors.forEach(sensor => {
                     sd[sensor.Name] = sensor.State
                 })
-                setSensorData(sd)
-                console.log(sd)
+                setSensorData(s => {
+                    return {...s, ...sd}
+                })
             }
         })
 
         setSocket(s)
     }, [emblem])
+
+    useEffect(() => {
+        console.log(motorData)
+    }, [motorData])
+
+    useEffect(() => {
+        console.log(sensorData)
+    }, [sensorData])
 
     if (error) {
         return (
@@ -141,38 +217,9 @@ function BoatDetail(props) {
                 backgroundPosition: "center"
             }} className="row-span-2 col-span-2 h-48 md:h-auto m-1 rounded-lg flex"/>
             <div className="row-span-1 col-span-2 m-1 py-2 px-4">
-                <div className="hidden font-mono dark:text-white text-2xl font-bold sm:flex w-full justify-center">
-                    <div className="-ml-6 flex">
-                        <div
-                            className={"rounded-full h-4 w-4 mt-2 mr-2 " + (connected && online ? "bg-green-600" : connected && !online ? "bg-red-600" : "bg-gray-500")}/>
-                        {boat.Name}
-                    </div>
-                </div>
-                <div className="sm:mt-1 flex dark:text-gray-300">
-                    <div className="mx-auto sm:mx-0 sm:flex-1 sm:flex sm:space-x-3">
-                        <div className="sm:text-right flex-1">
-                            <div className="dark:text-white text-2xl font-bold ml-0.5 font-mono flex sm:hidden">
-                                <div
-                                    className={"rounded-full h-4 w-4 mt-2 mr-1.5 " + (connected && online ? "bg-green-600" : connected && !online ? "bg-red-600" : "bg-gray-500")}/>
-                                {boat.Name}
-                            </div>
-                            <p>🌍 <span className="font-mono">M1</span> {"<->"}<span
-                                className="font-mono">11</span> Sats {"<->"}<span className="font-mono">3.3km/h</span>
-                            </p>
-                            <p>📡 <span className="font-mono">3.1mb</span> {"<->"}177.32.655.1</p>
-                            <p>🚧 ± <span className="font-mono">1.2km/h</span> {"<->"}± <span
-                                className="font-mono">9.3m</span></p>
-                        </div>
-                        <div className="flex-1">
-                            <p><span className="sm:hidden">🏝</span> <span className="font-mono">~20m</span> shore
-                                proximity <span className="opacity-0 sm:opacity-100">🏝</span></p>
-                            <p><span className="sm:hidden">🤖</span> Autopilot not active <span
-                                className="opacity-0 sm:opacity-100">🤖</span></p>
-                            <p><span className="sm:hidden">⛵️</span> <span className="font-mono">NNE</span> at <span
-                                className="font-mono">4km/h</span> <span className="opacity-0 sm:opacity-100">⛵️</span>
-                            </p>
-                        </div>
-                    </div>
+                <StatusOverview name={boat.Name || "Loading..."} connected={connected} online={online}
+                                boatSensors={boatSensors} sensorData={sensorData}/>
+            </div>
                 </div>
             </div>
             <div className="row-span-3 col-span-2 m-1 bg-blue-500 rounded-lg flex">
@@ -192,21 +239,26 @@ function BoatDetail(props) {
             </div>
             <div
                 className="row-span-2 col-span-2 md:col-span-3 m-1 p-2 rounded-lg flex-wrap lg:flex justify-center align-top select-none bg-gray-900 rounded">
-                {sensorData.BNO ?
-                    <SensorDeck heading={Math.round(sensorData.BNO.heading) || 0}
-                                pitch={Math.round(-sensorData.BNO.pitch) || 0}
-                                roll={Math.round(sensorData.BNO.roll) || 0} speed={0}/>
-                    :
-                    <SensorDeck startup={true}/>
+                {boatSensors && boatSensors['bno'] &&
+                <SensorDeck
+                    heading={(sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].heading) || 0}
+                    pitch={(sensorData && sensorData[boatSensors['bno'].Name] && -sensorData[boatSensors['bno'].Name].pitch) || 0}
+                    roll={(sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].roll) || 0}
+                    speed={0}
+                    startup={true}
+                />
                 }
                 <div
                     className="flex justify-between md:block space-x-2 md:space-x-0 md:space-y-2 text-gray-400 text-center font-mono flex-1 h-auto my-auto md:pl-1 md:pr-2">
+                    {boatSensors && boatSensors['bno'] &&
                     <div className="bg-gray-800 h-8 rounded shadow-md flex justify-center items-center p-1 w-full">
-                        <StrengthIndicator sys={sensorData.BNO ? sensorData.BNO.cal_status[0] : 0}
-                                           gyro={sensorData.BNO ? sensorData.BNO.cal_status[1] : 0}
-                                           acc={sensorData.BNO ? sensorData.BNO.cal_status[2] : 0}
-                                           mag={sensorData.BNO ? sensorData.BNO.cal_status[3] : 0}/>
+                        <StrengthIndicator
+                            sys={(sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status[0]) || 0}
+                            gyro={(sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status[1]) || 0}
+                            acc={(sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status[2]) || 0}
+                            mag={(sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status[3]) || 0}/>
                     </div>
+                    }
                     <div className="bg-gray-800 h-8 rounded shadow-md p-1">
                         STP
                     </div>
