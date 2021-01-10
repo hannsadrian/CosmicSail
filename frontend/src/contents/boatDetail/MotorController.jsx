@@ -1,13 +1,14 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import HardwareEmoji from "./HardwareEmoji";
 
 const MotorController = ({socket, motorConfig, useOrientation, state}) => {
+    let [hasRotationPermission, setHasRotationPermission] = useState(false)
     let [locked, setLocked] = useState(false)
 
     let [s, setS] = useState(0)
     let [previousValue, setPreviousValue] = useState(state)
 
-    const setMotor = (v) => {
+    const setMotor = useCallback((v) => {
         setS(v)
         if (socket == null) return
 
@@ -16,9 +17,7 @@ const MotorController = ({socket, motorConfig, useOrientation, state}) => {
             setPreviousValue(t)
             socket.emit("command", JSON.stringify({type: "motor", name: motorConfig.Name, value: t}))
         }
-    }
-
-    useEffect(() => console.log(locked), [locked])
+    }, [motorConfig.Name, previousValue, socket, state])
 
     useEffect(() => {
         if (locked) return
@@ -26,18 +25,59 @@ const MotorController = ({socket, motorConfig, useOrientation, state}) => {
         setS(state || 0)
     }, [state, locked])
 
+    const requestPermission = () => {
+        console.log("request ")
+        if (!useOrientation)
+            return
+
+        let prevVal = 0
+        window.DeviceOrientationEvent.requestPermission().then(value => {
+            console.log(value)
+            setHasRotationPermission(value === "granted");
+            window.addEventListener('deviceorientation', function (event) {
+                let orientation = Math.floor(event.gamma)
+                if (orientation > 30) {
+                    orientation = 30;
+                } else if (orientation < -30) {
+                    orientation = -30;
+                }
+                let t = Math.round(orientation * 10) / 300;
+                if (t !== prevVal) {
+                    prevVal = t
+                    setS(t)
+                    setMotor(t)
+                }
+            });
+        }).catch(err => {
+            setHasRotationPermission(false);
+        })
+    }
+
+    useEffect(() => {
+        if (!useOrientation)
+            return;
+        if ("DeviceOrientationEvent" in window && window.DeviceOrientationEvent.requestPermission) {
+            console.log("Supports Orientation! 🎉")
+            //requestPermission()
+
+        } else {
+            console.log("No Orientation on this device 😕")
+            setHasRotationPermission(true)
+        }
+    }, [])
+
     return (
-        <div
-            className={"bg-white dark:bg-gray-900 mx-1 my-1 shadow hover:shadow-lg transition duration-150 px-4 pt-4 pb-2 rounded-lg " + (useOrientation ? 'col-span-2' : 'col-span-2 md:col-span-1')}>
+        <div key={motorConfig.Name}
+            className={"bg-white dark:bg-gray-900 m-1 shadow hover:shadow-lg transition duration-150 px-4 pt-4 pb-2 rounded-lg " + (useOrientation ? 'col-span-2' : 'col-span-2 md:col-span-1')}>
             <input type="range" min="-1" max="1" step="0.0005" className="w-full shadow-lg"
                    onMouseDown={() => setLocked(true)} onMouseUp={() => setLocked(false)}
                    onDragStart={() => setLocked(true)} onDragEnd={() => setLocked(false)}
                    onChange={(event) => setMotor(event.target.value)} value={s}/>
+            {useOrientation && !hasRotationPermission && <button onClick={requestPermission}>Request orientation</button>}
             <p onClick={() => setMotor(motorConfig.Default)}
                className="cursor-pointer text-sm text-gray-800 dark:text-gray-300 text-center">
                 <HardwareEmoji hardware={motorConfig.Type}/>{" "}
-                <span
-                    className="{useOrientation ? 'font-bold' : ''}">{motorConfig.Name}</span> {(state || state === 0) && "-> " + parseFloat(state).toFixed(1)}
+                <span className={useOrientation ? 'font-bold' : undefined}>{motorConfig.Name}</span> {(state || state === 0) && "-> " + parseFloat(state).toFixed(1)}
             </p>
         </div>
     );
