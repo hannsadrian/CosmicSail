@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
 import io from 'socket.io-client';
-import ReactMapboxGl from 'react-mapbox-gl';
+import ReactMapboxGl, {Feature, GeoJSONLayer, Image, Layer, Source} from 'react-mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import SensorDeck from "../components/SensorDeck";
 import StrengthIndicator from "../components/StrengthIndicator";
@@ -18,6 +18,20 @@ const Map = ReactMapboxGl({
     pitchWithRotate: false,
     bearingSnap: 180
 });
+
+function getPosGeoJSON(lat, lng) {
+    return {
+        'type': 'FeatureCollection',
+        'features': {
+            'type': 'Feature',
+            'geometry': [{
+                'type': 'Point',
+                'coordinates': [lng, lat]
+            }]
+        },
+
+    };
+}
 
 function BoatDetail(props) {
     let {emblem} = useParams();
@@ -194,9 +208,7 @@ function BoatDetail(props) {
         return (
             <div className="w-screen h-screen flex justify-center align-center">
                 <div className="my-auto text-center">
-                    <div
-                        className={"my-3 mx-auto rounded-full h-4 w-4 bg-red-600"}
-                    >
+                    <div className={"my-3 mx-auto rounded-full h-4 w-4 bg-red-600"}>
                         <div className={"h-4 w-4 animate-ping rounded-full bg-red-500"}/>
                     </div>
                     <p className="mx-auto my-4 font-mono dark:text-white">{error}</p>
@@ -221,15 +233,16 @@ function BoatDetail(props) {
                 <StatusOverview name={boat.Name || "Loading..."} connected={connected} online={online}
                                 boatSensors={boatSensors} sensorData={sensorData}/>
             </div>
-            <div className="row-span-2 col-span-2 m-1 rounded-lg md:flex">
-                <div className="w-full grid grid-cols-2 grid-rows-2 my-auto">
-                    {boat.Motors && boat.Motors.map((m, i) => <MotorController motorConfig={m} socket={socket}
+            <div className="row-span-3 col-span-2 m-1 rounded-lg">
+                <div style={{height: "44%"}} className="w-full grid grid-cols-2 grid-rows-2">
+                    {boat.Motors && boat.Motors.map((m, i) => <MotorController key={m.Name} motorConfig={m}
+                                                                               socket={socket}
                                                                                state={motorData && motorData[m.Name]}
                                                                                useOrientation={i === 0}/>)}
                 </div>
-            </div>
-            <div className="row-span-1 col-span-2 m-1 bg-gray-500 rounded-lg flex">
-                <p className="m-auto text-white">Autopilot controls</p>
+                <div style={{height: "55%"}} className="bg-gray-500 mt-1 rounded-lg flex">
+                    <p className="m-auto text-white">Autopilot controls</p>
+                </div>
             </div>
             <div style={{height: "400px", width: "98.5%", zIndex: 300}}
                  className="row-span-3 col-span-2 md:col-span-3 m-1 mr-2 rounded-lg overflow-hidden h-full w-full">
@@ -239,8 +252,25 @@ function BoatDetail(props) {
                     } else {
                         map.dragPan.enable()
                     }
-                }} style={`mapbox://styles/mapbox/outdoors-v10`} center={[13.652844, 50.919446]}
+                }} style={`mapbox://styles/mapbox/outdoors-v10`}
+                     center={[13.652844, 50.919446]}
                      containerStyle={{height: "100%", width: "100%"}}>
+                    <Layer
+                        type="symbol"
+                        id="points"
+                        layout={{ 'icon-image': "arrow", "icon-allow-overlap": true, "icon-rotate": 180 }}
+                    >
+                        <Image id="arrow" url={process.env.REACT_APP_APIURL + '/arrow_up.png'}/>
+                        <Feature coordinates={[13.652844, 50.919446]} />
+                    </Layer>
+                    <GeoJSONLayer data={
+                        getPosGeoJSON((sensorData &&
+                            sensorData[boatSensors['gps'].Name] &&
+                            sensorData[boatSensors['gps'].Name].lat) || 50.919446,
+                            (sensorData && sensorData[boatSensors['gps'].Name] &&
+                                sensorData[boatSensors['gps'].Name].lng) || 13.652844)
+                    } symbolLayout={{'icon-image': 'arrow'}}>
+                    </GeoJSONLayer>
                 </Map>
             </div>
             <div
@@ -250,7 +280,7 @@ function BoatDetail(props) {
                     heading={(sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].heading) || 0}
                     pitch={(sensorData && sensorData[boatSensors['bno'].Name] && -sensorData[boatSensors['bno'].Name].pitch) || 0}
                     roll={(sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].roll) || 0}
-                    speed={0}
+                    speed={(sensorData && sensorData[boatSensors['gps'].Name] && sensorData[boatSensors['gps'].Name].speed * 3.6) || 0}
                     startup={true}
                 />
                 }
