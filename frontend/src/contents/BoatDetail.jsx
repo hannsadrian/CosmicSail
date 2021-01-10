@@ -6,6 +6,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import SensorDeck from "../components/SensorDeck";
 import StrengthIndicator from "../components/StrengthIndicator";
 import StatusOverview from "./boatDetail/StatusOverview";
+import MotorController from "./boatDetail/MotorController";
 
 const axios = require("axios").default
 
@@ -220,10 +221,15 @@ function BoatDetail(props) {
                 <StatusOverview name={boat.Name || "Loading..."} connected={connected} online={online}
                                 boatSensors={boatSensors} sensorData={sensorData}/>
             </div>
+            <div className="row-span-2 col-span-2 m-1 rounded-lg md:flex">
+                <div className="w-full grid grid-cols-2 grid-rows-2 my-auto">
+                    {boat.Motors && boat.Motors.map((m, i) => <MotorController motorConfig={m} socket={socket}
+                                                                               state={motorData && motorData[m.Name]}
+                                                                               useOrientation={i === 0}/>)}
                 </div>
             </div>
-            <div className="row-span-3 col-span-2 m-1 bg-blue-500 rounded-lg flex">
-                <p className="m-auto text-white">Controls</p>
+            <div className="row-span-1 col-span-2 m-1 bg-gray-500 rounded-lg flex">
+                <p className="m-auto text-white">Autopilot controls</p>
             </div>
             <div style={{height: "400px", width: "98.5%", zIndex: 300}}
                  className="row-span-3 col-span-2 md:col-span-3 m-1 mr-2 rounded-lg overflow-hidden h-full w-full">
