@@ -7,6 +7,8 @@ class ServoMotor:
     name = ""
     type = ""
 
+    prev_state = 0
+
     def __init__(self, name, channel, minimum, maximum, default, servo_type):
         self.name = name
         self.channel = channel
@@ -27,6 +29,12 @@ class ServoMotor:
         self.state = val
         remapped = math.floor(remap(val, -1, 1, self.min, self.max))
         self.channel.duty_cycle = remapped
+
+    def has_changed(self):
+        changed = self.state != self.prev_state
+        self.prev_state = self.state
+
+        return changed
 
     def get_state(self):
         return self.state

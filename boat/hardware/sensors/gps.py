@@ -7,6 +7,7 @@ import subprocess
 # https://github.com/MartijnBraam/gpsd-py3/blob/master/DOCS.md
 class GpsSensor():
     name = ""
+    prev_state = {}
 
     def __init__(self, name, token, port):
         self.name = name
@@ -80,6 +81,12 @@ class GpsSensor():
         if data.mode < 1:
             return None
         return data.position()[1]
+
+    def has_changed(self):
+        changed = self.get_meta() != self.prev_state
+        self.prev_state = self.get_meta()
+
+        return changed
 
     def get_meta(self):
         current_gps_data = self.get_value()

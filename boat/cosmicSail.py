@@ -53,9 +53,9 @@ autopilot = AutoPilot(0, None, None, None, None)
 
 async def internet_check():
     try:
-        t = requests.get('https://rudder.cosmicsail.online', timeout=1).text
+        t = requests.get('https://rudder.cosmicsail.online', timeout=3).text
     except requests.exceptions.Timeout:
-        print("timeout!")
+        #print("timeout!")
         reset_all_motors()
         return False
     except requests.exceptions.ConnectionError:
@@ -97,6 +97,8 @@ def command(data):
     command = json.loads(data)
     if command["type"] == "motor":
         motors[command["name"]].set_state(command["value"])
+    elif command["type"] == "full_meta":
+        send_meta(True)
 
 
 @sio.event
@@ -250,7 +252,7 @@ async def main_loops():
 async def internet_loop():
     while True:
         await internet_check()
-        await asyncio.sleep(2)
+        await asyncio.sleep(3)
 
 
 async def autopilot_loop():
@@ -291,22 +293,22 @@ def send_meta(entire_meta):
     sensor_data = []
 
     for motor in motors:
-        motor_data.append({'Name': motors[motor].get_name(), 'State': motors[motor].get_state()})
+        if entire_meta or motors[motor].has_changed():
+            motor_data.append({'Name': motors[motor].get_name(), 'State': motors[motor].get_state()})
 
     for sensor in sensors:
-        sensor_data.append({'Name': sensors[sensor].get_name(), 'State': sensors[sensor].get_meta()})
+        if entire_meta or sensors[sensor].has_changed():
+            sensor_data.append({'Name': sensors[sensor].get_name(), 'State': sensors[sensor].get_meta()})
 
-    if previous_motor_data != motor_data or entire_meta:
-        previous_motor_data = motor_data
-        # print(motor_data)
+    if len(motor_data) != 0:
         sio.emit("data", json.dumps({
+            'full': entire_meta,
             'motors': motor_data
         }))
 
-    if previous_sensor_data != sensor_data or entire_meta:
-        previous_sensor_data = sensor_data
-        # print(sensor_data)
+    if len(sensor_data) != 0:
         sio.emit("data", sio.emit("data", json.dumps({
+            'full': entire_meta,
             'sensors': sensor_data
         })))
 

@@ -3,6 +3,7 @@ from hardware.sensors.MPU6050 import MPU6050
 
 class IMU:
     name = ""
+    prev_state = {}
 
     i2c_bus = 1
     device_address = 0x68
@@ -72,6 +73,12 @@ class IMU:
 
     def get_name(self):
         return self.name
+
+    def has_changed(self):
+        changed = self.get_meta() != self.prev_state
+        self.prev_state = self.get_meta()
+
+        return changed
 
     def get_meta(self):
         return {"pitch": round(self.pitch), "roll": round(self.roll), "yaw": round(self.yaw)}

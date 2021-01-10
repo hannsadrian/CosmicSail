@@ -5,6 +5,7 @@ from board import SDA, SCL
 
 class BNO:
     name = ""
+    prev_state = {}
 
     def __init__(self, name):
         self.name = name
@@ -29,6 +30,12 @@ class BNO:
     def get_name(self):
         return self.name
 
+    def has_changed(self):
+        changed = self.get_meta() != self.prev_state
+        self.prev_state = self.get_meta()
+
+        return changed
+
     def get_meta(self):
         elr = self.sensor.euler
         euler = [0, 0, 0]
@@ -37,4 +44,4 @@ class BNO:
             euler[1] = round(elr[1])
             euler[2] = round(elr[2])
         return {"pitch": euler[2], "roll": euler[1], "heading": euler[0],
-                "cal_status": self.sensor.calibration_status, "temp": self.sensor.temperature}
+                "cal_status": self.sensor.calibration_status}

@@ -5,6 +5,8 @@ class IP:
     name = ""
     ip = "---.---.--.---"
 
+    prev_state = "---.---.--.---"
+
     def __init__(self, name):
         self.name = name
         try:
@@ -17,6 +19,15 @@ class IP:
 
     def get_name(self):
         return self.name
+
+    def has_changed(self):
+        changed = self.get_value() != self.prev_state
+        self.prev_state = self.get_value()
+
+        return changed
+
+    def get_change(self):
+        return self.get_value()
 
     def get_meta(self):
         return self.get_value()
