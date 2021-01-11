@@ -232,6 +232,16 @@ function BoatDetail(props) {
     let lng = sensorData && sensorData[boatSensors['gps'].Name] && sensorData[boatSensors['gps'].Name].position ?
         sensorData[boatSensors['gps'].Name].position[1] : 13.652844;
 
+    let heading = (sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].heading) || 0;
+    let pitch = (sensorData && sensorData[boatSensors['bno'].Name] && -sensorData[boatSensors['bno'].Name].pitch) || 0;
+    let roll = (sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].roll) || 0;
+    let speed = (sensorData && sensorData[boatSensors['gps'].Name] && sensorData[boatSensors['gps'].Name].speed * 3.6) || 0;
+
+    let sys_cal = (sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status && sensorData[boatSensors['bno'].Name].cal_status[0]) || 0;
+    let gyro_cal = (sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status && sensorData[boatSensors['bno'].Name].cal_status[1]) || 0;
+    let acc_cal = (sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status && sensorData[boatSensors['bno'].Name].cal_status[2]) || 0;
+    let mag_cal = (sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status && sensorData[boatSensors['bno'].Name].cal_status[3]) || 0;
+
     return (
         <div className="grid grid-cols-2 md:grid-cols-5 md:grid-rows-6 grid-flow-row md:grid-flow-col-dense p-2">
             <div style={{
@@ -283,10 +293,10 @@ function BoatDetail(props) {
                 className="row-span-2 col-span-2 md:col-span-3 m-1 p-2 rounded-lg flex-wrap lg:flex justify-center align-top select-none bg-gray-900 rounded">
                 {boatSensors && boatSensors['bno'] &&
                 <SensorDeck
-                    heading={(sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].heading) || 0}
-                    pitch={(sensorData && sensorData[boatSensors['bno'].Name] && -sensorData[boatSensors['bno'].Name].pitch) || 0}
-                    roll={(sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].roll) || 0}
-                    speed={(sensorData && sensorData[boatSensors['gps'].Name] && sensorData[boatSensors['gps'].Name].speed * 3.6) || 0}
+                    heading={heading}
+                    pitch={pitch}
+                    roll={roll}
+                    speed={speed}
                     startup={true}
                 />
                 }
@@ -295,10 +305,10 @@ function BoatDetail(props) {
                     {boatSensors && boatSensors['bno'] &&
                     <div className="bg-gray-800 h-8 rounded shadow-md flex justify-center items-center p-1 w-full">
                         <StrengthIndicator
-                            sys={(sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status[0]) || 0}
-                            gyro={(sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status[1]) || 0}
-                            acc={(sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status[2]) || 0}
-                            mag={(sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status[3]) || 0}/>
+                            sys={sys_cal}
+                            gyro={gyro_cal}
+                            acc={acc_cal}
+                            mag={mag_cal}/>
                     </div>
                     }
                     <div className="bg-gray-800 h-8 rounded shadow-md p-1">
