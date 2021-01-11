@@ -54,12 +54,12 @@ const MotorController = ({socket, motorConfig, useOrientation, state}) => {
     }
 
     useEffect(() => {
+        setS(motorConfig.Default)
+
         if (!useOrientation)
             return;
         if ("DeviceOrientationEvent" in window && window.DeviceOrientationEvent.requestPermission) {
             console.log("Supports Orientation! 🎉")
-            //requestPermission()
-
         } else {
             console.log("No Orientation on this device 😕")
             setHasRotationPermission(true)
@@ -68,7 +68,7 @@ const MotorController = ({socket, motorConfig, useOrientation, state}) => {
 
     return (
         <div key={motorConfig.Name}
-            className={"bg-white dark:bg-gray-900 m-1 shadow hover:shadow-lg transition duration-150 px-4 pt-4 pb-2 rounded-lg " + (useOrientation ? 'col-span-2' : 'col-span-2 md:col-span-1')}>
+            className={"select-none bg-white dark:bg-gray-900 m-1 shadow hover:shadow-lg transition duration-150 px-4 pt-4 pb-2 rounded-lg " + (useOrientation ? 'col-span-2' : 'col-span-2 md:col-span-1')}>
             <input type="range" min="-1" max="1" step="0.0005" className="w-full shadow-lg"
                    onMouseDown={() => setLocked(true)} onMouseUp={() => setLocked(false)}
                    onDragStart={() => setLocked(true)} onDragEnd={() => setLocked(false)}
