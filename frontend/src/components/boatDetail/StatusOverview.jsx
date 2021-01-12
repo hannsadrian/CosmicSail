@@ -38,7 +38,7 @@ const StatusOverview = ({name, connected, online, sensorData, boatSensors}) => {
                                     {parseFloat('' + (sensorData[boatSensors['gps'].Name].error.s || 0.00) * 3.6).toFixed(1)}km/h</span>
                                     {" <->"}± <span className="font-mono">
                                     {((sensorData[boatSensors['gps'].Name].error.x || 0 + sensorData[boatSensors['gps'].Name].error.y || 0) / 2).toFixed(1)}m</span>
-                                </> : <><HardwareEmoji hardware="locating"/> Locating, no gps fix...</>}</p>
+                                </> : <><HardwareEmoji hardware="locating"/> Locating, no gps...</>}</p>
                         }
                     </div>
                     <div className="flex-1 select-none cursor-default">
