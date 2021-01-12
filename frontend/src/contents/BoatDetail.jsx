@@ -5,8 +5,9 @@ import ReactMapboxGl, {Marker} from 'react-mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import SensorDeck from "../components/SensorDeck";
 import StrengthIndicator from "../components/StrengthIndicator";
-import StatusOverview from "./boatDetail/StatusOverview";
-import MotorController from "./boatDetail/MotorController";
+import StatusOverview from "../components/boatDetail/StatusOverview";
+import MotorController from "../components/boatDetail/MotorController";
+import ConfiguratorOverview from "../components/hardwareConfig/ConfiguratorOverview";
 
 const axios = require("axios").default
 
@@ -30,6 +31,9 @@ function BoatDetail(props) {
 
     // error blocks the entire screen with either the option to reload the page or go to boat overview
     let [error, setError] = useState("");
+
+    let [showConfig, setShowConfig] = useState(false);
+
     let [boat, setBoat] = useState({});
     let [boatSensors, setBoatSensors] = useState({});
     let [motorData, setMotorData] = useState(null);
@@ -127,7 +131,6 @@ function BoatDetail(props) {
 
         fetchBoats()
     }, [emblem])
-
 
     useEffect(() => {
         if (socket != null) socket.disconnect()
@@ -242,6 +245,19 @@ function BoatDetail(props) {
     let acc_cal = (sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status && sensorData[boatSensors['bno'].Name].cal_status[2]) || 0;
     let mag_cal = (sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status && sensorData[boatSensors['bno'].Name].cal_status[3]) || 0;
 
+    if (showConfig) {
+        return (<div className="w-full min-h-screen flex justify-center">
+            <div className="m-auto p-4 w-full max-w-sm rounded-lg shadow-xl bg-white dark:bg-gray-900">
+                <div className="mb-2 font-bold text-lg flex justify-between dark:text-white">
+                    <h3>🛠 Hardware</h3>
+                    <button className="font-mono" onClick={() => setShowConfig(false)}>(x)</button>
+                </div>
+                <ConfiguratorOverview boatEmblem={boat.BoatEmblem} socket={socket} motors={boat.Motors}
+                                      sensors={boat.Sensors}/>
+            </div>
+        </div>)
+    }
+
     return (
         <div className="grid grid-cols-2 md:grid-cols-5 md:grid-rows-6 grid-flow-row md:grid-flow-col-dense p-2">
             <div style={{
@@ -285,12 +301,14 @@ function BoatDetail(props) {
                         anchor="center"
                         className="h-6 w-6"
                     >
-                        <img style={{"transform": "rotate("+((sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].heading) || 0)+"deg)"}} alt="" src={process.env.REACT_APP_APIURL + "/arrow_up.png"}/>
+                        <img
+                            style={{"transform": "rotate(" + ((sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].heading) || 0) + "deg)"}}
+                            alt="" src={process.env.REACT_APP_APIURL + "/arrow_up.png"}/>
                     </Marker>
                 </Map>
             </div>
             <div
-                className="row-span-2 col-span-2 md:col-span-3 m-1 p-2 rounded-lg flex-wrap lg:flex justify-center align-top select-none bg-gray-900 rounded">
+                className="row-span-2 col-span-2 md:col-span-3 m-1 p-2 rounded-lg flex-wrap lg:flex justify-center align-top select-none bg-gray-900 dark:bg-black rounded">
                 {boatSensors && boatSensors['bno'] &&
                 <SensorDeck
                     heading={heading}
@@ -303,7 +321,7 @@ function BoatDetail(props) {
                 <div
                     className="relative flex justify-between md:block space-x-2 md:space-x-0 md:space-y-2 text-gray-400 text-center font-mono flex-1 h-auto my-auto md:pl-1 md:pr-2">
                     {boatSensors && boatSensors['bno'] &&
-                    <div className="bg-gray-800 h-8 rounded shadow-md flex justify-center items-center p-1 w-full">
+                    <div className="bg-gray-800 dark:bg-gray-900 h-8 rounded shadow-md flex justify-center items-center p-1 w-full">
                         <StrengthIndicator
                             sys={sys_cal}
                             gyro={gyro_cal}
@@ -311,10 +329,12 @@ function BoatDetail(props) {
                             mag={mag_cal}/>
                     </div>
                     }
-                    <div className="bg-gray-800 h-8 rounded shadow-md p-1">
+                    <button onClick={() => setShowConfig(true)}
+                            className="bg-gray-800 dark:bg-gray-900 hover:bg-black h-8 md:w-full rounded shadow-md p-1">
                         STP
-                    </div>
-                    <button onClick={setupAGPS} className="bg-gray-800 hover:bg-black h-8 md:w-full rounded shadow-md p-1">
+                    </button>
+                    <button onClick={setupAGPS}
+                            className="bg-gray-800 dark:bg-gray-900 hover:bg-black h-8 md:w-full rounded shadow-md p-1">
                         AGPS
                     </button>
                 </div>
