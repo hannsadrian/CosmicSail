@@ -13,7 +13,6 @@ class GpsSensor():
         self.name = name
         self.token = token
         self.port = port
-        #self.get_agps(lat, lon)
 
     def init_agps(self, lat, lon):
         print("Stopping GPSD for AGPS")
@@ -21,12 +20,12 @@ class GpsSensor():
         time.sleep(2)
 
         token = self.token
-        comPort = self.port
+        com_port = self.port
         r = requests.get(
             "http://online-live1.services.u-blox.com/GetOnlineData.ashx?token=" + token + ";lat="+str(lat)+";lon="+str(lon)+";gnss=gps;datatype=eph,alm,aux,pos;format=aid;",
             stream=True)
 
-        ser = serial.Serial(comPort, 9600)
+        ser = serial.Serial(com_port, 9600)
         drainer = True
         while drainer:
             drainer = ser.inWaiting()
