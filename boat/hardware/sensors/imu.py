@@ -1,4 +1,4 @@
-from hardware.sensors.MPU6050 import MPU6050
+from hardware.sensors.lib.MPU6050 import MPU6050
 
 
 class IMU:

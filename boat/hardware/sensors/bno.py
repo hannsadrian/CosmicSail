@@ -1,4 +1,4 @@
-from hardware.sensors.adafruit_bno055 import BNO055_I2C
+from hardware.sensors.lib.adafruit_bno055 import BNO055_I2C
 from busio import I2C
 from board import SDA, SCL
 
