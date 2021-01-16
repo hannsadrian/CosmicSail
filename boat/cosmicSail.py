@@ -20,12 +20,12 @@ from hardware.sensors.bandwidth import Bandwidth
 from hardware.sensors.ip import IP
 from hardware.sensors.imu import IMU
 from hardware.sensors.bno import BNO
+from hardware.sensors.digital_wind import DigitalWindSensor
 from hardware.autopilot import AutoPilot
 
 # For later compass implementation see: https://dev.to/welldone2094/use-gps-and-magnetometer-for-accurate-heading-4hbi
 
 DEBUG = False
-
 
 # environment
 dotenv_path = join(dirname(__file__), '.env')
@@ -55,7 +55,7 @@ async def internet_check():
     try:
         t = requests.get('https://rudder.cosmicsail.online', timeout=3).text
     except requests.exceptions.Timeout:
-        #print("timeout!")
+        # print("timeout!")
         reset_all_motors()
         return False
     except requests.exceptions.ConnectionError:
@@ -170,39 +170,31 @@ def init():
     print(f" | {len(boatData['Sensors'])} Sensor(s)")
     print()
 
-    if DEBUG is True:
-        # TODO: simulation
-        #simulation.connect('192.168.1.8:9002')
-        motorTypes.__setitem__('rudder', 'DummyRudder')
-        motors.__setitem__('DummyRudder', DummyServoMotor("DummyRudder", simulation))
-        motorTypes.__setitem__('sail', 'DummySail')
-        motors.__setitem__('DummySail', DummyServoMotor("DummySail", simulation))
-        motorTypes.__setitem__('engine', 'DummyEngine')
-        motors.__setitem__('DummyEngine', DummyServoMotor("DummyEngine", simulation))
-    else:
-        # load hardware
-        # ⚠ We are currently ignoring per-motor-pwm-cycle from config ⚠
-        for motor in boatData['Motors']:
-            motorTypes.__setitem__(motor['Type'], motor['Name'])
-            motors.__setitem__(motor['Name'],
-                               ServoMotor(motor['Name'], pca.channels[int(motor['Channel']) - 1], float(motor['Min']),
-                                          float(motor['Max']), float(motor['Default']), motor['Type']))
+    # load hardware
+    # ⚠ We are currently ignoring per-motor-pwm-cycle from config ⚠
+    for motor in boatData['Motors']:
+        motorTypes.__setitem__(motor['Type'], motor['Name'])
+        motors.__setitem__(motor['Name'],
+                           ServoMotor(motor['Name'], pca.channels[int(motor['Channel']) - 1], float(motor['Min']),
+                                      float(motor['Max']), float(motor['Default']), motor['Type']))
 
-        for sensor in boatData['Sensors']:
-            sensorTypes.__setitem__(sensor['Type'], sensor['Name'])
-            if sensor['Type'] == "gps":
-                sensors.__setitem__(sensor['Name'], GpsSensor(sensor['Name'], os.getenv("UBLOX_TOKEN"), sensor['Channel']))
-            if sensor['Type'] == "bandwidth":
-                sensors.__setitem__(sensor['Name'], Bandwidth(sensor['Name']))
-            if sensor['Type'] == "ip":
-                sensors.__setitem__(sensor['Name'], IP(sensor['Name']))
-            if sensor['Type'] == "imu":
-                sensors.__setitem__(sensor['Name'], IMU(sensor['Name']))
-            if sensor['Type'] == "bno":
-                sensors.__setitem__(sensor['Name'], BNO(sensor['Name']))
+    for sensor in boatData['Sensors']:
+        sensorTypes.__setitem__(sensor['Type'], sensor['Name'])
+        if sensor['Type'] == "gps":
+            sensors.__setitem__(sensor['Name'], GpsSensor(sensor['Name'], os.getenv("UBLOX_TOKEN"), sensor['Channel']))
+        if sensor['Type'] == "bandwidth":
+            sensors.__setitem__(sensor['Name'], Bandwidth(sensor['Name']))
+        if sensor['Type'] == "ip":
+            sensors.__setitem__(sensor['Name'], IP(sensor['Name']))
+        if sensor['Type'] == "imu":
+            sensors.__setitem__(sensor['Name'], IMU(sensor['Name']))
+        if sensor['Type'] == "bno":
+            sensors.__setitem__(sensor['Name'], BNO(sensor['Name']))
+        if sensor['Type'] == "wind":
+            sensors.__setitem__(sensor['Name'], DigitalWindSensor(sensor['Name'], os.getenv("OPENWEATHERMAP_TOKEN")))
 
-        print(motors)
-        print(sensors)
+    print(motors)
+    print(sensors)
 
     # load autopilot
     autopilot = AutoPilot(0,
@@ -211,9 +203,7 @@ def init():
                           motors.__getitem__(motorTypes.__getitem__('engine')),
                           sensors.__getitem__(sensorTypes.__getitem__('gps')))
 
-    if DEBUG is False:
-        # connect to socket
-        connect_socket()
+    connect_socket()
 
     try:
         asyncio.run(main_loops())
@@ -246,13 +236,26 @@ def reset_all_motors():
 
 
 async def main_loops():
-    await asyncio.gather(internet_loop(), meta_loop(), autopilot_loop())
+    await asyncio.gather(internet_loop(), meta_loop(), autopilot_loop(), digital_sensor_loop())
 
 
 async def internet_loop():
     while True:
         await internet_check()
         await asyncio.sleep(3)
+
+
+async def digital_sensor_loop():
+    while True:
+        try:
+            lat = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lat()
+            lng = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lng()
+
+            if lat is not None or lng is not None:
+                sensors.__getitem__(sensorTypes.__getitem__('wind')).fetch_wind(lat, lng)
+        except KeyError:
+            pass
+        await asyncio.sleep(5)
 
 
 async def autopilot_loop():
