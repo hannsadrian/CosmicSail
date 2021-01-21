@@ -14,13 +14,13 @@ import subprocess
 import sys
 
 from hardware.motors.servo import ServoMotor
-from hardware.motors.dummy_servo import DummyServoMotor
 from hardware.sensors.gps import GpsSensor
 from hardware.sensors.bandwidth import Bandwidth
 from hardware.sensors.ip import IP
 from hardware.sensors.imu import IMU
 from hardware.sensors.bno import BNO
 from hardware.sensors.digital_wind import DigitalWindSensor
+from hardware.sensors.digital_shore import DigitalShoreSensor
 from hardware.autopilot import AutoPilot
 
 # For later compass implementation see: https://dev.to/welldone2094/use-gps-and-magnetometer-for-accurate-heading-4hbi
@@ -138,9 +138,9 @@ def setup(data):
 
 def init():
     global boatData, autopilot
-    print("Retrieving data from " + os.getenv("BACKEND"))
+    print("Retrieving data from rudder service on " + os.getenv("BACKEND"))
 
-    # call golang api for hardware loading!
+    # call rudder api for hardware loading!
     # get `/boat/v1/` with Auth Header
     try:
         url = os.getenv("BACKEND") + "/boat/v1/"
@@ -192,6 +192,8 @@ def init():
             sensors.__setitem__(sensor['Name'], BNO(sensor['Name']))
         if sensor['Type'] == "wind":
             sensors.__setitem__(sensor['Name'], DigitalWindSensor(sensor['Name'], os.getenv("OPENWEATHERMAP_TOKEN")))
+        if sensor['Type'] == "shore":
+            sensors.__setitem__(sensor['Name'], DigitalShoreSensor(sensor['Name'], os.getenv("ONWATER_TOKEN")))
 
     print(motors)
     print(sensors)
@@ -236,16 +238,52 @@ def reset_all_motors():
 
 
 async def main_loops():
-    await asyncio.gather(internet_loop(), meta_loop(), autopilot_loop(), digital_sensor_loop())
+    # register services mandatory for running the boat
+    await asyncio.gather(internet_loop(), meta_loop(), autopilot_loop(), digital_shore_loop(), shore_api_loop(),
+                         digital_wind_loop())
 
 
+# check if the rudder service is reachable to react to outages quickly
 async def internet_loop():
     while True:
         await internet_check()
         await asyncio.sleep(3)
 
 
-async def digital_sensor_loop():
+# fetches shore data every 5 seconds
+async def shore_api_loop():
+    alternate = False
+    while True:
+        try:
+            lat = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lat()
+            lng = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lng()
+            heading = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_value()['heading']
+
+            if lat is not None or lng is not None and heading is not None:
+                sensors.__getitem__(sensorTypes.__getitem__('shore')).fetch_shore(lat, lng, heading, alternate)
+                alternate = not alternate
+        except KeyError:
+            pass
+        await asyncio.sleep(5)
+
+
+# checks shore distance based on existing land data
+async def digital_shore_loop():
+    while True:
+        try:
+            lat = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lat()
+            lng = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lng()
+            heading = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_value()['heading']
+
+            if lat is not None or lng is not None and heading is not None:
+                sensors.__getitem__(sensorTypes.__getitem__('shore')).get_shore_dist(lat, lng, heading)
+        except KeyError:
+            pass
+        await asyncio.sleep(1)
+
+
+# fetch wind data
+async def digital_wind_loop():
     while True:
         try:
             lat = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lat()
@@ -258,6 +296,7 @@ async def digital_sensor_loop():
         await asyncio.sleep(5)
 
 
+# execute autopilot logic
 async def autopilot_loop():
     while True:
         try:
@@ -270,6 +309,7 @@ async def autopilot_loop():
         await asyncio.sleep(0.1)
 
 
+# send metadata over socket
 async def meta_loop():
     counter = 4  # weird counter logic counting down; starting at 4 to give some time to setup
     while True:
