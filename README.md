@@ -1,13 +1,10 @@
 **Scientific value:**
-This project is subject to a thesis I wrote in 10th grade of my school career.
-You can find the thesis relevant documents under `science/`.
-The paper is as of now still work in progress and addresses the possibility
-of replacing global container shipment with autonomous sailing vessels,
-which would only transport small amounts of freight but though could be environmentally friendly. 
-Since I go to school in germany the thesis is also written in german.
-Hopefully I am able to write an english translation soon.
+This project is subject to a thesis I write/wrote in 10th grade of my school career.
+You can find the thesis relevant documents under `science/` as soon as the writing is completed 🙌.
+The paper addresses the possibility of replacing global freight shipment with autonomous sailing vessels.
+Those would only transport small amounts of cargo but though could be environmentally friendly and save costs of crew. 
 
-![My boat in action](https://cosmicsail.online/bg.JPG)
+![Boat in action](https://cosmicsail.online/bg.JPG)
 
 # ⛵️ CosmicSail
 
