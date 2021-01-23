@@ -4,12 +4,18 @@ import requests
 import serial
 import subprocess
 
+
 # https://github.com/MartijnBraam/gpsd-py3/blob/master/DOCS.md
 class GpsSensor():
     name = ""
     prev_state = {}
 
-    def __init__(self, name, token, port):
+    simulation = False
+    simulated_lat = 50.919547
+    simulated_lng = 13.652643
+
+    def __init__(self, name, token, port, simulation):
+        self.simulation = simulation
         self.name = name
         self.token = token
         self.port = port
@@ -66,6 +72,9 @@ class GpsSensor():
         return data.track
 
     def get_lat(self):
+        if self.simulation:
+            return self.simulated_lat
+
         data = self.get_value()
         if data is None:
             return None
@@ -74,12 +83,19 @@ class GpsSensor():
         return data.position()[0]
 
     def get_lng(self):
+        if self.simulation:
+            return self.simulated_lng
+
         data = self.get_value()
         if data is None:
             return None
         if data.mode < 1:
             return None
         return data.position()[1]
+
+    def set_simulated_coords(self, lat, lng):
+        self.simulated_lat = lat
+        self.simulated_lng = lng
 
     def has_changed(self):
         changed = self.get_meta() != self.prev_state
@@ -88,6 +104,20 @@ class GpsSensor():
         return changed
 
     def get_meta(self):
+        if self.simulation:
+            return {
+                'mode': 4,
+                'sats': 10,
+                # Mode 2:
+                'error': {},
+                'position': [self.get_lat(), self.get_lng()],
+                'speed': 0,
+                'precision': {},
+                'heading': 0,
+                # Mode 3:
+                'altitude': None
+            }
+
         current_gps_data = self.get_value()
         if current_gps_data is None:
             return None

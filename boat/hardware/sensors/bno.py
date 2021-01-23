@@ -7,16 +7,19 @@ class BNO:
     name = ""
     prev_state = {}
 
-    def __init__(self, name):
+    simulation = False
+    simulated_heading = 0
+
+    def __init__(self, name, simulation):
         self.name = name
+        self.simulation = simulation
 
         i2c = I2C(SCL, SDA)
         self.sensor = BNO055_I2C(i2c)
 
     def get_value(self):
-        euler = self.sensor.euler
-        return {"pitch": euler[2], "roll": euler[1], "heading": euler[0],
-                "cal_status": self.sensor.calibration_status}
+        return {"pitch": self.get_pitch(), "roll": self.get_roll(), "heading": self.get_heading(),
+                "cal_status": self.get_calibration_status()}
 
     def get_pitch(self):
         return self.sensor.euler[2]
@@ -25,7 +28,22 @@ class BNO:
         return self.sensor.euler[1]
 
     def get_heading(self):
+        if self.simulation:
+            return self.simulated_heading
+
         return self.sensor.euler[0]
+
+    def set_simulated_heading(self, heading):
+        if not self.simulation:
+            return None
+
+        self.simulated_heading = heading
+
+    def get_calibration_status(self):
+        if self.simulation:
+            return [2, 2, 2, 2]
+
+        return self.sensor.calibration_status
 
     def get_name(self):
         return self.name
@@ -37,11 +55,7 @@ class BNO:
         return changed
 
     def get_meta(self):
-        elr = self.sensor.euler
-        euler = [0, 0, 0]
-        if not any(map(lambda x: x is None, elr)):
-            euler[0] = round(elr[0])
-            euler[1] = round(elr[1])
-            euler[2] = round(elr[2])
-        return {"pitch": euler[2], "roll": euler[1], "heading": euler[0],
-                "cal_status": self.sensor.calibration_status}
+        return {"pitch": round(self.get_pitch()) if self.get_pitch() is not None else 0,
+                "roll": round(self.get_roll()) if self.get_roll() is not None else 0,
+                "heading": round(self.get_heading()) if self.get_heading() is not None else 0,
+                "cal_status": self.get_calibration_status()}

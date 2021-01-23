@@ -1,5 +1,6 @@
 import math
 from simulation.Vector2D import Vector2D, vector_from_heading
+from .boat import get_forward_force_by_wind, get_point
 
 
 class Simulation:
@@ -7,6 +8,15 @@ class Simulation:
     motor_types = {}
     sensors = {}
     sensor_types = {}
+
+    origin_lat = 50.919547
+    origin_lng = 13.652643
+
+    position = Vector2D(0, 0)
+    rotation = 0
+
+    wind_direction = 90  # degrees
+    wind_speed = 10  # m/s
 
     def __init__(self, motors, motor_types, sensors, sensor_types) -> None:
         self.motors = motors
@@ -19,33 +29,19 @@ class Simulation:
 
         return None
 
-    def update(self) -> None:
-        sail = 1  # sail value from -1 to 1
-        wind_speed = 3  # in m/s
-        wind_direction = 270  # degrees
-        heading = 0  # degrees
+    def update(self, time_step) -> None:
+        f3 = get_forward_force_by_wind(self.motors.__getitem__(self.motor_types.__getitem__('sail')).get_state(),
+                                       self.wind_speed, self.wind_direction, self.rotation)
 
-        sail_area = 0.366  # in m**2
-        air_density = 1.229  # in kg/m**3
+        self.rotation = (self.rotation + self.motors.__getitem__(
+            self.motor_types.__getitem__('rudder')).get_state()) % 360
 
-        wind_force = (sail_area ** 2) * (air_density ** 3) * wind_speed ** 2  # results in Newton
+        velocity = vector_from_heading(self.rotation) * f3 * time_step
 
-        # find smallest possible angle from wind_dir to heading
-        gamma = math.radians(360 - abs(wind_direction - heading) if abs(wind_direction - heading) > 180 else abs(
-            wind_direction - heading))
+        self.position = self.position + velocity
 
-        beta = 2 * math.asin(math.sqrt((6 + (sail + 1) * 3) ** 2 - 36) / 21)  # elongation from middle of boat
-        if beta > gamma:
-            beta = gamma
-
-        # alpha = gamma - beta
-        alpha = math.radians(180) - abs(gamma - beta) if abs(gamma - beta) > math.radians(90) else abs(gamma - beta)
-
-        f1 = vector_from_heading(math.degrees(gamma))  # wind vector
-        f1 = f1 * wind_force
-
-        f2 = f1 * (1 - alpha * 2 / math.pi)  # force that's "reflected" by the sails
-        f3 = vector_from_heading(math.degrees(beta) + 90) * abs(f1 * alpha * 2 / math.pi)  # actual force on the sails
-        print("forward force:", abs(f3.x))  # this is the forward force on the boat!
-
-        return None
+        # set sensor state
+        self.sensors.__getitem__(self.sensor_types.__getitem__('bno')).set_simulated_heading(self.rotation)
+        coords = get_point(self.origin_lat, self.origin_lng, math.atan2(self.position.y, self.position.x),
+                           abs(self.position))
+        self.sensors.__getitem__(self.sensor_types.__getitem__('gps')).set_simulated_coords(coords[0], coords[1])

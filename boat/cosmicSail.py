@@ -22,10 +22,11 @@ from hardware.sensors.bno import BNO
 from hardware.sensors.digital_wind import DigitalWindSensor
 from hardware.sensors.digital_shore import DigitalShoreSensor
 from hardware.autopilot import AutoPilot
+from simulation.simulation import Simulation
 
 # For later compass implementation see: https://dev.to/welldone2094/use-gps-and-magnetometer-for-accurate-heading-4hbi
 
-DEBUG = False
+SIMULATION = True
 
 # environment
 dotenv_path = join(dirname(__file__), '.env')
@@ -33,7 +34,6 @@ load_dotenv(dotenv_path)
 
 # socket
 sio = socketio.Client(request_timeout=1, reconnection_delay=0.5, reconnection_delay_max=1)
-simulation = socketio.Client(request_timeout=1, reconnection_delay=0.5, reconnection_delay_max=1)
 
 # PWM Control
 i2c_bus = busio.I2C(SCL, SDA)
@@ -49,6 +49,9 @@ motorTypes = {}
 
 # autopilot
 autopilot = AutoPilot(0, None, None, None, None)
+
+# simulation
+simulation = Simulation({}, {}, {}, {})
 
 
 async def internet_check():
@@ -137,7 +140,7 @@ def setup(data):
 
 
 def init():
-    global boatData, autopilot
+    global boatData, autopilot, simulation
     print("Retrieving data from rudder service on " + os.getenv("BACKEND"))
 
     # call rudder api for hardware loading!
@@ -181,7 +184,8 @@ def init():
     for sensor in boatData['Sensors']:
         sensorTypes.__setitem__(sensor['Type'], sensor['Name'])
         if sensor['Type'] == "gps":
-            sensors.__setitem__(sensor['Name'], GpsSensor(sensor['Name'], os.getenv("UBLOX_TOKEN"), sensor['Channel']))
+            sensors.__setitem__(sensor['Name'],
+                                GpsSensor(sensor['Name'], os.getenv("UBLOX_TOKEN"), sensor['Channel'], SIMULATION))
         if sensor['Type'] == "bandwidth":
             sensors.__setitem__(sensor['Name'], Bandwidth(sensor['Name']))
         if sensor['Type'] == "ip":
@@ -189,7 +193,7 @@ def init():
         if sensor['Type'] == "imu":
             sensors.__setitem__(sensor['Name'], IMU(sensor['Name']))
         if sensor['Type'] == "bno":
-            sensors.__setitem__(sensor['Name'], BNO(sensor['Name']))
+            sensors.__setitem__(sensor['Name'], BNO(sensor['Name'], SIMULATION))
         if sensor['Type'] == "wind":
             sensors.__setitem__(sensor['Name'], DigitalWindSensor(sensor['Name'], os.getenv("OPENWEATHERMAP_TOKEN")))
         if sensor['Type'] == "shore":
@@ -204,6 +208,8 @@ def init():
                           motors.__getitem__(motorTypes.__getitem__('sail')),
                           motors.__getitem__(motorTypes.__getitem__('engine')),
                           sensors.__getitem__(sensorTypes.__getitem__('gps')))
+
+    simulation = Simulation(motors, motorTypes, sensors, sensorTypes)
 
     connect_socket()
 
@@ -240,7 +246,18 @@ def reset_all_motors():
 async def main_loops():
     # register services mandatory for running the boat
     await asyncio.gather(internet_loop(), meta_loop(), autopilot_loop(), digital_shore_loop(), shore_api_loop(),
-                         digital_wind_loop())
+                         digital_wind_loop(), simulation_loop())
+
+
+async def simulation_loop():
+    if not SIMULATION:
+        return
+
+    simulation.start()
+
+    while True:
+        simulation.update(1/30)
+        await asyncio.sleep(1/30)
 
 
 # check if the rudder service is reachable to react to outages quickly
@@ -257,7 +274,7 @@ async def shore_api_loop():
         try:
             lat = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lat()
             lng = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lng()
-            heading = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_value()['heading']
+            heading = sensors.__getitem__(sensorTypes.__getitem__('bno')).get_heading()
 
             if lat is not None or lng is not None and heading is not None:
                 sensors.__getitem__(sensorTypes.__getitem__('shore')).fetch_shore(lat, lng, heading, alternate)
@@ -273,7 +290,7 @@ async def digital_shore_loop():
         try:
             lat = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lat()
             lng = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lng()
-            heading = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_value()['heading']
+            heading = sensors.__getitem__(sensorTypes.__getitem__('bno')).get_heading()
 
             if lat is not None or lng is not None and heading is not None:
                 sensors.__getitem__(sensorTypes.__getitem__('shore')).get_shore_dist(lat, lng, heading)
