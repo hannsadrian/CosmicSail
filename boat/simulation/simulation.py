@@ -3,7 +3,6 @@ from simulation.Vector2D import Vector2D, vector_from_heading
 
 
 class Simulation:
-
     motors = {}
     motor_types = {}
     sensors = {}
@@ -26,19 +25,19 @@ class Simulation:
         wind_force = (sail_area ** 2) * (1.229 ** 3) * wind_speed ** 2  # results in Newton
         wind_direction = 10  # degrees
         heading = 300  # degrees
-        sail = 40  # degrees of elongation from middle of boat
 
+        sail = 1  # sail value from 0 to -1
+        beta = 2 * math.asin(
+            math.sqrt((6 + (sail + 1) * 3) ** 2 - 36) / 21)  # degrees of elongation from middle of boat
         # find smallest possible angle from wind_dir to heading
-        gamma = math.radians(360 - abs(wind_direction - heading) if abs(wind_direction - heading) > 180 else abs(wind_direction - heading))
+        gamma = math.radians(360 - abs(wind_direction - heading) if abs(wind_direction - heading) > 180 else abs(
+            wind_direction - heading))
+        alpha = gamma - beta
 
-        alpha = gamma - math.radians(sail)
-
-        wind_vector = vector_from_heading(wind_direction)  # TODO: relative to boat direction?
+        wind_vector = vector_from_heading((wind_direction + 180) % 360)
         wind_vector = wind_vector * wind_force
 
-        sail_elongation = (sail + heading) % 360
-
-        f3 = vector_from_heading((sail_elongation + 90) % 360)
+        f3 = vector_from_heading((beta + math.radians(90)) % 360)
 
         f3 *= alpha * math.radians(90)
         print(math.degrees(math.atan2(f3.y, f3.x)))
