@@ -25,8 +25,7 @@ class Simulation:
         self.sensor_types = sensor_types
 
     def start(self) -> None:
-        # TODO: set all hardware into simulation mode
-
+        # potential setup
         return None
 
     def update(self, time_step) -> None:
@@ -34,7 +33,7 @@ class Simulation:
                                        self.wind_speed, self.wind_direction, self.rotation)
 
         self.rotation = (self.rotation + self.motors.__getitem__(
-            self.motor_types.__getitem__('rudder')).get_state()*4) % 360
+            self.motor_types.__getitem__('rudder')).get_state()*3) % 360
 
         velocity = (vector_from_heading(360 - (self.rotation-90) % 360) * -f3) * time_step
 
