@@ -22,16 +22,28 @@ class BNO:
                 "cal_status": self.get_calibration_status()}
 
     def get_pitch(self):
-        return self.sensor.euler[2]
+        elr = self.sensor.euler[2]
+        if elr is not None:
+            return round(elr)
+
+        return None
 
     def get_roll(self):
-        return self.sensor.euler[1]
+        elr = self.sensor.euler[1]
+        if elr is not None:
+            return round(elr)
+
+        return None
 
     def get_heading(self):
         if self.simulation:
             return self.simulated_heading
 
-        return self.sensor.euler[0]
+        elr = self.sensor.euler[0]
+        if elr is not None:
+            return round(elr)
+
+        return None
 
     def set_simulated_heading(self, heading):
         if not self.simulation:
@@ -55,7 +67,7 @@ class BNO:
         return changed
 
     def get_meta(self):
-        return {"pitch": round(self.get_pitch()) if self.get_pitch() is not None else 0,
-                "roll": round(self.get_roll()) if self.get_roll() is not None else 0,
-                "heading": round(self.get_heading()) if self.get_heading() is not None else 0,
+        return {"pitch": self.get_pitch(),
+                "roll": self.get_roll(),
+                "heading": self.get_heading(),
                 "cal_status": self.get_calibration_status()}

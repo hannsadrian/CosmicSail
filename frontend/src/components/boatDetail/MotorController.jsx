@@ -22,7 +22,7 @@ const MotorController = ({socket, motorConfig, useOrientation, state}) => {
     useEffect(() => {
         if (locked) return
 
-        setMotor(state || 0)
+        //setMotor(state || 0)
     }, [state, locked])
 
     const requestPermission = () => {

@@ -24,9 +24,11 @@ from hardware.sensors.digital_shore import DigitalShoreSensor
 from hardware.autopilot import AutoPilot
 from simulation.simulation import Simulation
 
-# For later compass implementation see: https://dev.to/welldone2094/use-gps-and-magnetometer-for-accurate-heading-4hbi
-
 SIMULATION = True
+
+meta_interval = 1/3
+if SIMULATION:
+    meta_interval = 1/20
 
 # environment
 dotenv_path = join(dirname(__file__), '.env')
@@ -209,7 +211,8 @@ def init():
                           motors.__getitem__(motorTypes.__getitem__('engine')),
                           sensors.__getitem__(sensorTypes.__getitem__('gps')))
 
-    simulation = Simulation(motors, motorTypes, sensors, sensorTypes)
+    if SIMULATION:
+        simulation = Simulation(motors, motorTypes, sensors, sensorTypes)
 
     connect_socket()
 
@@ -335,7 +338,7 @@ async def meta_loop():
             counter = 50
         else:
             send_meta(False)
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(meta_interval)
 
         counter -= 1
 
