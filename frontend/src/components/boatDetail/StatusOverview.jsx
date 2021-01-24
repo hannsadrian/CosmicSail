@@ -55,11 +55,11 @@ const StatusOverview = ({name, connected, online, sensorData, boatSensors}) => {
 
                         </>
                         }
-                        {boatSensors['bno'] &&
+                        {boatSensors['wind'] &&
                         <p>
                             <span className="sm:hidden"><HardwareEmoji hardware="wind"/></span> <span
-                            className="font-mono">NNE</span> at <span
-                            className="font-mono">4km/h</span> <span className="opacity-0 sm:opacity-100"><HardwareEmoji
+                            className="font-mono">{(sensorData && sensorData[boatSensors['wind']?.Name]?.direction && sensorData[boatSensors['wind']?.Name]?.direction + "°") || "--"}</span> at <span
+                            className="font-mono">{(sensorData && parseFloat(sensorData[boatSensors['wind']?.Name]?.speed * 3.6 + '').toFixed(1)) || "--"}km/h</span> <span className="opacity-0 sm:opacity-100"><HardwareEmoji
                             hardware="wind"/></span>
                         </p>
                         }
