@@ -26,9 +26,9 @@ from simulation.simulation import Simulation
 
 SIMULATION = True
 
-meta_interval = 1/3
+meta_interval = 1 / 3
 if SIMULATION:
-    meta_interval = 1/8
+    meta_interval = 1 / 8
 
 # environment
 dotenv_path = join(dirname(__file__), '.env')
@@ -201,9 +201,6 @@ def init():
         if sensor['Type'] == "shore":
             sensors.__setitem__(sensor['Name'], DigitalShoreSensor(sensor['Name'], os.getenv("ONWATER_TOKEN")))
 
-    print(motors)
-    print(sensors)
-
     # load autopilot
     autopilot = AutoPilot(0,
                           motors.__getitem__(motorTypes.__getitem__('rudder')),
@@ -259,8 +256,8 @@ async def simulation_loop():
     simulation.start()
 
     while True:
-        simulation.update(1/30)
-        await asyncio.sleep(1/30)
+        simulation.update(1 / 30)
+        await asyncio.sleep(1 / 30)
 
 
 # check if the rudder service is reachable to react to outages quickly
@@ -312,6 +309,8 @@ async def digital_wind_loop():
 
             if lat is not None or lng is not None:
                 sensors.__getitem__(sensorTypes.__getitem__('wind')).fetch_wind(lat, lng)
+                simulation.set_wind(sensors.__getitem__(sensorTypes.__getitem__('wind')).get_value()['direction'],
+                                    sensors.__getitem__(sensorTypes.__getitem__('wind')).get_value()['speed'])
         except KeyError:
             pass
         await asyncio.sleep(30)

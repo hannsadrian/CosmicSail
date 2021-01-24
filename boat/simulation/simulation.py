@@ -15,14 +15,18 @@ class Simulation:
     position = Vector2D(0, 0)
     rotation = 0
 
-    wind_direction = 90  # degrees
-    wind_speed = 4  # m/s
+    wind_direction = 0  # degrees
+    wind_speed = 0  # m/s
 
     def __init__(self, motors, motor_types, sensors, sensor_types) -> None:
         self.motors = motors
         self.motor_types = motor_types
         self.sensors = sensors
         self.sensor_types = sensor_types
+
+    def set_wind(self, direction, speed):
+        self.wind_direction = direction
+        self.wind_speed = speed
 
     def start(self) -> None:
         # potential setup
@@ -32,10 +36,15 @@ class Simulation:
         f3 = get_forward_force_by_wind(self.motors.__getitem__(self.motor_types.__getitem__('sail')).get_state(),
                                        self.wind_speed, self.wind_direction, self.rotation)
 
+        f_engine = self.motors.__getitem__(self.motor_types.__getitem__('engine')).get_state() * 3
+
         self.rotation = (self.rotation + self.motors.__getitem__(
             self.motor_types.__getitem__('rudder')).get_state() * 3) % 360
 
-        velocity = (vector_from_heading(360 - (self.rotation - 90) % 360) * -f3) * time_step
+        sail_vector = (vector_from_heading(360 - (self.rotation - 90) % 360) * -f3) * time_step
+        engine_vector = (vector_from_heading(360 - (self.rotation - 90) % 360) * f_engine) * time_step
+
+        velocity = sail_vector + engine_vector
 
         self.position = self.position + velocity
 
