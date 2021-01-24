@@ -1,6 +1,6 @@
 import math
 from simulation.Vector2D import Vector2D, vector_from_heading
-from .boat import get_forward_force_by_wind, get_point
+from .boat import get_forward_force_by_wind, get_point, get_distance
 
 
 class Simulation:
@@ -16,7 +16,7 @@ class Simulation:
     rotation = 0
 
     wind_direction = 90  # degrees
-    wind_speed = 15  # m/s
+    wind_speed = 4  # m/s
 
     def __init__(self, motors, motor_types, sensors, sensor_types) -> None:
         self.motors = motors
@@ -33,14 +33,19 @@ class Simulation:
                                        self.wind_speed, self.wind_direction, self.rotation)
 
         self.rotation = (self.rotation + self.motors.__getitem__(
-            self.motor_types.__getitem__('rudder')).get_state()*3) % 360
+            self.motor_types.__getitem__('rudder')).get_state() * 3) % 360
 
-        velocity = (vector_from_heading(360 - (self.rotation-90) % 360) * -f3) * time_step
+        velocity = (vector_from_heading(360 - (self.rotation - 90) % 360) * -f3) * time_step
 
         self.position = self.position + velocity
 
         # set sensor state
-        self.sensors.__getitem__(self.sensor_types.__getitem__('bno')).set_simulated_heading(self.rotation)
+        self.sensors.__getitem__(self.sensor_types.__getitem__('bno')).set_simulated_heading(round(self.rotation))
         coords = get_point(self.origin_lat, self.origin_lng, math.degrees(math.atan2(self.position.x, self.position.y)),
                            abs(self.position))
+        speed = get_distance(self.sensors.__getitem__(self.sensor_types.__getitem__('gps')).get_lat(),
+                             self.sensors.__getitem__(self.sensor_types.__getitem__('gps')).get_lng(),
+                             coords[0],
+                             coords[1]) / time_step
         self.sensors.__getitem__(self.sensor_types.__getitem__('gps')).set_simulated_coords(coords[0], coords[1])
+        self.sensors.__getitem__(self.sensor_types.__getitem__('gps')).set_simulated_speed(speed)

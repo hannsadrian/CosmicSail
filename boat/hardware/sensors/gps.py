@@ -13,6 +13,7 @@ class GpsSensor():
     simulation = False
     simulated_lat = 50.919547
     simulated_lng = 13.652643
+    simulated_speed = 0
 
     def __init__(self, name, token, port, simulation):
         self.simulation = simulation
@@ -93,9 +94,29 @@ class GpsSensor():
             return None
         return data.position()[1]
 
+    def get_speed(self):
+        if self.simulation:
+            return self.simulated_speed
+
+        data = self.get_value()
+        if data is None:
+            return None
+        if data.mode < 1:
+            return None
+        return data.hspeed
+
     def set_simulated_coords(self, lat, lng):
+        if not self.simulation:
+            return
+
         self.simulated_lat = lat
         self.simulated_lng = lng
+
+    def set_simulated_speed(self, speed):
+        if not self.simulation:
+            return
+
+        self.simulated_speed = speed
 
     def has_changed(self):
         changed = self.get_meta() != self.prev_state
@@ -111,7 +132,7 @@ class GpsSensor():
                 # Mode 2:
                 'error': {},
                 'position': [self.get_lat(), self.get_lng()],
-                'speed': 0,
+                'speed': self.simulated_speed,
                 'precision': {},
                 'heading': 0,
                 # Mode 3:
