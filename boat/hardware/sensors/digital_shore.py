@@ -47,8 +47,8 @@ def get_points(lat, lng, bearing, alternate, dist):
         p.append(get_point(lat, lng, bearing - 45 % 360, 30))
         p.append(get_point(lat, lng, bearing + 45 % 360, 30))
     else:
-        p.append(get_point(lat, lng, bearing, 50))
-        p.append(get_point(lat, lng, bearing, 100))
+        p.append(get_point(lat, lng, bearing, 10))
+        p.append(get_point(lat, lng, bearing, 75))
 
     points = []
     for t in p:

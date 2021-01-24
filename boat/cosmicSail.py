@@ -314,7 +314,7 @@ async def digital_wind_loop():
                 sensors.__getitem__(sensorTypes.__getitem__('wind')).fetch_wind(lat, lng)
         except KeyError:
             pass
-        await asyncio.sleep(5)
+        await asyncio.sleep(30)
 
 
 # execute autopilot logic
