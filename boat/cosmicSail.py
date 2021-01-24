@@ -28,7 +28,7 @@ SIMULATION = True
 
 meta_interval = 1/3
 if SIMULATION:
-    meta_interval = 1/20
+    meta_interval = 1/8
 
 # environment
 dotenv_path = join(dirname(__file__), '.env')
@@ -296,6 +296,7 @@ async def digital_shore_loop():
             heading = sensors.__getitem__(sensorTypes.__getitem__('bno')).get_heading()
 
             if lat is not None or lng is not None and heading is not None:
+                sensors.__getitem__(sensorTypes.__getitem__('shore')).get_meta()
                 sensors.__getitem__(sensorTypes.__getitem__('shore')).get_shore_dist(lat, lng, heading)
         except KeyError:
             pass

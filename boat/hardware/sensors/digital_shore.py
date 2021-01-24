@@ -41,14 +41,14 @@ def get_points(lat, lng, bearing, alternate, dist):
     p = [get_point(lat, lng, bearing, 25)]
 
     if dist <= 25:
-        p.append(get_point(lat, lng, bearing, 5))
         p.append(get_point(lat, lng, bearing, 15))
-    elif alternate:
-        p.append(get_point(lat, lng, bearing - 45 % 360, 15))
-        p.append(get_point(lat, lng, bearing + 45 % 360, 15))
-    else:
         p.append(get_point(lat, lng, bearing, 35))
+    elif alternate:
+        p.append(get_point(lat, lng, bearing - 45 % 360, 30))
+        p.append(get_point(lat, lng, bearing + 45 % 360, 30))
+    else:
         p.append(get_point(lat, lng, bearing, 50))
+        p.append(get_point(lat, lng, bearing, 100))
 
     points = []
     for t in p:
@@ -81,17 +81,17 @@ class DigitalShoreSensor:
         self.land_data = sorted(self.land_data, key=lambda p: (p['lat'] - lat) ** 2 + (p['lng'] - lng) ** 2)
 
         smallest_relative_angle = 360
-        straightest_distance = {'dist': None, 'bearing': None}
-        shortest_distance = {'dist': None, 'bearing': None}
+        straightest_distance = {'dist': None, 'bearing': None, 'relative_angle': None}
+        shortest_distance = {'dist': None, 'bearing': None, 'relative_angle': None}
 
         # loop trough first 50 land coords
         for point in self.land_data[:50]:
             d = get_distance(lat, lng, point['lat'], point['lng'])
             b = get_bearing(lat, lng, point['lat'], point['lng']) % 360
-            relativeAngle = round(b - bearing)
-            if abs(relativeAngle) < smallest_relative_angle:
-                smallest_relative_angle = abs(relativeAngle)
-                straightest_distance = {'dist': round(d), 'bearing': round(b)}
+            relative_angle = round(b - bearing)
+            if abs(relative_angle) < smallest_relative_angle and abs(relative_angle) < 20:
+                smallest_relative_angle = abs(relative_angle)
+                straightest_distance = {'dist': round(d), 'bearing': round(b), 'relative_angle': abs(relative_angle)}
             if shortest_distance['dist'] is None or d < shortest_distance['dist']:
                 shortest_distance = {'dist': round(d), 'bearing': round(b)}
 
