@@ -42,13 +42,19 @@ const StatusOverview = ({name, connected, online, sensorData, boatSensors}) => {
                         }
                     </div>
                     <div className="flex-1 select-none cursor-default">
-                        <p><span className="sm:hidden"><HardwareEmoji hardware="shore"/></span> <span
-                            className="font-mono">~20m</span> shore
-                            proximity <span className="opacity-0 sm:opacity-100"><HardwareEmoji
-                                hardware="shore"/></span></p>
-                        <p><span className="sm:hidden"><HardwareEmoji hardware="autopilot"/></span> Autopilot not
-                            active <span
-                                className="opacity-0 sm:opacity-100"><HardwareEmoji hardware="autopilot"/></span></p>
+                        {boatSensors['shore'] &&
+                        <>
+                            <p><span className="sm:hidden"><HardwareEmoji hardware="nearest-shore"/></span> <span
+                                className="font-mono">{(sensorData && sensorData[boatSensors['shore']?.Name]?.shortest?.dist && "~" + sensorData[boatSensors['shore']?.Name]?.shortest?.dist + "m") || "No"}</span> shore
+                                proximity <span className="opacity-0 sm:opacity-100"><HardwareEmoji
+                                    hardware="nearest-shore"/></span></p>
+                            <p><span className="sm:hidden"><HardwareEmoji hardware="shore"/></span> <span
+                                className="font-mono">{(sensorData && sensorData[boatSensors['shore']?.Name]?.straight?.dist && "~" + sensorData[boatSensors['shore']?.Name]?.straight?.dist + "m") || "No"}</span> shore
+                                ahead <span className="opacity-0 sm:opacity-100"><HardwareEmoji
+                                    hardware="shore"/></span></p>
+
+                        </>
+                        }
                         {boatSensors['bno'] &&
                         <p>
                             <span className="sm:hidden"><HardwareEmoji hardware="wind"/></span> <span

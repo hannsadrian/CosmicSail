@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter']
+        sans: ['Inter', 'Apple Color Emoji', 'Segoe UI Emoji']
       }
     },
     colors: colors

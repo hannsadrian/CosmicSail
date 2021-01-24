@@ -188,10 +188,6 @@ function BoatDetail(props) {
     }, [emblem])
 
     useEffect(() => {
-        console.log(motorData)
-    }, [motorData])
-
-    useEffect(() => {
         console.log(sensorData)
     }, [sensorData])
 
@@ -321,7 +317,8 @@ function BoatDetail(props) {
                 <div
                     className="relative flex justify-between md:block space-x-2 md:space-x-0 md:space-y-2 text-gray-400 text-center font-mono flex-1 h-auto my-auto md:pl-1 md:pr-2">
                     {boatSensors && boatSensors['bno'] &&
-                    <div className="bg-gray-800 dark:bg-gray-900 h-8 rounded shadow-md flex justify-center items-center p-1 w-full">
+                    <div
+                        className="bg-gray-800 dark:bg-gray-900 h-8 rounded shadow-md flex justify-center items-center p-1 w-full">
                         <StrengthIndicator
                             sys={sys_cal}
                             gyro={gyro_cal}

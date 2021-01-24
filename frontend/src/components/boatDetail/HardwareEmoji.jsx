@@ -10,6 +10,7 @@ const hardwares = [
     {name: "wind", emoji: "🍃"},
     {name: "autopilot", emoji: "🤖"},
     {name: "shore", emoji: "🏝"},
+    {name: "nearest-shore", emoji: "🏖"},
     {name: "rudder", emoji: "🛶"},
     {name: "sail", emoji: "⛵"},
     {name: "engine", emoji: "⛽️"},
