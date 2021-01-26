@@ -63,8 +63,8 @@ providing enough power for hours of sailing. The motor, is powered by a [LiPo 2S
 
 ## 🤖 Autopilot
 
-I am currently working on a simulation in Unity, that's why there is so much C# code :)<br>
-The simulation will be able to generate input for the autopilot and show its output too. Stay tuned 📻
+As of now, the forces on sails that the boat experiences in the real world can be simulated 
+right on the chip inside the boat. This enables easy debugging and development of the autopilot. 
 
 ## 🚧 Going further
 
