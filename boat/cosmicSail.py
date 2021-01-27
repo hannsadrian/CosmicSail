@@ -206,7 +206,10 @@ def init():
                           motors.__getitem__(motorTypes.__getitem__('rudder')),
                           motors.__getitem__(motorTypes.__getitem__('sail')),
                           motors.__getitem__(motorTypes.__getitem__('engine')),
-                          sensors.__getitem__(sensorTypes.__getitem__('gps')))
+                          sensors.__getitem__(sensorTypes.__getitem__('gps')),
+                          sensors.__getitem__(sensorTypes.__getitem__('bno')),
+                          sensors.__getitem__(sensorTypes.__getitem__('wind')),
+                          sensors.__getitem__(sensorTypes.__getitem__('shore')))
 
     if SIMULATION:
         simulation = Simulation(motors, motorTypes, sensors, sensorTypes)

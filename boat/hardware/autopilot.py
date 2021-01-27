@@ -1,13 +1,6 @@
 import math
 
 
-# motor mode
-
-# determine direction & distance from current pos to target
-# set motor speed accordingly
-# turn rudder
-
-
 class AutoPilot:
     mode = 0
     rudder = None
@@ -15,18 +8,24 @@ class AutoPilot:
     engine = None
 
     gps = None
+    bno = None
+    wind = None
+    shore = None
 
     destLat = 0
     destLng = 0
 
     running = False
 
-    def __init__(self, mode, rudder, sail, engine, gps):
+    def __init__(self, mode, rudder, sail, engine, gps, bno, wind, shore):
         self.mode = mode
         self.rudder = rudder
         self.sail = sail
         self.engine = engine
         self.gps = gps
+        self.bno = bno
+        self.wind = wind
+        self.shore = shore
 
     def set_dest(self, lat, lng):
         self.destLat = lat
