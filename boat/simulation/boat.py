@@ -17,6 +17,7 @@ def get_forward_force_by_wind(sail, wind_speed, wind_direction, heading) -> floa
     gamma = math.radians(360 - abs(wind_direction - heading) if abs(wind_direction - heading) > 180 else abs(
         wind_direction - heading))
 
+    # 2 * asin(sqrt(c^2-b^2)/21)
     beta = 2 * math.asin(math.sqrt((6 + (sail + 1) * 3) ** 2 - 36) / 21) + 0.17453  # elongation from middle of boat
     if beta > gamma:
         beta = gamma
