@@ -22,12 +22,30 @@ def get_points(lat, lng, bearing, alternate, dist):
     return points
 
 
+class ShoreDistance:
+    dist = None
+    bearing = None
+    relative_angle = None
+
+    def __init__(self, dist, bearing, relative_angle):
+        self.dist = dist
+        self.bearing = bearing
+        self.relative_angle = relative_angle
+
+    def to_dict(self):
+        return {
+            'dist': self.dist,
+            'bearing': self.bearing,
+            'relative_angle': self.relative_angle
+        }
+
+
 class DigitalShoreSensor:
     name = ""
 
-    value = {}
+    straightest_distance = ShoreDistance(None, None, None)
+    shortest_distance = ShoreDistance(None, None, None)
     prev_state = {}
-    distances = []  # all detected land points, structured like nearest distance
 
     land_data = []
 
@@ -36,7 +54,7 @@ class DigitalShoreSensor:
         self.token = token
 
     def get_value(self):
-        return self.value
+        return self.get_meta()
 
     def get_name(self):
         return self.name
@@ -49,7 +67,7 @@ class DigitalShoreSensor:
         straightest_distance = {'dist': None, 'bearing': None, 'relative_angle': None}
         shortest_distance = {'dist': None, 'bearing': None, 'relative_angle': None}
 
-        # loop trough first 50 land coords
+        # loop trough nearest 50 land coords
         for point in self.land_data[:50]:
             d = get_distance(lat, lng, point['lat'], point['lng'])
             b = get_bearing(lat, lng, point['lat'], point['lng']) % 360
@@ -58,16 +76,17 @@ class DigitalShoreSensor:
                 smallest_relative_angle = abs(relative_angle)
                 straightest_distance = {'dist': round(d), 'bearing': round(b), 'relative_angle': abs(relative_angle)}
             if shortest_distance['dist'] is None or d < shortest_distance['dist']:
-                shortest_distance = {'dist': round(d), 'bearing': round(b)}
+                shortest_distance = {'dist': round(d), 'bearing': round(b), 'relative_angle': abs(relative_angle)}
 
-        self.value = {
-            'straight': straightest_distance,
-            'shortest': shortest_distance
-        }
-        return self.value
+        self.straightest_distance = ShoreDistance(straightest_distance['dist'], straightest_distance['bearing'],
+                                                  straightest_distance['relative_angle'])
+        self.shortest_distance = ShoreDistance(shortest_distance['dist'], shortest_distance['bearing'],
+                                               shortest_distance['relative_angle'])
+
+        return [self.straightest_distance, self.shortest_distance]
 
     def fetch_shore(self, lat, lng, bearing, alternate):
-        dist = self.get_shore_dist(lat, lng, bearing)['straight']['dist']
+        dist = self.get_shore_dist(lat, lng, bearing)[0].dist
         if dist is None:
             dist = 100
 
@@ -98,4 +117,7 @@ class DigitalShoreSensor:
         return changed
 
     def get_meta(self):
-        return self.get_value()
+        return {
+            'straight': self.straightest_distance.to_dict(),
+            'shortest': self.shortest_distance.to_dict()
+        }
