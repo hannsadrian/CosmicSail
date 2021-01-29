@@ -21,7 +21,7 @@ from hardware.sensors.imu import IMU
 from hardware.sensors.bno import BNO
 from hardware.sensors.digital_wind import DigitalWindSensor
 from hardware.sensors.digital_shore import DigitalShoreSensor
-from hardware.autopilot import AutoPilot
+from autopilot.autopilot import AutoPilot
 from simulation.simulation import Simulation
 
 SIMULATION = True
