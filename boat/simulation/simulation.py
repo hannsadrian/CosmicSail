@@ -1,6 +1,7 @@
 import math
 from simulation.Vector2D import Vector2D, vector_from_heading
-from .boat import get_forward_force_by_wind, get_point, get_distance
+from .boat import get_forward_force_by_wind
+from utility.coordinates import get_point, get_distance
 
 
 class Simulation:

@@ -1,5 +1,6 @@
 import math
 from simulation.Vector2D import Vector2D, vector_from_heading
+from utility.coordinates import get_point, get_distance
 
 
 # sail            -> sail value from -1 to 1
@@ -29,32 +30,3 @@ def get_forward_force_by_wind(sail, wind_speed, wind_direction, heading) -> floa
     f2 = f1 * (1 - alpha * 2 / math.pi)  # force that's "reflected" by the sails
     f3 = vector_from_heading(math.degrees(beta) + 90) * abs(f1 * alpha * 2 / math.pi)  # actual force on the sails
     return f3.x  # this is the forward force on the boat!
-
-
-def get_point(lat, lng, bearing, distance):
-    R = 6371e3
-    bearing = math.radians(bearing)
-
-    lat = math.radians(lat)
-    lng = math.radians(lng)
-
-    lat2 = math.asin(math.sin(lat) * math.cos(distance / R) +
-                     math.cos(lat) * math.sin(distance / R) * math.cos(bearing))
-
-    lng2 = lng + math.atan2(math.sin(bearing) * math.sin(distance / R) * math.cos(lat),
-                            math.cos(distance / R) - math.sin(lat) * math.sin(lat2))
-
-    return round(math.degrees(lat2), 10), round(math.degrees(lng2), 10)
-
-
-def get_distance(lat1, lng1, lat2, lng2):
-    R = 6371e3
-    phi1 = math.radians(lat1)
-    phi2 = math.radians(lat2)
-    delta_phi = math.radians(lat2 - lat1)
-    delta_lambda = math.radians(lng2 - lng1)
-
-    a = math.sin(delta_phi / 2) * math.sin(delta_phi / 2) + math.cos(phi1) * math.cos(phi2) * math.sin(
-        delta_lambda / 2) * math.sin(delta_lambda / 2)
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    return R * c
