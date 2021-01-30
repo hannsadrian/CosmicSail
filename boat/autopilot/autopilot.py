@@ -80,6 +80,10 @@ class AutoPilot:
             self.sail_state = sail
 
     def cycle(self):
+        if self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng()) < 10 and (
+                self.motor_state is not MotorState.STAY and self.mode is AutoPilotMode.MOTOR):
+            self.way_points.pop(0)
+
         if len(self.way_points) == 0:
             self.set_mode(AutoPilotMode.MOTOR)
             self.set_state(motor=MotorState.STAY)
