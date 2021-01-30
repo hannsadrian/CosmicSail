@@ -21,7 +21,7 @@ from hardware.sensors.imu import IMU
 from hardware.sensors.bno import BNO
 from hardware.sensors.digital_wind import DigitalWindSensor
 from hardware.sensors.digital_shore import DigitalShoreSensor
-from autopilot.autopilot import AutoPilot
+from autopilot.autopilot import AutoPilot, WayPoint
 from simulation.simulation import Simulation
 
 SIMULATION = True
@@ -108,22 +108,44 @@ def command(data):
 
 @sio.event
 def setup(data):
-    setup = json.loads(data)
-    print("Setup!")
-    print(data)
+    payload = json.loads(data)
+
+    if payload['type'] == 'autopilot_start':
+        autopilot.start()
+
+    if payload['type'] == 'autopilot_stop':
+        autopilot.stop()
+
+    if payload['type'] == 'autopilot_reset':
+        autopilot.reset()
+
+    if payload['type'] == 'autopilot_waypoints':
+        way_points = []
+        if isinstance(payload['waypoints'], list):
+            for point in payload['waypoints']:
+                way_points.append(WayPoint(point['lat'], point['lng']))
+        else:
+            print("Way Points not valid!")
+            return
+
+        autopilot.set_way_points(way_points)
+
+
 
     # type=agps name=from config lat=51 lon=13
-    if setup['type'] == 'agps':
-        sensors[setup['name']].init_agps(setup['lat'], setup['lon'])
+    if payload['type'] == 'agps':
+        sensors[payload['name']].init_agps(payload['lat'], payload['lon'])
 
-    if setup['type'] == 'reload':
+    if payload['type'] == 'reload':
+        print("Reloading...")
         sio.disconnect()
         autopilot.stop_autopilot()
         # TODO: test reloading
         os.execv(sys.executable, ['python3'] + sys.argv)
         quit()
 
-    if setup['type'] == 'shutdown':
+    if payload['type'] == 'shutdown':
+        print("Shutdown!")
         subprocess.run("sudo shutdown now", shell=True, check=True)
 
 

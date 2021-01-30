@@ -53,6 +53,11 @@ class AutoPilot:
         self.wind = wind
         self.shore = shore
 
+    def reset(self):
+        self.set_way_points([])
+        self.set_mode(AutoPilotMode.MOTOR)
+        self.set_state(motor=MotorState.LINEAR, sail=SailState.LINEAR)
+
     def set_way_points(self, way_points: [WayPoint]):
         self.way_points = way_points
 
