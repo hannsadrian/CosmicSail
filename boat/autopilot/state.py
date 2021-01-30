@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class AutopilotMode(Enum):
+class AutoPilotMode(Enum):
     MOTOR = 0
     SAIL = 1
 

@@ -4,9 +4,24 @@ from hardware.sensors.digital_shore import DigitalShoreSensor
 from hardware.sensors.bno import BNO
 from hardware.sensors.digital_wind import DigitalWindSensor
 from hardware.sensors.gps import GpsSensor
-from .state import AutopilotMode, MotorState, SailState
+from .state import AutoPilotMode, MotorState, SailState
 from .motor_instructions import execute_motor_mode
 import math
+
+
+class WayPoint:
+    lat = 0
+    lng = 0
+
+    def __init__(self, lat: float, lng: float):
+        self.lat = 0
+        self.lng = 0
+
+    def distance(self, from_lat: float, from_lng: float):
+        return get_distance(from_lat, from_lng, self.lat, self.lng)
+
+    def magnetic_bearing(self, from_lat: float, from_lng: float):
+        return get_bearing(from_lat, from_lng, self.lat, self.lng)
 
 
 class AutoPilot:
@@ -19,11 +34,11 @@ class AutoPilot:
     wind = None
     shore = None
 
-    way_points = []
+    way_points: [WayPoint]
 
     running = False
 
-    mode = AutopilotMode.MOTOR
+    mode = AutoPilotMode.MOTOR
     motor_state = MotorState.LINEAR
     sail_state = SailState.LINEAR
 
@@ -38,9 +53,11 @@ class AutoPilot:
         self.wind = wind
         self.shore = shore
 
-    def set_dest(self, lat, lng):
-        self.destLat = lat
-        self.destLng = lng
+    def set_way_points(self, way_points: [WayPoint]):
+        self.way_points = way_points
+
+    def add_immediate_way_point(self, way_point: WayPoint):
+        self.way_points.insert(0, way_point)
 
     def start_autopilot(self):
         self.running = True
@@ -48,7 +65,7 @@ class AutoPilot:
     def stop_autopilot(self):
         self.running = False
 
-    def set_mode(self, mode: AutopilotMode):
+    def set_mode(self, mode: AutoPilotMode):
         self.mode = mode
 
     def set_state(self, motor: MotorState = None, sail: SailState = None):
@@ -58,7 +75,11 @@ class AutoPilot:
             self.sail_state = sail
 
     def cycle(self):
-        if self.mode is AutopilotMode.MOTOR:
+        if len(self.way_points) == 0:
+            self.set_mode(AutoPilotMode.MOTOR)
+            self.set_state(motor=MotorState.STAY)
+            self.add_immediate_way_point(WayPoint(self.gps.get_lat(), self.gps.get_lng()))
+
+        if self.mode is AutoPilotMode.MOTOR:
             execute_motor_mode(self, self.motor_state, self.rudder, self.sail, self.engine, self.bno.get_heading(),
-                               self.gps.get_lat(), self.gps.get_lng(), self.way_points[0]['lat'],
-                               self.way_points[0]['lng'], self.shore.shortest_distance)
+                               self.gps.get_lat(), self.gps.get_lng(), self.way_points[0], self.shore.shortest_distance)
