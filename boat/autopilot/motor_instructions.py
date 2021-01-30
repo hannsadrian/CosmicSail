@@ -15,6 +15,8 @@ def execute_motor_mode(autopilot: AutoPilot, state: MotorState, rudder: ServoMot
     if state is MotorState.LINEAR:
         linear(autopilot, bearing, current_lat, current_lng, way_point, rudder, engine,
                shortest_shore_distance)
+    if state is MotorState.DANGER:
+        danger(autopilot, current_lat, current_lng, shortest_shore_distance)
 
 
 def linear(autopilot: AutoPilot, bearing: float, current_lat: float, current_lng: float, way_point: WayPoint,
@@ -38,3 +40,10 @@ def linear(autopilot: AutoPilot, bearing: float, current_lat: float, current_lng
         speed = 0
 
     engine.set_state(speed)
+
+
+def danger(autopilot: AutoPilot, current_lat: float, current_lng: float, closest_shore: ShoreDistance):
+    rescue_point = get_point(current_lat, current_lng, closest_shore.bearing - 180 % 360, 30)
+
+    autopilot.add_immediate_way_point(WayPoint(rescue_point[0], rescue_point[1]))
+    autopilot.set_state(motor=MotorState.LINEAR)
