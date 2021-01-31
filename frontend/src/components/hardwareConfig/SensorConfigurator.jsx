@@ -59,9 +59,9 @@ const SensorConfigurator = ({itemOpen, onOpenChange, boatEmblem, creationMode, s
     }
 
     return (
-        <div className="my-1 py-1 px-2 bg-gray-200 dark:bg-gray-800 rounded">
+        <div className="my-1 py-1 px-2 bg-gray-100 dark:bg-gray-800 rounded">
             <div onClick={() => onOpenChange("sensor" + (sensorConfig.ID || "create"))} className="cursor-pointer">
-                <h4 className="font-semibold">
+                <h4 className="font-medium">
                     {!creationMode ?
                         <>
                             <HardwareEmoji hardware={sensorConfig.Type}/> {sensorConfig.Name}
