@@ -15,6 +15,7 @@
     "react": "^17.0.1",
     "react-compass": "^0.1.0",
     "react-dom": "^17.0.1",
+    "react-draggable-list": "^4.0.3",
     "react-mapbox-gl": "^5.1.1",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",

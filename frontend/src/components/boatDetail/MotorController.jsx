@@ -68,12 +68,12 @@ const MotorController = ({socket, motorConfig, useOrientation, state}) => {
 
     return (
         <div key={motorConfig.Name}
-            className={"select-none bg-white dark:bg-gray-900 m-1 shadow hover:shadow-lg transition duration-150 px-4 pt-4 pb-2 rounded-lg " + (useOrientation ? 'col-span-2' : 'col-span-2 md:col-span-1')}>
-            <input type="range" min="-1" max="1" step="0.1" className="w-full shadow-lg"
+            className={"select-none bg-gray-200 dark:bg-gray-900 transition duration-150 px-4 pt-4 pb-2 rounded-lg " + (useOrientation ? 'col-span-2' : 'col-span-2 md:col-span-1')}>
+            <input type="range" min="-1" max="1" step="0.1" className="w-full"
                    onMouseDown={() => setLocked(true)} onMouseUp={() => setLocked(false)}
                    onDragStart={() => setLocked(true)} onDragEnd={() => setLocked(false)}
                    onChange={(event) => setMotor(event.target.value)} value={s}/>
-            {useOrientation && !hasRotationPermission && <button onClick={requestPermission}>Request orientation</button>}
+            {useOrientation && !hasRotationPermission && <button className="dark:text-gray-400" onClick={requestPermission}>Request orientation</button>}
             <p onClick={() => setMotor(motorConfig.Default)}
                className="cursor-pointer text-sm text-gray-800 dark:text-gray-300 text-center">
                 <HardwareEmoji hardware={motorConfig.Type}/>{" "}

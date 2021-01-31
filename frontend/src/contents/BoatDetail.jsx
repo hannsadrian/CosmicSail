@@ -8,6 +8,7 @@ import StrengthIndicator from "../components/StrengthIndicator";
 import StatusOverview from "../components/boatDetail/StatusOverview";
 import MotorController from "../components/boatDetail/MotorController";
 import ConfiguratorOverview from "../components/hardwareConfig/ConfiguratorOverview";
+import DraggableList from "react-draggable-list";
 
 const axios = require("axios").default
 
@@ -19,6 +20,19 @@ const Map = ReactMapboxGl({
     pitchWithRotate: false,
     bearingSnap: 180
 });
+
+const emojiNumbers = {
+    1: "1️⃣",
+    2: "2️⃣",
+    3: "3️⃣",
+    4: "4️⃣",
+    5: "5️⃣",
+    6: "6️⃣",
+    7: "7️⃣",
+    8: "8️⃣",
+    9: "9️⃣",
+    10: "🔟",
+}
 
 function BoatDetail(props) {
     let {emblem} = useParams();
@@ -38,6 +52,12 @@ function BoatDetail(props) {
     let [boatSensors, setBoatSensors] = useState({});
     let [motorData, setMotorData] = useState(null);
     let [sensorData, setSensorData] = useState(null);
+
+    let [wayPoints, setWayPoints] = useState([{index: 1, lat: 51.781275811234, lng: 13.57187521634}, {
+        index: 2,
+        lat: 50.1765718214,
+        lng: 13.124766521
+    }]);
 
 
     useEffect(() => {
@@ -187,6 +207,18 @@ function BoatDetail(props) {
         setSocket(s)
     }, [emblem])
 
+    // reassign indexes in waypoint list
+    const reassignWayPoints = (newWayPoints) => {
+        setWayPoints(newWayPoints)
+
+        setTimeout(() => {
+            for (let i = 0; i < newWayPoints.length; i++) {
+                newWayPoints[i].index = i + 1
+            }
+            setWayPoints(newWayPoints)
+        }, 500)
+    }
+
     useEffect(() => {
         console.log(sensorData)
     }, [sensorData])
@@ -255,25 +287,48 @@ function BoatDetail(props) {
     }
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-5 md:grid-rows-6 grid-flow-row md:grid-flow-col-dense p-2">
+        <div
+            className="mb-10 md:mb-0 grid grid-cols-2 md:grid-cols-5 md:grid-rows-6 grid-flow-row md:grid-flow-col-dense p-2">
             <div style={{
                 backgroundImage: "url('https://cosmicsail.online/bg.JPG')",
                 backgroundSize: "cover",
                 backgroundPosition: "center"
             }} className="row-span-2 col-span-2 h-48 md:h-auto m-1 rounded-lg flex"/>
-            <div className="row-span-1 col-span-2 m-1 py-2 px-4">
+            <div className="row-span-1 col-span-2 bg-gray-200 dark:bg-black rounded-lg m-1 py-2 px-4">
                 <StatusOverview name={boat.Name || "Loading..."} connected={connected} online={online}
                                 boatSensors={boatSensors} sensorData={sensorData}/>
             </div>
             <div className="row-span-3 col-span-2 m-1 rounded-lg">
-                <div style={{height: "44%"}} className="w-full grid grid-cols-2 grid-rows-2">
+                <div style={{height: "44%"}} className="w-full gap-2 grid grid-cols-2 grid-rows-2">
                     {boat.Motors && boat.Motors.map((m, i) => <MotorController key={m.Name} motorConfig={m}
                                                                                socket={socket}
                                                                                state={motorData && motorData[m.Name]}
                                                                                useOrientation={i === 0}/>)}
                 </div>
-                <div style={{height: "55%"}} className="bg-gray-500 mt-1 rounded-lg flex">
-                    <p className="m-auto text-white">Autopilot controls</p>
+                <div style={{height: "54%"}}
+                     className="bg-gray-200 dark:bg-black dark:text-white mt-1 md:mt-2 rounded-lg md:flex">
+                    <div className="md:w-1/2 flex">
+                        <div className="my-auto">
+                            <DraggableList itemKey={(item) => item.lat / item.lng} template={WayPointListEntry}
+                                           list={wayPoints}
+                                           onMoveEnd={newList => reassignWayPoints(newList)}
+                                           container={() => document.body}/>
+                        </div>
+                    </div>
+                    <div className="md:w-1/2 flex">
+                        <div className="my-auto">
+                            <div className="my-2 ml-7 md:ml-2 font-mono">
+                                <div>
+                                    <p className="text-xs text-gray-700 dark:text-gray-300 uppercase">📟 Mission Progress</p>
+                                    <p className="text-sm ml-6 -mt-1">53%</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-700 dark:text-gray-300 uppercase">🎚 Next Waypoint Distance</p>
+                                    <p className="text-sm ml-6 -mt-1">233m</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div style={{height: "400px", width: "98.5%", zIndex: 300}}
@@ -304,7 +359,7 @@ function BoatDetail(props) {
                 </Map>
             </div>
             <div
-                className="row-span-2 col-span-2 md:col-span-3 m-1 p-2 rounded-lg flex-wrap lg:flex justify-center align-top select-none bg-gray-900 dark:bg-black rounded">
+                className="row-span-2 col-span-2 md:col-span-3 m-1 p-2 rounded-lg flex-wrap lg:flex justify-center align-top select-none bg-gray-200 dark:bg-black rounded">
                 {boatSensors && boatSensors['bno'] &&
                 <SensorDeck
                     heading={heading}
@@ -315,10 +370,10 @@ function BoatDetail(props) {
                 />
                 }
                 <div
-                    className="relative flex justify-between md:block space-x-2 md:space-x-0 md:space-y-2 text-gray-400 text-center font-mono flex-1 h-auto my-auto md:pl-1 md:pr-2">
+                    className="relative flex justify-between md:block space-x-2 md:space-x-0 md:space-y-2 text-gray-900 dark:text-gray-400 text-center font-mono flex-1 h-auto my-auto md:pl-1 md:pr-2">
                     {boatSensors && boatSensors['bno'] &&
                     <div
-                        className="bg-gray-800 dark:bg-gray-900 h-8 rounded shadow-md flex justify-center items-center p-1 w-full">
+                        className="bg-gray-300 dark:bg-gray-900 h-8 rounded flex justify-center items-center p-1 w-full">
                         <StrengthIndicator
                             sys={sys_cal}
                             gyro={gyro_cal}
@@ -327,63 +382,79 @@ function BoatDetail(props) {
                     </div>
                     }
                     <button onClick={() => setShowConfig(true)}
-                            className="bg-gray-800 dark:bg-gray-900 hover:bg-black h-8 md:w-full rounded shadow-md p-1">
+                            className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-900 dark:hover:bg-black h-8 md:w-full rounded p-1">
                         STP
                     </button>
                     <button onClick={setupAGPS}
-                            className="bg-gray-800 dark:bg-gray-900 hover:bg-black h-8 md:w-full rounded shadow-md p-1">
+                            className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-900 dark:hover:bg-black h-8 md:w-full rounded p-1">
                         AGPS
                     </button>
                 </div>
             </div>
-            <div className="row-span-1 col-span-2 md:col-span-1 h-32 m-1 bg-gray-900 dark:bg-black rounded-lg flex">
+            <div
+                className="row-span-1 col-span-2 md:col-span-1 h-32 md:h-auto m-1 bg-gray-200 dark:bg-black rounded-lg flex">
                 <div className="flex-wrap m-auto">
-                    <p className="-mt-3 mb-2 text-sm text-white font-mono font-semibold text-center">AUTOPILOT</p>
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-1">
+                        <button
+                            className="my-auto cursor-default rounded bg-gray-200 dark:bg-black text-xs font-semibold font-mono text-gray-700 dark:text-gray-400 p-2">
+                            PILOT
+                        </button>
                         <button
                             className={(false ? "bg-red-500" : "bg-green-600") + " py-3 px-5 font-bold font-mono text-xl rounded-lg text-white"}>
                             {false ? "STOP" : "START"}
                         </button>
                         <button
-                            className="my-auto rounded-lg bg-gray-700 text-xs font-semibold font-mono text-gray-400 p-2">
+                            className="my-auto rounded bg-gray-200 hover:bg-gray-300 dark:bg-black dark:hover:bg-gray-700 text-xs font-semibold font-mono text-gray-700 dark:text-gray-400 p-2">
                             RESET
                         </button>
                     </div>
                 </div>
             </div>
             <div
-                className="row-span-1 col-span-2 m-1 bg-gray-900 dark:bg-black rounded-lg px-4 py-3 font-mono text-sm text-white flex-wrap md:flex">
-                <div className="md:w-1/2 space-y-1">
-                    <div>
-                        <p className="text-xs text-gray-300 uppercase">📟 Mission Progress</p>
-                        <p className="ml-6 -mt-1">53%</p>
-                    </div>
-                    <div>
-                        <p className="text-xs text-gray-300 uppercase">🎚 Next Waypoint Distance</p>
-                        <p className="ml-6 -mt-1">233m</p>
-                    </div>
-                    <div>
-                        <p className="text-xs text-gray-300 uppercase">🔭 Approach Rate</p>
-                        <p className="ml-6 -mt-1">+2.4m/s</p>
+                className="row-span-1 col-span-2 m-1 bg-gray-200 dark:bg-black rounded-lg px-4 py-3 font-mono text-black dark:text-white flex-wrap md:flex">
+                <div className="md:w-5/12 flex">
+                    <div className="md:m-auto space-y-2">
+                        <div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">⛵️ Mode</p>
+                            <p className="ml-7 -mt-1">Sail</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">🚥 State</p>
+                            <p className="ml-7 -mt-1">Linear</p>
+                        </div>
                     </div>
                 </div>
-                <div className="md:w-1/2 space-y-1">
-                    <div>
-                        <p className="text-xs text-gray-300 uppercase">⛵️ Mode</p>
-                        <p className="ml-6 -mt-1">Sail</p>
-                    </div>
-                    <div>
-                        <p className="text-xs text-gray-300 uppercase">🚥 State</p>
-                        <p className="ml-6 -mt-1">Linear</p>
-                    </div>
-                    <div>
-                        <p className="text-xs text-gray-300 uppercase">📜 Last instruction</p>
-                        <p className="ml-6 -mt-1">{"<-"} 20°; sail haul;</p>
+                <div className="md:w-7/12 flex">
+                    <div className="my-2 md:my-auto md:ml-8 space-y-2">
+                        <div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">🔭 Approach Rate</p>
+                            <p className="ml-7 -mt-1">+2.4m/s</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">📜 Last instruction</p>
+                            <p className="ml-7 -mt-1">{"<-"} 20°; sail haul;</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     );
+}
+
+function WayPointListEntry({item, dragHandleProps, commonProps, anySelected}) {
+    return (
+        <div className="select-none ml-3 m-2 flex h-8 w-64 font-mono" {...dragHandleProps}>
+            <div className="m-1 rounded-full text-gray-900 dark:text-gray-100 bg-gray-300 dark:bg-gray-700">
+                <p className="mx-2">{item.index}</p>
+            </div>
+            <div className="ml-2 px-2 bg-gray-300 dark:bg-gray-800 rounded flex">
+                <p className="my-auto mr-3">{emojiNumbers[item.index]}</p>
+                <span className="my-auto text-sm text-gray-900 dark:text-gray-300">
+                    {parseFloat(item.lat).toFixed(4)}, {parseFloat(item.lng).toFixed(4)}
+                </span>
+            </div>
+        </div>
+    )
 }
 
 export default BoatDetail;
