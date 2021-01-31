@@ -306,7 +306,7 @@ function BoatDetail(props) {
                                                                                useOrientation={i === 0}/>)}
                 </div>
                 <div style={{height: "54%"}}
-                     className="bg-gray-200 dark:bg-black dark:text-white mt-1 md:mt-2 rounded-lg md:flex">
+                     className="bg-gray-200 dark:bg-black dark:text-white mt-2 rounded-lg md:flex">
                     <div className="md:w-1/2 flex">
                         <div className="my-auto">
                             <DraggableList itemKey={(item) => item.lat / item.lng} template={WayPointListEntry}
