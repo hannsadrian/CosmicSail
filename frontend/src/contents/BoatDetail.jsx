@@ -336,8 +336,20 @@ function BoatDetail(props) {
                     </button>
                 </div>
             </div>
-            <div className="row-span-1 col-span-2 md:col-span-1 m-1 bg-red-500 rounded-lg flex">
-                <p className="m-auto text-white">Start</p>
+            <div className="row-span-1 col-span-2 md:col-span-1 m-1 bg-gray-900 dark:bg-black rounded-lg flex">
+                <div className="flex-wrap m-auto">
+                    <p className="-mt-3 mb-2 text-sm text-white font-mono font-semibold text-center">AUTOPILOT</p>
+                    <div className="flex space-x-2">
+                        <button
+                            className={(false ? "bg-red-500" : "bg-green-600") + " py-3 px-5 font-bold font-mono text-xl rounded-lg text-white"}>
+                            {false ? "STOP" : "START"}
+                        </button>
+                        <button
+                            className="my-auto rounded-lg bg-gray-700 text-xs font-semibold font-mono text-gray-400 p-2">
+                            RESET
+                        </button>
+                    </div>
+                </div>
             </div>
             <div className="row-span-1 col-span-2 m-1 bg-gray-500 rounded-lg flex">
                 <p className="m-auto text-white">Autopilot controls</p>
