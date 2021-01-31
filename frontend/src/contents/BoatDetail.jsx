@@ -336,7 +336,7 @@ function BoatDetail(props) {
                     </button>
                 </div>
             </div>
-            <div className="row-span-1 col-span-2 md:col-span-1 m-1 bg-gray-900 dark:bg-black rounded-lg flex">
+            <div className="row-span-1 col-span-2 md:col-span-1 h-32 m-1 bg-gray-900 dark:bg-black rounded-lg flex">
                 <div className="flex-wrap m-auto">
                     <p className="-mt-3 mb-2 text-sm text-white font-mono font-semibold text-center">AUTOPILOT</p>
                     <div className="flex space-x-2">
@@ -351,8 +351,36 @@ function BoatDetail(props) {
                     </div>
                 </div>
             </div>
-            <div className="row-span-1 col-span-2 m-1 bg-gray-500 rounded-lg flex">
-                <p className="m-auto text-white">Autopilot controls</p>
+            <div
+                className="row-span-1 col-span-2 m-1 bg-gray-900 dark:bg-black rounded-lg px-4 py-3 font-mono text-sm text-white flex-wrap md:flex">
+                <div className="md:w-1/2 space-y-1">
+                    <div>
+                        <p className="text-xs text-gray-300 uppercase">📟 Mission Progress</p>
+                        <p className="ml-6 -mt-1">53%</p>
+                    </div>
+                    <div>
+                        <p className="text-xs text-gray-300 uppercase">🎚 Next Waypoint Distance</p>
+                        <p className="ml-6 -mt-1">233m</p>
+                    </div>
+                    <div>
+                        <p className="text-xs text-gray-300 uppercase">🔭 Approach Rate</p>
+                        <p className="ml-6 -mt-1">+2.4m/s</p>
+                    </div>
+                </div>
+                <div className="md:w-1/2 space-y-1">
+                    <div>
+                        <p className="text-xs text-gray-300 uppercase">⛵️ Mode</p>
+                        <p className="ml-6 -mt-1">Sail</p>
+                    </div>
+                    <div>
+                        <p className="text-xs text-gray-300 uppercase">🚥 State</p>
+                        <p className="ml-6 -mt-1">Linear</p>
+                    </div>
+                    <div>
+                        <p className="text-xs text-gray-300 uppercase">📜 Last instruction</p>
+                        <p className="ml-6 -mt-1">{"<-"} 20°; sail haul;</p>
+                    </div>
+                </div>
             </div>
         </div>
     );
