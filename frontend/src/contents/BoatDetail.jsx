@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
 import io from 'socket.io-client';
-import ReactMapboxGl, {Marker} from 'react-mapbox-gl';
+import ReactMapboxGl, {Feature, Layer, Marker} from 'react-mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import SensorDeck from "../components/SensorDeck";
 import StrengthIndicator from "../components/StrengthIndicator";
@@ -55,11 +55,7 @@ function BoatDetail(props) {
 
     let [addMode, setAddMode] = useState(false);
     let [editMode, setEditMode] = useState(false);
-    let [wayPoints, setWayPoints] = useState([{index: 1, lat: 51.781275811234, lng: 13.57187521634}, {
-        index: 2,
-        lat: 50.1765718214,
-        lng: 13.124766521
-    }]);
+    let [wayPoints, setWayPoints] = useState([]);
 
 
     useEffect(() => {
@@ -222,6 +218,11 @@ function BoatDetail(props) {
         }, 500)
     }
 
+    const addWayPoint = (map, event, index) => {
+        setWayPoints(wps => {wps.push({id: Math.random() * Math.random(), index: index, lat: event.lngLat.lat, lng: event.lngLat.lng}); return wps})
+        setAddMode(false)
+    }
+
     useEffect(() => {
         console.log(sensorData)
     }, [sensorData])
@@ -291,7 +292,7 @@ function BoatDetail(props) {
 
     return (
         <div
-            className="mb-10 md:mb-0 grid grid-cols-2 md:grid-cols-5 md:grid-rows-6 grid-flow-row md:grid-flow-col-dense p-2">
+            className="mb-10 md:mb-0 grid grid-cols-2 md:grid-cols-5 md:grid-rows-6 grid-flow-row md:grid-flow-col-dense p-2 dark:bg-gray-900">
             <div style={{
                 backgroundImage: "url('https://cosmicsail.online/bg.JPG')",
                 backgroundSize: "cover",
@@ -311,8 +312,11 @@ function BoatDetail(props) {
                 <div style={{height: "54%"}}
                      className="bg-gray-200 dark:bg-black dark:text-white mt-2 rounded-lg md:flex">
                     <div className="md:w-1/2 flex">
-                        <div className="my-auto">
-                            <DraggableList itemKey={(item) => item.lat / item.lng} template={WayPointListEntry}
+                        {wayPoints.length === 0 && <p className="mx-auto my-2 md:m-auto font-mono text-gray-400 dark:text-gray-600">No waypoints set.</p>}
+                        <div className="my-auto max-h-48">
+                            <DraggableList itemKey={(item) => {
+                                if (item) return item.id
+                            }} template={WayPointListEntry}
                                            list={wayPoints}
                                            onMoveEnd={newList => reassignWayPoints(newList)}
                                            container={() => document.body}/>
@@ -323,34 +327,61 @@ function BoatDetail(props) {
                             <div className="my-2 flex w-full">
                                 <div className="ml-7 md:mx-auto pr-3 font-mono">
                                     <div>
-                                        <p className="text-xs text-gray-700 dark:text-gray-300 uppercase">📟 Mission
-                                            Progress</p>
+                                        <p className="text-xs text-gray-700 dark:text-gray-300 uppercase">
+                                            📟 Mission Progress
+                                        </p>
                                         <p className="text-sm ml-6 -mt-1">53%</p>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-gray-700 dark:text-gray-300 uppercase">🎚 Next
-                                            Waypoint
-                                            Distance</p>
+                                        <p className="text-xs text-gray-700 dark:text-gray-300 uppercase">
+                                            🎚 Next Waypoint Distance
+                                        </p>
                                         <p className="text-sm ml-6 -mt-1">233m</p>
                                     </div>
                                 </div>
                             </div>
-                            <div className="font-mono flex space-x-2 w-full px-6">
-                                <button onClick={() => setAddMode(a => !a)}
-                                        className={"px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-none rounded " + (addMode && "ring-4 hover:ring-4")}
-                                >🗺 Add
+                            <div className="mb-2 font-mono text-sm flex space-x-2 w-full px-2 md:px-4 2xl:px-6">
+                                <button onClick={() => {
+                                    setAddMode(a => !a);
+                                    if (!addMode) setEditMode(false)
+                                }}
+                                        disabled={wayPoints.length >= 4}
+                                        className={"px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-none rounded " + (addMode && " ring-4 hover:ring-4 ") + (wayPoints.length >= 4 && " ring-0 hover:ring-0 cursor-not-allowed text-gray-500 dark:text-gray-600 ")}
+                                >
+                                    🗺 Add
                                 </button>
-                                <button onClick={() => setEditMode(e => !e)}
+                                <button onClick={() => {
+                                    setEditMode(e => !e);
+                                    if (!editMode) setAddMode(false)
+                                }}
                                         className={"px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-grow rounded w-full " + (editMode && "ring-4 hover:ring-4")}
-                                >🖋 Edit
+                                >
+                                    Edit
                                 </button>
-                                <button className="px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-none rounded">🪂 Skip</button>
+                                <button
+                                    disabled={wayPoints.length === 0}
+                                    onClick={() => {
+                                        setEditMode(true);
+                                        setAddMode(false);
+                                        wayPoints.splice(0, 1);
+                                        reassignWayPoints(wayPoints);
+                                    }}
+                                    className={"px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-none rounded " + (wayPoints.length === 0 && " ring-0 hover:ring-0 cursor-not-allowed text-gray-500 dark:text-gray-600 ")}>
+                                    🪂 Skip
+                                </button>
+                            </div>
+                            <div className="mb-2 font-mono text-sm flex space-x-2 w-full px-2 md:px-4 2xl:px-6">
+                                <button onClick={() => {}}
+                                        className="px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-grow rounded w-full"
+                                >
+                                    📡 Upload
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div style={{height: "400px", width: "98.5%", zIndex: 300}}
+            <div style={{height: "25.125rem", width: "98.5%", zIndex: 300}}
                  className="row-span-3 col-span-2 md:col-span-3 m-1 mr-2 rounded-lg overflow-hidden h-full w-full">
                 <Map onTouchStart={(map, event) => {
                     if (event.originalEvent.touches.length < 2) {
@@ -358,14 +389,16 @@ function BoatDetail(props) {
                     } else {
                         map.dragPan.enable()
                     }
-                }} style={`mapbox://styles/mapbox/outdoors-v10`}
+                }}
+                     style={`mapbox://styles/mapbox/outdoors-v10`}
                      center={!editMode && !addMode && [lng, lat]}
                      zoom={!editMode && !addMode && [mapZoom]}
                      movingMethod={"easeTo"}
                      onZoomEnd={(map, event) => {
                          setMapZoom(map.getZoom())
                      }}
-                     containerStyle={{height: "100%", width: "100%"}}>
+                     onMouseDown={addMode && ((map, event) => {setAddMode(false); addWayPoint(map, event, wayPoints.length+1)})}
+                     containerStyle={{height: "100%", width: "100%", touchAction: (editMode || addMode) && "none"}}>
                     <Marker
                         coordinates={[lng, lat]}
                         anchor="center"
@@ -375,6 +408,33 @@ function BoatDetail(props) {
                             style={{"transform": "rotate(" + ((sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].heading) || 0) + "deg)"}}
                             alt="" src={process.env.REACT_APP_APIURL + "/arrow_up.png"}/>
                     </Marker>
+                    {wayPoints.map(wp =>
+                        <Layer
+                            key={wp.index}
+                            type="symbol"
+                            layout={{
+                                "icon-image": "harbor-15",
+                                "icon-allow-overlap": true,
+                                "text-field": emojiNumbers[wp.index],
+                                "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+                                "text-size": 11,
+                                "text-transform": "uppercase",
+                                "text-letter-spacing": 0.05,
+                                "text-offset": [0, 1.5]
+                            }}>
+                            <Feature
+                                draggable={!!editMode}
+                                coordinates={[wp.lng, wp.lat]}
+                                onDragEnd={event => {
+                                    if (event.lngLat) setWayPoints(wps => {
+                                        wps[wp.index - 1].lat = event.lngLat.lat;
+                                        wps[wp.index - 1].lng = event.lngLat.lng;
+                                        return wps;
+                                    })
+                                }}
+                            />
+                        </Layer>
+                    )}
                 </Map>
             </div>
             <div
@@ -460,20 +520,25 @@ function BoatDetail(props) {
     );
 }
 
-function WayPointListEntry({item, dragHandleProps, commonProps, anySelected}) {
-    return (
-        <div className="select-none ml-3 m-2 flex h-8 w-64 font-mono" {...dragHandleProps}>
-            <div className="m-1 rounded-full text-gray-900 dark:text-gray-100 bg-gray-300 dark:bg-gray-700">
-                <p className="mx-2">{item.index}</p>
-            </div>
-            <div className="ml-2 px-2 bg-gray-300 dark:bg-gray-800 rounded flex">
-                <p className="my-auto mr-3">{emojiNumbers[item.index]}</p>
-                <span className="my-auto text-sm text-gray-900 dark:text-gray-300">
-                    {parseFloat(item.lat).toFixed(4)}, {parseFloat(item.lng).toFixed(4)}
+class WayPointListEntry extends React.Component {
+    render () {
+        let {item, dragHandleProps} = this.props
+
+        return (
+            <div style={{touchAction: "none"}}
+                 className="select-none ml-3 m-2 flex h-8 w-64 font-mono" {...dragHandleProps}>
+                <div className="m-1 rounded-full text-gray-900 dark:text-gray-100 bg-gray-300 dark:bg-gray-700">
+                    <p className="mx-2">{item.index}</p>
+                </div>
+                <div className="ml-2 px-2 bg-gray-300 dark:bg-gray-800 rounded flex">
+                    <p className="my-auto mr-3">{emojiNumbers[item.index]}</p>
+                    <span className="my-auto text-sm text-gray-900 dark:text-gray-300">
+                    {parseFloat(item.lat).toFixed(5)}, {parseFloat(item.lng).toFixed(5)}
                 </span>
+                </div>
             </div>
-        </div>
-    )
+        )
+    }
 }
 
 export default BoatDetail;
