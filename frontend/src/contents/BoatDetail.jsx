@@ -333,7 +333,7 @@ function BoatDetail(props) {
                                         <p className="text-sm ml-6 -mt-1">53%</p>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-gray-700 dark:text-gray-300 uppercase">
+                                        <p style={{fontFamily: "monospace, Segoe UI Emoji"}} className="text-xs text-gray-700 dark:text-gray-300 uppercase">
                                             🎚 Next Waypoint Distance
                                         </p>
                                         <p className="text-sm ml-6 -mt-1">233m</p>
@@ -345,6 +345,7 @@ function BoatDetail(props) {
                                     setAddMode(a => !a);
                                     if (!addMode) setEditMode(false)
                                 }}
+                                        style={{fontFamily: "monospace, Segoe UI Emoji"}}
                                         disabled={wayPoints.length >= 4}
                                         className={"px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-none rounded " + (addMode && " ring-4 hover:ring-4 ") + (wayPoints.length >= 4 && " ring-0 hover:ring-0 cursor-not-allowed text-gray-500 dark:text-gray-600 ")}
                                 >
