@@ -53,6 +53,8 @@ function BoatDetail(props) {
     let [motorData, setMotorData] = useState(null);
     let [sensorData, setSensorData] = useState(null);
 
+    let [addMode, setAddMode] = useState(false);
+    let [editMode, setEditMode] = useState(false);
     let [wayPoints, setWayPoints] = useState([{index: 1, lat: 51.781275811234, lng: 13.57187521634}, {
         index: 2,
         lat: 50.1765718214,
@@ -209,6 +211,7 @@ function BoatDetail(props) {
 
     // reassign indexes in waypoint list
     const reassignWayPoints = (newWayPoints) => {
+        setEditMode(true)
         setWayPoints(newWayPoints)
 
         setTimeout(() => {
@@ -316,16 +319,32 @@ function BoatDetail(props) {
                         </div>
                     </div>
                     <div className="md:w-1/2 flex">
-                        <div className="my-auto">
-                            <div className="my-2 ml-7 md:ml-2 font-mono">
-                                <div>
-                                    <p className="text-xs text-gray-700 dark:text-gray-300 uppercase">📟 Mission Progress</p>
-                                    <p className="text-sm ml-6 -mt-1">53%</p>
+                        <div className="my-auto w-full">
+                            <div className="my-2 flex w-full">
+                                <div className="ml-7 md:mx-auto pr-3 font-mono">
+                                    <div>
+                                        <p className="text-xs text-gray-700 dark:text-gray-300 uppercase">📟 Mission
+                                            Progress</p>
+                                        <p className="text-sm ml-6 -mt-1">53%</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-700 dark:text-gray-300 uppercase">🎚 Next
+                                            Waypoint
+                                            Distance</p>
+                                        <p className="text-sm ml-6 -mt-1">233m</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-xs text-gray-700 dark:text-gray-300 uppercase">🎚 Next Waypoint Distance</p>
-                                    <p className="text-sm ml-6 -mt-1">233m</p>
-                                </div>
+                            </div>
+                            <div className="font-mono flex space-x-2 w-full px-6">
+                                <button onClick={() => setAddMode(a => !a)}
+                                        className={"px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-none rounded " + (addMode && "ring-4 hover:ring-4")}
+                                >🗺 Add
+                                </button>
+                                <button onClick={() => setEditMode(e => !e)}
+                                        className={"px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-grow rounded w-full " + (editMode && "ring-4 hover:ring-4")}
+                                >🖋 Edit
+                                </button>
+                                <button className="px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-none rounded">🪂 Skip</button>
                             </div>
                         </div>
                     </div>
@@ -340,8 +359,8 @@ function BoatDetail(props) {
                         map.dragPan.enable()
                     }
                 }} style={`mapbox://styles/mapbox/outdoors-v10`}
-                     center={[lng, lat]}
-                     zoom={[mapZoom]}
+                     center={!editMode && !addMode && [lng, lat]}
+                     zoom={!editMode && !addMode && [mapZoom]}
                      movingMethod={"easeTo"}
                      onZoomEnd={(map, event) => {
                          setMapZoom(map.getZoom())
@@ -382,11 +401,11 @@ function BoatDetail(props) {
                     </div>
                     }
                     <button onClick={() => setShowConfig(true)}
-                            className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-900 dark:hover:bg-black h-8 md:w-full rounded p-1">
+                            className="bg-gray-300 dark:bg-gray-900 ring-orange-500 ring-0 hover:ring-2 transition duration-200 h-8 md:w-full rounded p-1">
                         STP
                     </button>
                     <button onClick={setupAGPS}
-                            className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-900 dark:hover:bg-black h-8 md:w-full rounded p-1">
+                            className="bg-gray-300 dark:bg-gray-900 ring-orange-500 ring-0 hover:ring-2 transition duration-200 h-8 md:w-full rounded p-1">
                         AGPS
                     </button>
                 </div>
