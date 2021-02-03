@@ -1,27 +1,11 @@
-from utility.coordinates import get_point, get_distance, get_bearing
+from autopilot.waypoint import WayPoint
 from hardware.motors.servo import ServoMotor
 from hardware.sensors.digital_shore import DigitalShoreSensor
 from hardware.sensors.bno import BNO
 from hardware.sensors.digital_wind import DigitalWindSensor
 from hardware.sensors.gps import GpsSensor
-from .state import AutoPilotMode, MotorState, SailState
-from .motor_instructions import execute_motor_mode
-import math
-
-
-class WayPoint:
-    lat = 0
-    lng = 0
-
-    def __init__(self, lat: float, lng: float):
-        self.lat = 0
-        self.lng = 0
-
-    def distance(self, from_lat: float, from_lng: float):
-        return get_distance(from_lat, from_lng, self.lat, self.lng)
-
-    def magnetic_bearing(self, from_lat: float, from_lng: float):
-        return get_bearing(from_lat, from_lng, self.lat, self.lng)
+from autopilot.state import AutoPilotMode, MotorState, SailState
+#from autopilot.motor_instructions import execute_motor_mode
 
 
 class AutoPilot:
@@ -37,7 +21,7 @@ class AutoPilot:
     wind = None
     shore = None
 
-    way_points: [WayPoint]
+    way_points: [WayPoint] = []
     approach_rate = 0
     last_instruction = ''
 
@@ -85,7 +69,9 @@ class AutoPilot:
             self.sail_state = sail
 
     def cycle(self):
-        if self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng()) < 10 and (
+        time_step = 1/10
+
+        if len(self.way_points) > 0 and self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng()) < 10 and (
                 self.motor_state is not MotorState.STAY and self.mode is AutoPilotMode.MOTOR):
             self.way_points.pop(0)
 
@@ -95,10 +81,11 @@ class AutoPilot:
             self.add_immediate_way_point(WayPoint(self.gps.get_lat(), self.gps.get_lng()))
 
         waypoint_distance = self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng())
-        self.approach_rate = waypoint_distance - self.prev_waypoint_dist
+        self.approach_rate = (self.prev_waypoint_dist - waypoint_distance) / time_step
         self.prev_waypoint_dist = waypoint_distance
 
         if self.mode is AutoPilotMode.MOTOR:
+            from autopilot.motor_instructions import execute_motor_mode
             execute_motor_mode(self, self.motor_state, self.rudder, self.sail, self.engine, self.bno.get_heading(),
                                self.gps.get_lat(), self.gps.get_lng(), self.way_points[0], self.shore.shortest_distance)
 
@@ -111,7 +98,7 @@ class AutoPilot:
     def get_meta(self):
         next_waypoint_dist = "--m"
         if len(self.way_points) > 0:
-            next_waypoint_dist = str(self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng())) + "m"
+            next_waypoint_dist = str(round(self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng()), 1)) + "m"
 
         state = "----"
         if self.running and self.mode == AutoPilotMode.MOTOR:
@@ -121,17 +108,23 @@ class AutoPilot:
 
         approach_rate = '---m/s'
         if self.running:
-            approach_rate = '{0:+}m/s'.format(self.approach_rate)
+            approach_rate = '{0:+}m/s'.format(round(self.approach_rate, 1))
 
         last_instruction = '---'
         if self.running:
             last_instruction = self.last_instruction
 
+        waypoints = []
+        for wp in self.way_points:
+            waypoints.append(wp.to_dict())
+
         return {
+            'active': self.running,
             'mission_progress': "--%",
             'next_waypoint_dist': next_waypoint_dist,
-            'mode': self.mode,
-            'state': state,
+            'mode': str(self.mode),
+            'state': str(state),
             'approach_rate': approach_rate,
-            'last_instruction': last_instruction
+            'last_instruction': last_instruction,
+            'way_points': waypoints
         }

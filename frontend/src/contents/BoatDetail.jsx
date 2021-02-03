@@ -206,8 +206,8 @@ function BoatDetail(props) {
     }, [emblem])
 
     // reassign indexes in waypoint list
-    const reassignWayPoints = (newWayPoints) => {
-        setEditMode(true)
+    const reassignWayPoints = (newWayPoints, switchToEdit) => {
+        setEditMode(switchToEdit)
         setWayPoints(newWayPoints)
 
         setTimeout(() => {
@@ -219,13 +219,27 @@ function BoatDetail(props) {
     }
 
     const addWayPoint = (map, event, index) => {
-        setWayPoints(wps => {wps.push({id: Math.random() * Math.random(), index: index, lat: event.lngLat.lat, lng: event.lngLat.lng}); return wps})
+        setWayPoints(wps => {
+            wps.push({id: Math.random() * Math.random(), index: index, lat: event.lngLat.lat, lng: event.lngLat.lng});
+            return wps
+        })
         setAddMode(false)
     }
 
+    const [lastTransmittedWayPoints, setLastTransmittedWayPoints] = useState([])
     useEffect(() => {
         console.log(sensorData)
-    }, [sensorData])
+
+        if (sensorData && sensorData.autopilot && !editMode && !addMode && lastTransmittedWayPoints !== sensorData.autopilot?.way_points) {
+            let wps = []
+            sensorData.autopilot?.way_points?.forEach(wp => {
+                wps.push({id: Math.random() * Math.random(), index: 1, lat: wp.lat, lng: wp.lng})
+            })
+            reassignWayPoints(wps, false)
+            setLastTransmittedWayPoints(sensorData.autopilot?.way_points)
+        }
+    }, [addMode, editMode, lastTransmittedWayPoints, sensorData])
+
 
     const setupAGPS = useCallback(() => {
         navigator.geolocation.getCurrentPosition(function (location) {
@@ -312,13 +326,15 @@ function BoatDetail(props) {
                 <div style={{height: "54%"}}
                      className="bg-gray-200 dark:bg-black dark:text-white mt-2 rounded-lg md:flex">
                     <div className="md:w-1/2 flex">
-                        {wayPoints.length === 0 && <p className="mx-auto my-2 md:m-auto font-mono text-gray-400 dark:text-gray-600">No waypoints set.</p>}
+                        {wayPoints.length === 0 &&
+                        <p className="mx-auto my-2 md:m-auto font-mono text-gray-400 dark:text-gray-600">No waypoints
+                            set.</p>}
                         <div className="my-auto max-h-48">
                             <DraggableList itemKey={(item) => {
                                 if (item) return item.id
                             }} template={WayPointListEntry}
                                            list={wayPoints}
-                                           onMoveEnd={newList => reassignWayPoints(newList)}
+                                           onMoveEnd={newList => reassignWayPoints(newList, true)}
                                            container={() => document.body}/>
                         </div>
                     </div>
@@ -330,13 +346,14 @@ function BoatDetail(props) {
                                         <p className="text-xs text-gray-700 dark:text-gray-300 uppercase">
                                             📟 Mission Progress
                                         </p>
-                                        <p className="text-sm ml-6 -mt-1">53%</p>
+                                        <p className="text-sm ml-6 -mt-1">{sensorData?.autopilot?.mission_progress}</p>
                                     </div>
                                     <div>
-                                        <p style={{fontFamily: "monospace, Segoe UI Emoji"}} className="text-xs text-gray-700 dark:text-gray-300 uppercase">
+                                        <p style={{fontFamily: "monospace, Segoe UI Emoji"}}
+                                           className="text-xs text-gray-700 dark:text-gray-300 uppercase">
                                             🎚 Next Waypoint Distance
                                         </p>
-                                        <p className="text-sm ml-6 -mt-1">233m</p>
+                                        <p className="text-sm ml-6 -mt-1">{sensorData?.autopilot?.next_waypoint_dist}</p>
                                     </div>
                                 </div>
                             </div>
@@ -365,14 +382,15 @@ function BoatDetail(props) {
                                         setEditMode(true);
                                         setAddMode(false);
                                         wayPoints.splice(0, 1);
-                                        reassignWayPoints(wayPoints);
+                                        reassignWayPoints(wayPoints, true);
                                     }}
                                     className={"px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-none rounded " + (wayPoints.length === 0 && " ring-0 hover:ring-0 cursor-not-allowed text-gray-500 dark:text-gray-600 ")}>
                                     🪂 Skip
                                 </button>
                             </div>
                             <div className="mb-2 font-mono text-sm flex space-x-2 w-full px-2 md:px-4 2xl:px-6">
-                                <button onClick={() => {}}
+                                <button onClick={() => {
+                                }}
                                         className="px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-grow rounded w-full"
                                 >
                                     📡 Upload
@@ -398,7 +416,10 @@ function BoatDetail(props) {
                      onZoomEnd={(map, event) => {
                          setMapZoom(map.getZoom())
                      }}
-                     onMouseDown={addMode && ((map, event) => {setAddMode(false); addWayPoint(map, event, wayPoints.length+1)})}
+                     onMouseDown={addMode && ((map, event) => {
+                         setAddMode(false);
+                         addWayPoint(map, event, wayPoints.length + 1)
+                     })}
                      containerStyle={{height: "100%", width: "100%", touchAction: (editMode || addMode) && "none"}}>
                     <Marker
                         coordinates={[lng, lat]}
@@ -476,14 +497,18 @@ function BoatDetail(props) {
                 <div className="flex-wrap m-auto">
                     <div className="flex space-x-1">
                         <button
+                            hidden={sensorData?.autopilot?.active}
                             className="my-auto cursor-default rounded bg-gray-200 dark:bg-black text-xs font-semibold font-mono text-gray-700 dark:text-gray-400 p-2">
                             PILOT
                         </button>
                         <button
-                            className={(false ? "bg-red-500" : "bg-green-600") + " py-3 px-5 font-bold font-mono text-xl rounded-lg text-white"}>
-                            {false ? "STOP" : "START"}
+                            onClick={() => socket.emit("setup", JSON.stringify({type: sensorData.autopilot?.active ? 'autopilot_stop' : 'autopilot_start'}))}
+                            className={(sensorData?.autopilot?.active ? "bg-red-500" : "bg-green-600") + " py-3 px-5 font-bold font-mono text-xl rounded-lg text-white"}>
+                            {sensorData?.autopilot?.active ? "STOP" : "START"}
                         </button>
                         <button
+                            hidden={sensorData?.autopilot?.active}
+                            onClick={() => socket.emit("setup", JSON.stringify({type: 'autopilot_reset'}))}
                             className="my-auto rounded bg-gray-200 hover:bg-gray-300 dark:bg-black dark:hover:bg-gray-700 text-xs font-semibold font-mono text-gray-700 dark:text-gray-400 p-2">
                             RESET
                         </button>
@@ -496,11 +521,14 @@ function BoatDetail(props) {
                     <div className="md:m-auto space-y-2">
                         <div>
                             <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">⛵️ Mode</p>
-                            <p className="ml-7 -mt-1">Sail</p>
+                            <p className="ml-7 -mt-1">{sensorData?.autopilot?.mode}</p>
                         </div>
                         <div>
                             <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">🚥 State</p>
-                            <p className="ml-7 -mt-1">Linear</p>
+                            <p onClick={() => sensorData?.autopilot?.mode?.includes('MOTOR') && socket.emit("setup", JSON.stringify({
+                                type: "autopilot_state",
+                                state: sensorData?.autopilot?.state?.includes("STAY") ? 'linear_motor' : 'stay_motor'
+                            }))} className="ml-7 -mt-1 cursor-pointer">{sensorData?.autopilot?.state}</p>
                         </div>
                     </div>
                 </div>
@@ -508,11 +536,11 @@ function BoatDetail(props) {
                     <div className="my-2 md:my-auto md:ml-8 space-y-2">
                         <div>
                             <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">🔭 Approach Rate</p>
-                            <p className="ml-7 -mt-1">+2.4m/s</p>
+                            <p className="ml-7 -mt-1">{sensorData?.autopilot?.approach_rate}</p>
                         </div>
                         <div>
                             <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">📜 Last instruction</p>
-                            <p className="ml-7 -mt-1">{"<-"} 20°; sail haul;</p>
+                            <p className="ml-7 -mt-1">{sensorData?.autopilot?.last_instruction}</p>
                         </div>
                     </div>
                 </div>
@@ -522,7 +550,7 @@ function BoatDetail(props) {
 }
 
 class WayPointListEntry extends React.Component {
-    render () {
+    render() {
         let {item, dragHandleProps} = this.props
 
         return (

@@ -22,8 +22,9 @@ from hardware.sensors.imu import IMU
 from hardware.sensors.bno import BNO
 from hardware.sensors.digital_wind import DigitalWindSensor
 from hardware.sensors.digital_shore import DigitalShoreSensor
-from autopilot.autopilot import AutoPilot, WayPoint
+from autopilot.waypoint import WayPoint
 from simulation.simulation import Simulation
+from autopilot.pilot import AutoPilot
 
 SIMULATION = True
 
@@ -51,7 +52,7 @@ motors = {}
 motorTypes = {}
 
 # autopilot
-autopilot = AutoPilot(0, None, None, None, None)
+autopilot: AutoPilot
 
 # simulation
 simulation = Simulation({}, {}, {}, {})
@@ -291,8 +292,8 @@ async def simulation_loop():
     simulation.start()
 
     while True:
-        simulation.update(1 / 30)
-        await asyncio.sleep(1 / 30)
+        simulation.update(1 / 15)
+        await asyncio.sleep(1 / 15)
 
 
 # check if the rudder service is reachable to react to outages quickly

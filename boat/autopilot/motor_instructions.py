@@ -1,5 +1,6 @@
-from .state import MotorState
-from .autopilot import AutoPilot, WayPoint
+from autopilot.state import MotorState
+from autopilot.pilot import AutoPilot
+from autopilot.waypoint import WayPoint
 from utility.coordinates import get_bearing, get_distance, get_point
 from utility.angle_calc import get_turning_angle
 from hardware.motors.servo import ServoMotor
@@ -21,7 +22,7 @@ def execute_motor_mode(autopilot: AutoPilot, state: MotorState, rudder: ServoMot
 
 def linear(autopilot: AutoPilot, bearing: float, current_lat: float, current_lng: float, way_point: WayPoint,
            rudder: ServoMotor, engine: ServoMotor, closest_shore: ShoreDistance):
-    if closest_shore.dist < 25:
+    if closest_shore.dist is not None and closest_shore.dist < 25:
         autopilot.set_state(motor=MotorState.DANGER)
         rudder.set_state(0)
         engine.set_state(0)
@@ -33,10 +34,10 @@ def linear(autopilot: AutoPilot, bearing: float, current_lat: float, current_lng
     # TODO: maybe slow down if currently turning?
     rudder.set_state(math.sin(math.pi / 360 * angle))
 
-    speed = dist / 40 - 1 / 4
-    if dist >= 50:
+    speed = dist / 10
+    if dist >= 10:
         speed = 1
-    if dist <= 10:
+    if dist <= 0:
         speed = 0
 
     engine.set_state(speed)
