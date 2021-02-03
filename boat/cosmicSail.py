@@ -130,8 +130,6 @@ def setup(data):
 
         autopilot.set_way_points(way_points)
 
-
-
     # type=agps name=from config lat=51 lon=13
     if payload['type'] == 'agps':
         sensors[payload['name']].init_agps(payload['lat'], payload['lon'])
@@ -387,6 +385,10 @@ def send_meta(entire_meta):
     for sensor in sensors:
         if entire_meta or sensors[sensor].has_changed():
             sensor_data.append({'Name': sensors[sensor].get_name(), 'State': sensors[sensor].get_meta()})
+
+    # autopilot
+    if entire_meta or autopilot.has_changed():
+        sensor_data.append({'Name': 'autopilot', 'State': autopilot.get_meta()})
 
     if len(motor_data) != 0:
         sio.emit("data", json.dumps({

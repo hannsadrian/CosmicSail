@@ -25,6 +25,9 @@ class WayPoint:
 
 
 class AutoPilot:
+    prev_state = {}
+    prev_waypoint_dist = 0
+
     rudder = None
     sail = None
     engine = None
@@ -35,6 +38,8 @@ class AutoPilot:
     shore = None
 
     way_points: [WayPoint]
+    approach_rate = 0
+    last_instruction = ''
 
     running = False
 
@@ -64,10 +69,10 @@ class AutoPilot:
     def add_immediate_way_point(self, way_point: WayPoint):
         self.way_points.insert(0, way_point)
 
-    def start_autopilot(self):
+    def start(self):
         self.running = True
 
-    def stop_autopilot(self):
+    def stop(self):
         self.running = False
 
     def set_mode(self, mode: AutoPilotMode):
@@ -89,6 +94,44 @@ class AutoPilot:
             self.set_state(motor=MotorState.STAY)
             self.add_immediate_way_point(WayPoint(self.gps.get_lat(), self.gps.get_lng()))
 
+        waypoint_distance = self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng())
+        self.approach_rate = waypoint_distance - self.prev_waypoint_dist
+        self.prev_waypoint_dist = waypoint_distance
+
         if self.mode is AutoPilotMode.MOTOR:
             execute_motor_mode(self, self.motor_state, self.rudder, self.sail, self.engine, self.bno.get_heading(),
                                self.gps.get_lat(), self.gps.get_lng(), self.way_points[0], self.shore.shortest_distance)
+
+    def has_changed(self):
+        changed = self.get_meta() != self.prev_state
+        self.prev_state = self.get_meta()
+
+        return changed
+
+    def get_meta(self):
+        next_waypoint_dist = "--m"
+        if len(self.way_points) > 0:
+            next_waypoint_dist = str(self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng())) + "m"
+
+        state = "----"
+        if self.running and self.mode == AutoPilotMode.MOTOR:
+            state = self.motor_state
+        if self.running and self.mode == AutoPilotMode.SAIL:
+            state = self.sail_state
+
+        approach_rate = '---m/s'
+        if self.running:
+            approach_rate = '{0:+}m/s'.format(self.approach_rate)
+
+        last_instruction = '---'
+        if self.running:
+            last_instruction = self.last_instruction
+
+        return {
+            'mission_progress': "--%",
+            'next_waypoint_dist': next_waypoint_dist,
+            'mode': self.mode,
+            'state': state,
+            'approach_rate': approach_rate,
+            'last_instruction': last_instruction
+        }
