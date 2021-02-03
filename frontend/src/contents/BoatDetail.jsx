@@ -331,7 +331,7 @@ function BoatDetail(props) {
                     {boat.Motors && boat.Motors.map((m, i) => <MotorController key={m.Name} motorConfig={m}
                                                                                socket={socket}
                                                                                state={motorData && motorData[m.Name]}
-                                                                               useOrientation={i === 0}/>)}
+                                                                               useOrientation={i === 0} autopilotActive={sensorData?.autopilot?.active}/>)}
                 </div>
                 <div style={{height: "54%"}}
                      className="bg-gray-200 dark:bg-black dark:text-white mt-2 rounded-lg md:flex">

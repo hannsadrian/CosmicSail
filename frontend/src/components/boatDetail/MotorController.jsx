@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import HardwareEmoji from "./HardwareEmoji";
 
-const MotorController = ({socket, motorConfig, useOrientation, state}) => {
+const MotorController = ({socket, motorConfig, useOrientation, state, autopilotActive}) => {
     let [hasRotationPermission, setHasRotationPermission] = useState(false)
     let [locked, setLocked] = useState(false)
 
@@ -22,8 +22,9 @@ const MotorController = ({socket, motorConfig, useOrientation, state}) => {
     useEffect(() => {
         if (locked) return
 
-        //setMotor(state || 0)
-    }, [state, locked])
+        if (autopilotActive)
+            setMotor(state || 0)
+    }, [setMotor, autopilotActive, state, locked])
 
     const requestPermission = () => {
         console.log("request ")
