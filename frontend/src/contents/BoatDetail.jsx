@@ -34,6 +34,15 @@ const emojiNumbers = {
     10: "🔟",
 }
 
+
+const objectsEqual = (o1, o2) =>
+    Object.keys(o1).length === Object.keys(o2).length
+    && Object.keys(o1).every(p => o1[p] === o2[p]);
+
+const arraysEqual = (a1, a2) =>
+    a1.length === a2.length && a1.every((o, idx) => objectsEqual(o, a2[idx]));
+
+
 function BoatDetail(props) {
     let {emblem} = useParams();
     let [socket, setSocket] = useState(null);
@@ -224,16 +233,17 @@ function BoatDetail(props) {
             return wps
         })
         setAddMode(false)
+        setEditMode(true)
     }
 
     const [lastTransmittedWayPoints, setLastTransmittedWayPoints] = useState([])
     useEffect(() => {
         console.log(sensorData)
 
-        if (sensorData && sensorData.autopilot && !editMode && !addMode && lastTransmittedWayPoints !== sensorData.autopilot?.way_points) {
+        if (sensorData && sensorData.autopilot && !editMode && !addMode && !arraysEqual(lastTransmittedWayPoints, sensorData.autopilot?.way_points)) {
             let wps = []
             sensorData.autopilot?.way_points?.forEach(wp => {
-                wps.push({id: Math.random() * Math.random(), index: 1, lat: wp.lat, lng: wp.lng})
+                wps.push({id: Math.random() * Math.random(), index: wps.length+1, lat: wp.lat, lng: wp.lng})
             })
             reassignWayPoints(wps, false)
             setLastTransmittedWayPoints(sensorData.autopilot?.way_points)
@@ -390,6 +400,9 @@ function BoatDetail(props) {
                             </div>
                             <div className="mb-2 font-mono text-sm flex space-x-2 w-full px-2 md:px-4 2xl:px-6">
                                 <button onClick={() => {
+                                    socket.emit("setup", JSON.stringify({type: 'autopilot_waypoints', waypoints: wayPoints}))
+                                    setAddMode(false)
+                                    setEditMode(false)
                                 }}
                                         className="px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-grow rounded w-full"
                                 >
@@ -432,12 +445,12 @@ function BoatDetail(props) {
                     </Marker>
                     {wayPoints.map(wp =>
                         <Layer
-                            key={wp.index}
+                            key={wp.id}
                             type="symbol"
                             layout={{
                                 "icon-image": "harbor-15",
                                 "icon-allow-overlap": true,
-                                "text-field": emojiNumbers[wp.index],
+                                "text-field": emojiNumbers[wp.index] || '--',
                                 "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
                                 "text-size": 11,
                                 "text-transform": "uppercase",
