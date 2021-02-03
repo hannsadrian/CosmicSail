@@ -13,6 +13,7 @@ import json
 import subprocess
 import sys
 
+from autopilot.state import AutoPilotMode, MotorState
 from hardware.motors.servo import ServoMotor
 from hardware.sensors.gps import GpsSensor
 from hardware.sensors.bandwidth import Bandwidth
@@ -119,11 +120,22 @@ def setup(data):
     if payload['type'] == 'autopilot_reset':
         autopilot.reset()
 
+    if payload['type'] == 'autopilot_mode':
+        autopilot.set_mode(AutoPilotMode.MOTOR if autopilot.mode is AutoPilotMode.SAIL else AutoPilotMode.SAIL)
+
+    if payload['type'] == 'autopilot_state':
+        if payload['state'] == 'linear_motor':
+            autopilot.set_state(motor=MotorState.LINEAR)
+        if payload['state'] == 'stay_motor':
+            autopilot.set_state(motor=MotorState.STAY)
+
     if payload['type'] == 'autopilot_waypoints':
         way_points = []
         if isinstance(payload['waypoints'], list):
-            for point in payload['waypoints']:
-                way_points.append(WayPoint(point['lat'], point['lng']))
+            points = sorted(payload['waypoints'], key=lambda k: k['index'])
+            for point in points:
+                if 'lat' in point and 'lng' in point:
+                    way_points.append(WayPoint(point['lat'], point['lng']))
         else:
             print("Way Points not valid!")
             return
