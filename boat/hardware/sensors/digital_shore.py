@@ -72,7 +72,7 @@ class DigitalShoreSensor:
             d = get_distance(lat, lng, point['lat'], point['lng'])
             b = get_bearing(lat, lng, point['lat'], point['lng']) % 360
             relative_angle = round(b - bearing)
-            if abs(relative_angle) < smallest_relative_angle and abs(relative_angle) < 20:
+            if abs(relative_angle) < smallest_relative_angle and abs(relative_angle) < 35:
                 smallest_relative_angle = abs(relative_angle)
                 straightest_distance = {'dist': round(d), 'bearing': round(b), 'relative_angle': abs(relative_angle)}
             if shortest_distance['dist'] is None or d < shortest_distance['dist']:

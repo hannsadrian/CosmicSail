@@ -9,7 +9,7 @@ class DigitalWindSensor:
 
     wind_data = {}
 
-    debug = True
+    debug = False
     debug_wind_dir = 180
     debug_wind_speed = 15
 
