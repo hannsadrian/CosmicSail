@@ -75,7 +75,8 @@ class AutoPilot:
     def cycle(self):
         time_step = 1 / 15
 
-        if len(self.way_points) > 0 and self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng()) < 20:
+        if (len(self.way_points) > 0 and self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng()) < 20) and \
+                (self.motor_state is not MotorState.STAY or self.mode is AutoPilotMode.SAIL):
             self.way_points.pop(0)
 
         if len(self.way_points) == 0:
@@ -90,7 +91,8 @@ class AutoPilot:
         if self.mode is AutoPilotMode.MOTOR:
             from autopilot.motor_instructions import execute_motor_mode
             execute_motor_mode(self, self.motor_state, self.rudder, self.sail, self.engine, self.bno.get_heading(),
-                               self.gps.get_lat(), self.gps.get_lng(), self.way_points[0], self.shore.shortest_distance)
+                               self.gps.get_lat(), self.gps.get_lng(), self.way_points[0], self.shore.shortest_distance,
+                               self.wind.get_wind_direction())
         if self.mode is AutoPilotMode.SAIL:
             from autopilot.sail_instructions import execute_sail_mode
             execute_sail_mode(self, self.sail_state, self.rudder, self.sail, self.engine, self.bno.get_heading(),
