@@ -5,7 +5,9 @@ from hardware.sensors.bno import BNO
 from hardware.sensors.digital_wind import DigitalWindSensor
 from hardware.sensors.gps import GpsSensor
 from autopilot.state import AutoPilotMode, MotorState, SailState
-#from autopilot.motor_instructions import execute_motor_mode
+
+
+# from autopilot.motor_instructions import execute_motor_mode
 
 
 class AutoPilot:
@@ -24,6 +26,8 @@ class AutoPilot:
     way_points: [WayPoint] = []
     approach_rate = 0
     last_instruction = ''
+
+    turning_direction = 0
 
     running = False
 
@@ -69,10 +73,9 @@ class AutoPilot:
             self.sail_state = sail
 
     def cycle(self):
-        time_step = 1/10
+        time_step = 1 / 10
 
-        if len(self.way_points) > 0 and self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng()) < 10 and (
-                self.motor_state is not MotorState.STAY and self.mode is AutoPilotMode.MOTOR):
+        if len(self.way_points) > 0 and self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng()) < 20:
             self.way_points.pop(0)
 
         if len(self.way_points) == 0:
@@ -88,6 +91,12 @@ class AutoPilot:
             from autopilot.motor_instructions import execute_motor_mode
             execute_motor_mode(self, self.motor_state, self.rudder, self.sail, self.engine, self.bno.get_heading(),
                                self.gps.get_lat(), self.gps.get_lng(), self.way_points[0], self.shore.shortest_distance)
+        if self.mode is AutoPilotMode.SAIL:
+            from autopilot.sail_instructions import execute_sail_mode
+            execute_sail_mode(self, self.sail_state, self.rudder, self.sail, self.engine, self.bno.get_heading(),
+                              self.wind.get_wind_direction(), self.gps.get_speed(), self.gps.get_lat(),
+                              self.gps.get_lng(), self.way_points[0], self.shore.straightest_distance,
+                              self.shore.shortest_distance, self.approach_rate)
 
     def has_changed(self):
         changed = self.get_meta() != self.prev_state
@@ -98,7 +107,8 @@ class AutoPilot:
     def get_meta(self):
         next_waypoint_dist = "--m"
         if len(self.way_points) > 0:
-            next_waypoint_dist = str(round(self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng()), 1)) + "m"
+            next_waypoint_dist = str(
+                round(self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng()), 1)) + "m"
 
         state = "----"
         if self.running and self.mode == AutoPilotMode.MOTOR:

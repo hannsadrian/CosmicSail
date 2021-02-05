@@ -4,6 +4,7 @@ from utility.coordinates import get_distance, get_bearing
 class WayPoint:
     lat = 0
     lng = 0
+    danger_point = False
 
     def __init__(self, lat: float, lng: float):
         self.lat = lat

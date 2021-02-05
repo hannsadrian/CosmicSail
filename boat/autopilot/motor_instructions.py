@@ -22,7 +22,7 @@ def execute_motor_mode(autopilot: AutoPilot, state: MotorState, rudder: ServoMot
 
 def linear(autopilot: AutoPilot, bearing: float, current_lat: float, current_lng: float, way_point: WayPoint,
            rudder: ServoMotor, engine: ServoMotor, closest_shore: ShoreDistance):
-    if closest_shore.dist is not None and closest_shore.dist < 25:
+    if closest_shore.dist is not None and closest_shore.dist < 25 and way_point.danger_point is False:
         autopilot.set_state(motor=MotorState.DANGER)
         rudder.set_state(0)
         engine.set_state(0)
@@ -44,7 +44,9 @@ def linear(autopilot: AutoPilot, bearing: float, current_lat: float, current_lng
 
 
 def danger(autopilot: AutoPilot, current_lat: float, current_lng: float, closest_shore: ShoreDistance):
-    rescue_point = get_point(current_lat, current_lng, closest_shore.bearing - 180 % 360, 30)
+    rescue_coords = get_point(current_lat, current_lng, closest_shore.bearing - 180 % 360, 30)
+    rescue_point = WayPoint(rescue_coords[0], rescue_coords[1])
+    rescue_point.danger_point = True
 
-    autopilot.add_immediate_way_point(WayPoint(rescue_point[0], rescue_point[1]))
+    autopilot.add_immediate_way_point(rescue_point)
     autopilot.set_state(motor=MotorState.LINEAR)

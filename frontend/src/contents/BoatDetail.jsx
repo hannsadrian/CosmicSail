@@ -534,7 +534,9 @@ function BoatDetail(props) {
                     <div className="md:m-auto space-y-2">
                         <div>
                             <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">⛵️ Mode</p>
-                            <p className="ml-7 -mt-1">{sensorData?.autopilot?.mode}</p>
+                            <p onClick={() => socket.emit("setup", JSON.stringify({
+                                type: "autopilot_mode",
+                            }))} className="ml-7 -mt-1 cursor-pointer">{sensorData?.autopilot?.mode}</p>
                         </div>
                         <div>
                             <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">🚥 State</p>

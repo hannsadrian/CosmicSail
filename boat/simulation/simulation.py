@@ -28,6 +28,7 @@ class Simulation:
     def set_wind(self, direction, speed):
         self.wind_direction = direction
         self.wind_speed = speed
+        return
 
     def start(self) -> None:
         # potential setup
@@ -37,7 +38,7 @@ class Simulation:
         f3 = get_forward_force_by_wind(self.motors.__getitem__(self.motor_types.__getitem__('sail')).get_state(),
                                        self.wind_speed, self.wind_direction, self.rotation)
 
-        f_engine = self.motors.__getitem__(self.motor_types.__getitem__('engine')).get_state() * 3
+        f_engine = self.motors.__getitem__(self.motor_types.__getitem__('engine')).get_state() * 6
 
         self.rotation = (self.rotation + self.motors.__getitem__(
             self.motor_types.__getitem__('rudder')).get_state() * 3) % 360

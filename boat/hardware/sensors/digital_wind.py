@@ -2,11 +2,16 @@ import arrow
 import requests
 from utility.coordinates import get_distance
 
+
 class DigitalWindSensor:
     name = ""
     prev_state = {}
 
     wind_data = {}
+
+    debug = True
+    debug_wind_dir = 180
+    debug_wind_speed = 15
 
     def __init__(self, name, token):
         self.name = name
@@ -30,12 +35,18 @@ class DigitalWindSensor:
 
     # wind direction in degrees
     def get_wind_direction(self):
+        if self.debug:
+            return self.debug_wind_dir
+
         if 'wind_deg' not in self.wind_data:
             return None
         return self.wind_data['wind_deg']
 
     # wind speed in m/s
     def get_wind_speed(self):
+        if self.debug:
+            return self.debug_wind_speed
+
         if 'wind_speed' not in self.wind_data:
             return None
         return self.wind_data['wind_speed']
