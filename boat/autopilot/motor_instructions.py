@@ -22,7 +22,7 @@ def execute_motor_mode(autopilot: AutoPilot, state: MotorState, rudder: ServoMot
 
 def linear(autopilot: AutoPilot, bearing: float, current_lat: float, current_lng: float, way_point: WayPoint,
            rudder: ServoMotor, engine: ServoMotor, closest_shore: ShoreDistance, wind_direction: float, stay: bool):
-    if closest_shore.dist is not None and closest_shore.dist < 25 and way_point.danger_point is False:
+    if closest_shore.dist is not None and closest_shore.dist < 15 and way_point.danger_point is False:
         autopilot.set_state(motor=MotorState.DANGER)
         rudder.set_state(0)
         engine.set_state(0)
