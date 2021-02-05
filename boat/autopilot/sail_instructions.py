@@ -56,7 +56,7 @@ def tracking(autopilot: AutoPilot, bearing: float, current_lat: float, current_l
     rudder.set_state(get_optimal_rudder_state(-boat_gamma - 60 if boat_gamma < 0 else -boat_gamma + 60))
     sail.set_state(remap(abs(boat_gamma), 180, 60, 1, -1))
 
-    if way_point_proximity_trend <= 0.0 or (shore_ahead.dist is not None and shore_ahead.dist < 40):
+    if way_point_proximity_trend <= 0.0 or (shore_ahead.dist is not None and shore_ahead.dist < 60):
         if speed < 0:
             autopilot.set_state(sail=SailState.TACK)
         else:
