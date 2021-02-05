@@ -73,7 +73,7 @@ class AutoPilot:
             self.sail_state = sail
 
     def cycle(self):
-        time_step = 1 / 10
+        time_step = 1 / 15
 
         if len(self.way_points) > 0 and self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng()) < 20:
             self.way_points.pop(0)
@@ -120,10 +120,6 @@ class AutoPilot:
         if self.running:
             approach_rate = '{0:+}m/s'.format(round(self.approach_rate, 1))
 
-        last_instruction = '---'
-        if self.running:
-            last_instruction = self.last_instruction
-
         waypoints = []
         for wp in self.way_points:
             waypoints.append(wp.to_dict())
@@ -135,6 +131,5 @@ class AutoPilot:
             'mode': str(self.mode),
             'state': str(state),
             'approach_rate': approach_rate,
-            'last_instruction': last_instruction,
             'way_points': waypoints
         }

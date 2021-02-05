@@ -362,7 +362,7 @@ async def autopilot_loop():
 
         if autopilot.running:
             autopilot.cycle()
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(1 / 15)
 
 
 # send metadata over socket

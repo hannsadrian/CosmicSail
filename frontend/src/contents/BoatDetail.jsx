@@ -352,12 +352,12 @@ function BoatDetail(props) {
                         <div className="my-auto w-full">
                             <div className="my-2 flex w-full">
                                 <div className="ml-7 md:mx-auto pr-3 font-mono">
-                                    <div>
+                                    {/*<div>
                                         <p className="text-xs text-gray-700 dark:text-gray-300 uppercase">
                                             📟 Mission Progress
                                         </p>
                                         <p className="text-sm ml-6 -mt-1">{sensorData?.autopilot?.mission_progress}</p>
-                                    </div>
+                                    </div>*/}
                                     <div>
                                         <p style={{fontFamily: "monospace, Segoe UI Emoji"}}
                                            className="text-xs text-gray-700 dark:text-gray-300 uppercase">
@@ -553,10 +553,10 @@ function BoatDetail(props) {
                             <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">🔭 Approach Rate</p>
                             <p className="ml-7 -mt-1">{sensorData?.autopilot?.approach_rate}</p>
                         </div>
-                        <div>
+                        {/*<div>
                             <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">📜 Last instruction</p>
                             <p className="ml-7 -mt-1">{sensorData?.autopilot?.last_instruction}</p>
-                        </div>
+                        </div>*/}
                     </div>
                 </div>
             </div>

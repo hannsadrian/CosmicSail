@@ -11,7 +11,7 @@ class DigitalWindSensor:
 
     debug = False
     debug_wind_dir = 180
-    debug_wind_speed = 15
+    debug_wind_speed = 5
 
     def __init__(self, name, token):
         self.name = name
