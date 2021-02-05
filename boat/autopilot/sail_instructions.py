@@ -1,4 +1,3 @@
-import math
 from autopilot.pilot import AutoPilot
 from autopilot.state import SailState
 from autopilot.waypoint import WayPoint
@@ -22,19 +21,17 @@ def execute_sail_mode(autopilot: AutoPilot, state: SailState, rudder: ServoMotor
     gamma = abs(boat_gamma) - angle
 
     if state is SailState.LINEAR:
-        linear(autopilot, bearing, current_lat, current_lng, way_point, rudder, sail,
-               shortest_shore_distance, boat_gamma, gamma, angle)
+        linear(autopilot, rudder, sail, shortest_shore_distance, boat_gamma, angle)
     if state is SailState.TRACKING:
-        tracking(autopilot, bearing, current_lat, current_lng, way_point, rudder, sail,
-                 straightest_shore_distance, way_point_proximity_trend, boat_gamma, gamma, angle, speed)
+        tracking(autopilot, rudder, sail, straightest_shore_distance, way_point_proximity_trend, boat_gamma, angle,
+                 speed)
     if state is SailState.GYBE:
-        gybe(autopilot, bearing, rudder, sail, boat_gamma, gamma, angle)
+        gybe(autopilot, rudder, sail, boat_gamma)
     if state is SailState.TACK:
-        tack(autopilot, bearing, rudder, sail, boat_gamma, gamma, angle)
+        tack(autopilot, rudder, sail, boat_gamma)
 
 
-def linear(autopilot: AutoPilot, bearing: float, current_lat: float, current_lng: float, way_point: WayPoint,
-           rudder: ServoMotor, sail: ServoMotor, closest_shore: ShoreDistance, boat_gamma: float, gamma: float,
+def linear(autopilot: AutoPilot, rudder: ServoMotor, sail: ServoMotor, closest_shore: ShoreDistance, boat_gamma: float,
            angle: float):
     if abs(boat_gamma) < 70:
         autopilot.set_state(sail=SailState.TRACKING)
@@ -48,9 +45,8 @@ def linear(autopilot: AutoPilot, bearing: float, current_lat: float, current_lng
     return
 
 
-def tracking(autopilot: AutoPilot, bearing: float, current_lat: float, current_lng: float, way_point: WayPoint,
-             rudder: ServoMotor, sail: ServoMotor, shore_ahead: ShoreDistance, way_point_proximity_trend: float,
-             boat_gamma: float, gamma: float, angle: float, speed: float):
+def tracking(autopilot: AutoPilot, rudder: ServoMotor, sail: ServoMotor, shore_ahead: ShoreDistance,
+             way_point_proximity_trend: float, boat_gamma: float, angle: float, speed: float):
     if abs(boat_gamma) > 80:
         autopilot.set_state(sail=SailState.LINEAR)
         return
@@ -64,7 +60,7 @@ def tracking(autopilot: AutoPilot, bearing: float, current_lat: float, current_l
         else:
             autopilot.turning_direction = 1
 
-        if speed < 15:
+        if speed < 1:
             autopilot.set_state(sail=SailState.TACK)
         else:
             autopilot.set_state(sail=SailState.GYBE)
@@ -72,20 +68,16 @@ def tracking(autopilot: AutoPilot, bearing: float, current_lat: float, current_l
     return
 
 
-def gybe(autopilot: AutoPilot, bearing: float,
-         rudder: ServoMotor, sail: ServoMotor,
-         boat_gamma: float, gamma: float, angle: float):
-    # sail.set_state(1)
+def gybe(autopilot: AutoPilot, rudder: ServoMotor, sail: ServoMotor, boat_gamma: float):
+    sail.set_state(1)
     if abs(boat_gamma) > 70:
         autopilot.set_state(sail=SailState.TRACKING)
 
     rudder.set_state(autopilot.turning_direction)
 
 
-def tack(autopilot: AutoPilot, bearing: float,
-         rudder: ServoMotor, sail: ServoMotor,
-         boat_gamma: float, gamma: float, angle: float):
-    # sail.set_state(1)
+def tack(autopilot: AutoPilot, rudder: ServoMotor, sail: ServoMotor, boat_gamma: float):
+    sail.set_state(1)
     if abs(boat_gamma) < 50:
         autopilot.set_state(sail=SailState.TRACKING)
 
