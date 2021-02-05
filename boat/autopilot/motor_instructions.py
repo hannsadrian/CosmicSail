@@ -2,7 +2,7 @@ from autopilot.state import MotorState
 from autopilot.pilot import AutoPilot
 from autopilot.waypoint import WayPoint
 from utility.coordinates import get_bearing, get_distance, get_point
-from utility.angle_calc import get_turning_angle
+from utility.angle_calc import get_turning_angle, get_optimal_rudder_state
 from hardware.motors.servo import ServoMotor
 from hardware.sensors.digital_shore import ShoreDistance
 import math
@@ -32,7 +32,7 @@ def linear(autopilot: AutoPilot, bearing: float, current_lat: float, current_lng
     dist = get_distance(current_lat, current_lng, way_point.lat, way_point.lng)
 
     # TODO: maybe slow down if currently turning?
-    rudder.set_state(math.sin(math.pi / 360 * angle))
+    rudder.set_state(get_optimal_rudder_state(angle))
 
     speed = dist / 10
     if dist >= 10:

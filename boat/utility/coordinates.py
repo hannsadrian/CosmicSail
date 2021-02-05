@@ -33,4 +33,4 @@ def get_point(lat, lng, bearing, distance):
     lng2 = lng + math.atan2(math.sin(bearing) * math.sin(distance / R) * math.cos(lat),
                             math.cos(distance / R) - math.sin(lat) * math.sin(lat2))
 
-    return round(math.degrees(lat2), 6), round(math.degrees(lng2), 6)
+    return round(math.degrees(lat2), 10), round(math.degrees(lng2), 10)

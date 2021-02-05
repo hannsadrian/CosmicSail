@@ -53,9 +53,10 @@ class Simulation:
         self.sensors.__getitem__(self.sensor_types.__getitem__('bno')).set_simulated_heading(round(self.rotation))
         coords = get_point(self.origin_lat, self.origin_lng, math.degrees(math.atan2(self.position.x, self.position.y)),
                            abs(self.position))
-        speed = get_distance(self.sensors.__getitem__(self.sensor_types.__getitem__('gps')).get_lat(),
-                             self.sensors.__getitem__(self.sensor_types.__getitem__('gps')).get_lng(),
-                             coords[0],
-                             coords[1]) / time_step
+        distance = get_distance(self.sensors.__getitem__(self.sensor_types.__getitem__('gps')).get_lat(),
+                                self.sensors.__getitem__(self.sensor_types.__getitem__('gps')).get_lng(),
+                                coords[0],
+                                coords[1])
+        speed = distance / time_step
         self.sensors.__getitem__(self.sensor_types.__getitem__('gps')).set_simulated_coords(coords[0], coords[1])
         self.sensors.__getitem__(self.sensor_types.__getitem__('gps')).set_simulated_speed(speed)
