@@ -4,7 +4,7 @@ You can find the thesis relevant documents under `science/` as soon as the writi
 The paper addresses the possibility of replacing global freight shipment with autonomous sailing vessels
 which would only transport small amounts of cargo but though could be environmentally friendly and save costs of crew. 
 
-![Boat in action](https://cosmicsail.online/bg.JPG)
+![Boat in action](http://cosmicsail.online/bg.JPG)
 
 # ⛵️ CosmicSail
 
