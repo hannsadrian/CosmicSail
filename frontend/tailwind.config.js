@@ -7,6 +7,10 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['Inter', 'Apple Color Emoji', 'Segoe UI Emoji']
+      },
+      height: {
+        'control-sliders': '44%',
+        'waypoint-control': '54%'
       }
     },
     colors: colors

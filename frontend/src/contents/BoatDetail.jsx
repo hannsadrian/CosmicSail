@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
 import io from 'socket.io-client';
-import ReactMapboxGl, {Feature, Layer, Marker} from 'react-mapbox-gl';
+import ReactMapboxGl, {Feature, GeoJSONLayer, Layer, Marker} from 'react-mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import SensorDeck from "../components/SensorDeck";
 import StrengthIndicator from "../components/StrengthIndicator";
@@ -34,6 +34,11 @@ const emojiNumbers = {
     10: "🔟",
 }
 
+const linePaint = {
+    'line-color': 'white',
+    'line-width': 2
+};
+
 
 const objectsEqual = (o1, o2) =>
     Object.keys(o1).length === Object.keys(o2).length
@@ -48,6 +53,20 @@ function BoatDetail(props) {
     let [socket, setSocket] = useState(null);
 
     let [mapZoom, setMapZoom] = useState(16);
+
+    let [displayTrail, setDisplayTrail] = useState(false);
+    let [geoJSONLine, setGeoJSONLine] = useState({
+        'type': 'FeatureCollection',
+        features: [
+            {
+                'type': 'Feature',
+                geometry: {
+                    'type': 'LineString',
+                    coordinates: []
+                }
+            }
+        ]
+    });
 
     let [connected, setConnected] = useState(false);
     let [online, setOnline] = useState(false);
@@ -243,12 +262,26 @@ function BoatDetail(props) {
         if (sensorData && sensorData.autopilot && !editMode && !addMode && !arraysEqual(lastTransmittedWayPoints, sensorData.autopilot?.way_points)) {
             let wps = []
             sensorData.autopilot?.way_points?.forEach(wp => {
-                wps.push({id: Math.random() * Math.random(), index: wps.length+1, lat: wp.lat, lng: wp.lng})
+                wps.push({id: Math.random() * Math.random(), index: wps.length + 1, lat: wp.lat, lng: wp.lng})
             })
             reassignWayPoints(wps, false)
             setLastTransmittedWayPoints(sensorData.autopilot?.way_points)
         }
-    }, [addMode, editMode, lastTransmittedWayPoints, sensorData])
+
+        if (displayTrail && !!sensorData && !!sensorData[boatSensors['gps'].Name]?.position) {
+            let point = [sensorData[boatSensors['gps'].Name].position[1], sensorData[boatSensors['gps'].Name].position[0]];
+
+            if (!geoJSONLine.features[0].geometry.coordinates.find(coords => coords[0] === point[0] && coords[1] === point[1])) {
+                setGeoJSONLine(line => {
+                    line.features[0].geometry.coordinates.push(point);
+                    return line
+                })
+            }
+        }
+        if (!displayTrail && geoJSONLine.features[0].geometry.coordinates.length > 0)
+            geoJSONLine.features[0].geometry.coordinates = []
+
+    }, [addMode, boatSensors, editMode, lastTransmittedWayPoints, sensorData, displayTrail])
 
 
     const setupAGPS = useCallback(() => {
@@ -286,20 +319,22 @@ function BoatDetail(props) {
         )
     }
 
-    let lat = sensorData && sensorData[boatSensors['gps'].Name] && sensorData[boatSensors['gps'].Name].position ?
+    // TODO: improve data fetching
+
+    let lat = boatSensors['gps'] && sensorData && sensorData[boatSensors['gps'].Name] && sensorData[boatSensors['gps'].Name].position ?
         sensorData[boatSensors['gps'].Name].position[0] : 50.919446;
-    let lng = sensorData && sensorData[boatSensors['gps'].Name] && sensorData[boatSensors['gps'].Name].position ?
+    let lng = boatSensors['gps'] && sensorData && sensorData[boatSensors['gps'].Name] && sensorData[boatSensors['gps'].Name].position ?
         sensorData[boatSensors['gps'].Name].position[1] : 13.652844;
 
-    let heading = (sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].heading) || 0;
-    let pitch = (sensorData && sensorData[boatSensors['bno'].Name] && -sensorData[boatSensors['bno'].Name].pitch) || 0;
-    let roll = (sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].roll) || 0;
-    let speed = (sensorData && sensorData[boatSensors['gps'].Name] && sensorData[boatSensors['gps'].Name].speed * 3.6) || 0;
+    let heading = (boatSensors['bno'] && sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].heading) || 0;
+    let pitch = (boatSensors['bno'] && sensorData && sensorData[boatSensors['bno'].Name] && -sensorData[boatSensors['bno'].Name].pitch) || 0;
+    let roll = (boatSensors['bno'] && sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].roll) || 0;
+    let speed = (boatSensors['gps'] && sensorData && sensorData[boatSensors['gps'].Name] && sensorData[boatSensors['gps'].Name].speed * 3.6) || 0;
 
-    let sys_cal = (sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status && sensorData[boatSensors['bno'].Name].cal_status[0]) || 0;
-    let gyro_cal = (sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status && sensorData[boatSensors['bno'].Name].cal_status[1]) || 0;
-    let acc_cal = (sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status && sensorData[boatSensors['bno'].Name].cal_status[2]) || 0;
-    let mag_cal = (sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status && sensorData[boatSensors['bno'].Name].cal_status[3]) || 0;
+    let sys_cal = (boatSensors['bno'] && sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status && sensorData[boatSensors['bno'].Name].cal_status[0]) || 0;
+    let gyro_cal = (boatSensors['bno'] && sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status && sensorData[boatSensors['bno'].Name].cal_status[1]) || 0;
+    let acc_cal = (boatSensors['bno'] && sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status && sensorData[boatSensors['bno'].Name].cal_status[2]) || 0;
+    let mag_cal = (boatSensors['bno'] && sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].cal_status && sensorData[boatSensors['bno'].Name].cal_status[3]) || 0;
 
     if (showConfig) {
         return (<div className="w-full min-h-screen flex justify-center">
@@ -327,14 +362,14 @@ function BoatDetail(props) {
                                 boatSensors={boatSensors} sensorData={sensorData}/>
             </div>
             <div className="row-span-3 col-span-2 m-1 rounded-lg">
-                <div style={{height: "44%"}} className="w-full gap-2 grid grid-cols-2 grid-rows-2">
+                <div className="w-full gap-2 grid grid-cols-2 grid-rows-2 md:h-control-sliders">
                     {boat.Motors && boat.Motors.map((m, i) => <MotorController key={m.Name} motorConfig={m}
                                                                                socket={socket}
                                                                                state={motorData && motorData[m.Name]}
-                                                                               useOrientation={i === 0} autopilotActive={sensorData?.autopilot?.active}/>)}
+                                                                               useOrientation={i === 0}
+                                                                               autopilotActive={sensorData?.autopilot?.active}/>)}
                 </div>
-                <div style={{height: "54%"}}
-                     className="bg-gray-200 dark:bg-black dark:text-white mt-2 rounded-lg md:flex">
+                <div className="bg-gray-200 dark:bg-black dark:text-white mt-2 rounded-lg md:flex md:h-waypoint-control">
                     <div className="md:w-1/2 flex">
                         {wayPoints.length === 0 &&
                         <p className="mx-auto my-2 md:m-auto font-mono text-gray-400 dark:text-gray-600">No waypoints
@@ -363,7 +398,7 @@ function BoatDetail(props) {
                                            className="text-xs text-gray-700 dark:text-gray-300 uppercase">
                                             🎚 Next Waypoint Distance
                                         </p>
-                                        <p className="text-sm ml-6 -mt-1">{sensorData?.autopilot?.next_waypoint_dist}</p>
+                                        <p className="text-sm ml-6 -mt-1">{sensorData?.autopilot?.next_waypoint_dist || '---'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -400,7 +435,10 @@ function BoatDetail(props) {
                             </div>
                             <div className="mb-2 font-mono text-sm flex space-x-2 w-full px-2 md:px-4 2xl:px-6">
                                 <button onClick={() => {
-                                    socket.emit("setup", JSON.stringify({type: 'autopilot_waypoints', waypoints: wayPoints}))
+                                    socket.emit("setup", JSON.stringify({
+                                        type: 'autopilot_waypoints',
+                                        waypoints: wayPoints
+                                    }))
                                     setAddMode(false)
                                     setEditMode(false)
                                 }}
@@ -440,9 +478,15 @@ function BoatDetail(props) {
                         className="h-6 w-6"
                     >
                         <img
-                            style={{"transform": "rotate(" + ((sensorData && sensorData[boatSensors['bno'].Name] && sensorData[boatSensors['bno'].Name].heading) || 0) + "deg)"}}
+                            style={{"transform": "rotate(" + heading + "deg)"}}
                             alt="" src={process.env.REACT_APP_APIURL + "/arrow_up.png"}/>
                     </Marker>
+
+                    <GeoJSONLayer
+                        data={Object.assign({}, geoJSONLine)}
+                        linePaint={linePaint}
+                    />
+
                     {wayPoints.map(wp =>
                         <Layer
                             key={wp.id}
@@ -495,6 +539,10 @@ function BoatDetail(props) {
                             mag={mag_cal}/>
                     </div>
                     }
+                    <button onClick={() => setDisplayTrail(t => !t)}
+                            className={"bg-gray-300 dark:bg-gray-900 ring-orange-500 ring-0 hover:ring-2 transition duration-200 h-8 md:w-full rounded p-1 " + (displayTrail && "ring-4 hover:ring-4")}>
+                        TRAIL
+                    </button>
                     <button onClick={() => setShowConfig(true)}
                             className="bg-gray-300 dark:bg-gray-900 ring-orange-500 ring-0 hover:ring-2 transition duration-200 h-8 md:w-full rounded p-1">
                         STP
@@ -536,14 +584,14 @@ function BoatDetail(props) {
                             <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">⛵️ Mode</p>
                             <p onClick={() => socket.emit("setup", JSON.stringify({
                                 type: "autopilot_mode",
-                            }))} className="ml-7 -mt-1 cursor-pointer">{sensorData?.autopilot?.mode}</p>
+                            }))} className="ml-7 -mt-1 cursor-pointer">{sensorData?.autopilot?.mode || '---'}</p>
                         </div>
                         <div>
                             <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">🚥 State</p>
                             <p onClick={() => sensorData?.autopilot?.mode?.includes('MOTOR') && socket.emit("setup", JSON.stringify({
                                 type: "autopilot_state",
                                 state: sensorData?.autopilot?.state?.includes("STAY") ? 'linear_motor' : 'stay_motor'
-                            }))} className="ml-7 -mt-1 cursor-pointer">{sensorData?.autopilot?.state}</p>
+                            }))} className="ml-7 -mt-1 cursor-pointer">{sensorData?.autopilot?.state || '---'}</p>
                         </div>
                     </div>
                 </div>
@@ -551,7 +599,7 @@ function BoatDetail(props) {
                     <div className="my-2 md:my-auto md:ml-8 space-y-2">
                         <div>
                             <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">🔭 Approach Rate</p>
-                            <p className="ml-7 -mt-1">{sensorData?.autopilot?.approach_rate}</p>
+                            <p className="ml-7 -mt-1">{sensorData?.autopilot?.approach_rate || '---'}</p>
                         </div>
                         {/*<div>
                             <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">📜 Last instruction</p>
