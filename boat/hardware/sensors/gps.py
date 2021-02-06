@@ -1,7 +1,6 @@
 from . import gpsd
 import time
 import requests
-import serial
 import subprocess
 
 
@@ -22,6 +21,9 @@ class GpsSensor():
         self.port = port
 
     def init_agps(self, lat, lon):
+        if self.simulation:
+            return None
+
         print("Stopping GPSD for AGPS")
         subprocess.run("sudo service gpsd stop", shell=True, check=True)
         time.sleep(2)
@@ -32,6 +34,7 @@ class GpsSensor():
             "http://online-live1.services.u-blox.com/GetOnlineData.ashx?token=" + token + ";lat="+str(lat)+";lon="+str(lon)+";gnss=gps;datatype=eph,alm,aux,pos;format=aid;",
             stream=True)
 
+        import serial
         ser = serial.Serial(com_port, 9600)
         drainer = True
         while drainer:
@@ -47,6 +50,9 @@ class GpsSensor():
         gpsd.connect()
 
     def get_value(self):
+        if self.simulation:
+            return None
+
         try:
             return gpsd.get_current()
         except Exception:
@@ -59,6 +65,8 @@ class GpsSensor():
             return None
 
     def get_device(self):
+        if self.simulation:
+            return ""
         return gpsd.device()
 
     def get_name(self):

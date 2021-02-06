@@ -28,7 +28,8 @@ class ServoMotor:
     def set_state(self, val):
         self.state = val
         remapped = math.floor(remap(val, -1, 1, self.min, self.max))
-        self.channel.duty_cycle = remapped
+        if self.channel is not None:
+            self.channel.duty_cycle = remapped
 
     def has_changed(self):
         changed = self.state != self.prev_state

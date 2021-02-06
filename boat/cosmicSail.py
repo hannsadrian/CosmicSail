@@ -6,19 +6,13 @@ import time
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
-from board import SCL, SDA
-import busio
-import adafruit_pca9685 as pca_driver
-import json
-import subprocess
-import sys
 
 from autopilot.state import AutoPilotMode, MotorState
 from hardware.motors.servo import ServoMotor
 from hardware.sensors.gps import GpsSensor
 from hardware.sensors.bandwidth import Bandwidth
 from hardware.sensors.ip import IP
-from hardware.sensors.imu import IMU
+# from hardware.sensors.imu import IMU
 from hardware.sensors.bno import BNO
 from hardware.sensors.digital_wind import DigitalWindSensor
 from hardware.sensors.digital_shore import DigitalShoreSensor
@@ -26,11 +20,22 @@ from autopilot.waypoint import WayPoint
 from simulation.simulation import Simulation
 from autopilot.pilot import AutoPilot
 
+import json
+import subprocess
+import sys
+
 # environment
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
+
 SIMULATION = True if os.getenv("SIMULATION") == 'True' else False
+
+if SIMULATION is False:
+    from board import SCL, SDA
+    import busio
+    import adafruit_pca9685 as pca_driver
+
 
 meta_interval = 1 / 3
 if SIMULATION:
@@ -41,9 +46,10 @@ if SIMULATION:
 sio = socketio.Client(request_timeout=1, reconnection_delay=0.5, reconnection_delay_max=1)
 
 # PWM Control
-i2c_bus = busio.I2C(SCL, SDA)
-pca = pca_driver.PCA9685(i2c_bus)
-pca.frequency = 24
+if SIMULATION is False:
+    i2c_bus = busio.I2C(SCL, SDA)
+    pca = pca_driver.PCA9685(i2c_bus)
+    pca.frequency = 24
 
 # boat data
 boatData = {}
@@ -245,7 +251,7 @@ def init():
     for motor in boatData['Motors']:
         motorTypes.__setitem__(motor['Type'], motor['Name'])
         motors.__setitem__(motor['Name'],
-                           ServoMotor(motor['Name'], pca.channels[int(motor['Channel']) - 1], float(motor['Min']),
+                           ServoMotor(motor['Name'], pca.channels[int(motor['Channel']) - 1] if SIMULATION is False else None, float(motor['Min']),
                                       float(motor['Max']), float(motor['Default']), motor['Type']))
 
     for sensor in boatData['Sensors']:
@@ -257,8 +263,8 @@ def init():
             sensors.__setitem__(sensor['Name'], Bandwidth(sensor['Name']))
         if sensor['Type'] == "ip":
             sensors.__setitem__(sensor['Name'], IP(sensor['Name']))
-        if sensor['Type'] == "imu":
-            sensors.__setitem__(sensor['Name'], IMU(sensor['Name']))
+        #if sensor['Type'] == "imu":
+        #    sensors.__setitem__(sensor['Name'], IMU(sensor['Name']))
         if sensor['Type'] == "bno":
             sensors.__setitem__(sensor['Name'], BNO(sensor['Name'], SIMULATION))
         if sensor['Type'] == "wind":
