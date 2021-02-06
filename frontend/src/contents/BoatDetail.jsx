@@ -643,7 +643,7 @@ function SimulationController({socket, sensorData, boatSensors}) {
     }, [lat, lng, socket])
 
     return (
-        <div className="mx-4 mb-20 md:mb-0">
+        <div className="mx-4 mb-20 md:mb-4">
             <button
                 onClick={() =>
                     socket.emit('setup', JSON.stringify({'type': 'toggle_sim'}))
