@@ -3,6 +3,7 @@ package socket
 import (
 	"CosmicSailBackend/logic"
 	"CosmicSailBackend/models"
+	"CosmicSailBackend/models/database"
 	"errors"
 	socketio "github.com/googollee/go-socket.io"
 	"log"
@@ -50,6 +51,17 @@ func registerMethods(server *socketio.Server) {
 				log.Println("| " + boatEmblem + " connected")
 				server.BroadcastToRoom("/", boatEmblem + userSuffix, "online", "true")
 			} else if payload.Type == "user" {
+				user := models.User{}
+				if err := database.Db.Where("username = ?", payload.Identifier).First(&user).Error; err != nil {
+					_ = s.Close()
+					return errors.New("user invalid")
+				}
+				_, err := logic.GetBoatForUser(user, boatEmblem)
+				if err != nil {
+					_ = s.Close()
+					return errors.New("boat invalid")
+				}
+
 				roomName += userSuffix
 				s.Join(roomName)
 				log.Println("| User connected")

@@ -10,6 +10,7 @@ type Boat struct {
 	BoatEmblem string `gorm:"type:varchar(5);unique_index"`
 	UserID     uint
 	Name       string
+	ImageUrl   string
 	Series     string
 	Make       string
 	Online     bool
