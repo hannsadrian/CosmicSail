@@ -350,266 +350,320 @@ function BoatDetail(props) {
     }
 
     return (
-        <div
-            className="mb-10 md:mb-0 grid grid-cols-2 md:grid-cols-5 md:grid-rows-6 grid-flow-row md:grid-flow-col-dense p-2 dark:bg-gray-900">
-            <div style={{
-                backgroundImage: "url('https://cosmicsail.online/bg.JPG')",
-                backgroundSize: "cover",
-                backgroundPosition: "center"
-            }} className="row-span-2 col-span-2 h-48 md:h-auto m-1 rounded-lg flex"/>
-            <div className="row-span-1 col-span-2 bg-gray-200 dark:bg-black rounded-lg m-1 py-2 px-4">
-                <StatusOverview name={boat.Name || "Loading..."} connected={connected} online={online}
-                                boatSensors={boatSensors} sensorData={sensorData}/>
-            </div>
-            <div className="row-span-3 col-span-2 m-1 rounded-lg">
-                <div className="w-full gap-2 grid grid-cols-2 grid-rows-2 md:h-control-sliders">
-                    {boat.Motors && boat.Motors.map((m, i) => <MotorController key={m.Name} motorConfig={m}
-                                                                               socket={socket}
-                                                                               state={motorData && motorData[m.Name]}
-                                                                               useOrientation={i === 0}
-                                                                               autopilotActive={sensorData?.autopilot?.active}/>)}
+        <div>
+            <div
+                className="mb-10 md:mb-0 grid grid-cols-2 md:grid-cols-5 md:grid-rows-6 grid-flow-row md:grid-flow-col-dense p-2 dark:bg-gray-900">
+                <div style={{
+                    backgroundImage: "url('" + boat.Image + "')",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center"
+                }} className="row-span-2 col-span-2 h-48 md:h-auto m-1 rounded-lg flex"/>
+                <div className="row-span-1 col-span-2 bg-gray-200 dark:bg-black rounded-lg m-1 py-2 px-4">
+                    <StatusOverview name={boat.Name || "Loading..."} connected={connected} online={online}
+                                    boatSensors={boatSensors} sensorData={sensorData}/>
                 </div>
-                <div className="bg-gray-200 dark:bg-black dark:text-white mt-2 rounded-lg md:flex md:h-waypoint-control">
-                    <div className="md:w-1/2 flex">
-                        {wayPoints.length === 0 &&
-                        <p className="mx-auto my-2 md:m-auto font-mono text-gray-400 dark:text-gray-600">No waypoints
-                            set.</p>}
-                        <div className="my-auto max-h-48">
-                            <DraggableList itemKey={(item) => {
-                                if (item) return item.id
-                            }} template={WayPointListEntry}
-                                           list={wayPoints}
-                                           onMoveEnd={newList => reassignWayPoints(newList, true)}
-                                           container={() => document.body}/>
-                        </div>
+                <div className="row-span-3 col-span-2 m-1 rounded-lg">
+                    <div className="w-full gap-2 grid grid-cols-2 grid-rows-2 md:h-control-sliders">
+                        {boat.Motors && boat.Motors.map((m, i) => <MotorController key={m.Name} motorConfig={m}
+                                                                                   socket={socket}
+                                                                                   state={motorData && motorData[m.Name]}
+                                                                                   useOrientation={i === 0}
+                                                                                   autopilotActive={sensorData?.autopilot?.active}/>)}
                     </div>
-                    <div className="md:w-1/2 flex">
-                        <div className="my-auto w-full">
-                            <div className="my-2 flex w-full">
-                                <div className="ml-7 md:mx-auto pr-3 font-mono">
-                                    {/*<div>
+                    <div
+                        className="bg-gray-200 dark:bg-black dark:text-white mt-2 rounded-lg md:flex md:h-waypoint-control">
+                        <div className="md:w-1/2 flex">
+                            {wayPoints.length === 0 &&
+                            <p className="mx-auto my-2 md:m-auto font-mono text-gray-400 dark:text-gray-600">No
+                                waypoints
+                                set.</p>}
+                            <div className="my-auto max-h-48">
+                                <DraggableList itemKey={(item) => {
+                                    if (item) return item.id
+                                }} template={WayPointListEntry}
+                                               list={wayPoints}
+                                               onMoveEnd={newList => reassignWayPoints(newList, true)}
+                                               container={() => document.body}/>
+                            </div>
+                        </div>
+                        <div className="md:w-1/2 flex">
+                            <div className="my-auto w-full">
+                                <div className="my-2 flex w-full">
+                                    <div className="ml-7 md:mx-auto pr-3 font-mono">
+                                        {/*<div>
                                         <p className="text-xs text-gray-700 dark:text-gray-300 uppercase">
                                             📟 Mission Progress
                                         </p>
                                         <p className="text-sm ml-6 -mt-1">{sensorData?.autopilot?.mission_progress}</p>
                                     </div>*/}
-                                    <div>
-                                        <p style={{fontFamily: "monospace, Segoe UI Emoji"}}
-                                           className="text-xs text-gray-700 dark:text-gray-300 uppercase">
-                                            🎚 Next Waypoint Distance
-                                        </p>
-                                        <p className="text-sm ml-6 -mt-1">{sensorData?.autopilot?.next_waypoint_dist || '---'}</p>
+                                        <div>
+                                            <p style={{fontFamily: "monospace, Segoe UI Emoji"}}
+                                               className="text-xs text-gray-700 dark:text-gray-300 uppercase">
+                                                🎚 Next Waypoint Distance
+                                            </p>
+                                            <p className="text-sm ml-6 -mt-1">{sensorData?.autopilot?.next_waypoint_dist || '---'}</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="mb-2 font-mono text-sm flex space-x-2 w-full px-2 md:px-4 2xl:px-6">
-                                <button onClick={() => {
-                                    setAddMode(a => !a);
-                                    if (!addMode) setEditMode(false)
-                                }}
-                                        style={{fontFamily: "monospace, Segoe UI Emoji"}}
-                                        disabled={wayPoints.length >= 4}
-                                        className={"px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-none rounded " + (addMode && " ring-4 hover:ring-4 ") + (wayPoints.length >= 4 && " ring-0 hover:ring-0 cursor-not-allowed text-gray-500 dark:text-gray-600 ")}
-                                >
-                                    🗺 Add
-                                </button>
-                                <button onClick={() => {
-                                    setEditMode(e => !e);
-                                    if (!editMode) setAddMode(false)
-                                }}
-                                        className={"px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-grow rounded w-full " + (editMode && "ring-4 hover:ring-4")}
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    disabled={wayPoints.length === 0}
-                                    onClick={() => {
-                                        setEditMode(true);
-                                        setAddMode(false);
-                                        wayPoints.splice(0, 1);
-                                        reassignWayPoints(wayPoints, true);
+                                <div className="mb-2 font-mono text-sm flex space-x-2 w-full px-2 md:px-4 2xl:px-6">
+                                    <button onClick={() => {
+                                        setAddMode(a => !a);
+                                        if (!addMode) setEditMode(false)
                                     }}
-                                    className={"px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-none rounded " + (wayPoints.length === 0 && " ring-0 hover:ring-0 cursor-not-allowed text-gray-500 dark:text-gray-600 ")}>
-                                    🪂 Skip
-                                </button>
-                            </div>
-                            <div className="mb-2 font-mono text-sm flex space-x-2 w-full px-2 md:px-4 2xl:px-6">
-                                <button onClick={() => {
-                                    socket.emit("setup", JSON.stringify({
-                                        type: 'autopilot_waypoints',
-                                        waypoints: wayPoints
-                                    }))
-                                    setAddMode(false)
-                                    setEditMode(false)
-                                }}
-                                        className="px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-grow rounded w-full"
-                                >
-                                    📡 Upload
-                                </button>
+                                            style={{fontFamily: "monospace, Segoe UI Emoji"}}
+                                            disabled={wayPoints.length >= 4}
+                                            className={"px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-none rounded " + (addMode && " ring-4 hover:ring-4 ") + (wayPoints.length >= 4 && " ring-0 hover:ring-0 cursor-not-allowed text-gray-500 dark:text-gray-600 ")}
+                                    >
+                                        🗺 Add
+                                    </button>
+                                    <button onClick={() => {
+                                        setEditMode(e => !e);
+                                        if (!editMode) setAddMode(false)
+                                    }}
+                                            className={"px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-grow rounded w-full " + (editMode && "ring-4 hover:ring-4")}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        disabled={wayPoints.length === 0}
+                                        onClick={() => {
+                                            setEditMode(true);
+                                            setAddMode(false);
+                                            wayPoints.splice(0, 1);
+                                            reassignWayPoints(wayPoints, true);
+                                        }}
+                                        className={"px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-none rounded " + (wayPoints.length === 0 && " ring-0 hover:ring-0 cursor-not-allowed text-gray-500 dark:text-gray-600 ")}>
+                                        🪂 Skip
+                                    </button>
+                                </div>
+                                <div className="mb-2 font-mono text-sm flex space-x-2 w-full px-2 md:px-4 2xl:px-6">
+                                    <button onClick={() => {
+                                        socket.emit("setup", JSON.stringify({
+                                            type: 'autopilot_waypoints',
+                                            waypoints: wayPoints
+                                        }))
+                                        setAddMode(false)
+                                        setEditMode(false)
+                                    }}
+                                            className="px-2 py-1 bg-gray-300 dark:bg-gray-800 dark:text-gray-300 ring-orange-500 ring-0 hover:ring-2 transition duration-200 flex-grow rounded w-full"
+                                    >
+                                        📡 Upload
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div style={{height: "25.125rem", width: "98.5%", zIndex: 300}}
-                 className="row-span-3 col-span-2 md:col-span-3 m-1 mr-2 rounded-lg overflow-hidden h-full w-full">
-                <Map onTouchStart={(map, event) => {
-                    if (event.originalEvent.touches.length < 2) {
-                        map.dragPan.disable()
-                    } else {
-                        map.dragPan.enable()
-                    }
-                }}
-                     style={`mapbox://styles/mapbox/outdoors-v10`}
-                     center={!editMode && !addMode && [lng, lat]}
-                     zoom={!editMode && !addMode && [mapZoom]}
-                     movingMethod={"easeTo"}
-                     onZoomEnd={(map, event) => {
-                         setMapZoom(map.getZoom())
-                     }}
-                     onMouseDown={addMode && ((map, event) => {
-                         setAddMode(false);
-                         addWayPoint(map, event, wayPoints.length + 1)
-                     })}
-                     containerStyle={{height: "100%", width: "100%", touchAction: (editMode || addMode) && "none"}}>
-                    <Marker
-                        coordinates={[lng, lat]}
-                        anchor="center"
-                        className="h-6 w-6"
-                    >
-                        <img
-                            style={{"transform": "rotate(" + heading + "deg)"}}
-                            alt="" src={process.env.REACT_APP_APIURL + "/arrow_up.png"}/>
-                    </Marker>
+                <div style={{height: "25.125rem", width: "98.5%", zIndex: 300}}
+                     className="row-span-3 col-span-2 md:col-span-3 m-1 mr-2 rounded-lg overflow-hidden h-full w-full">
+                    <Map onTouchStart={(map, event) => {
+                        if (event.originalEvent.touches.length < 2) {
+                            map.dragPan.disable()
+                        } else {
+                            map.dragPan.enable()
+                        }
+                    }}
+                         style={`mapbox://styles/mapbox/outdoors-v10`}
+                         center={!editMode && !addMode && [lng, lat]}
+                         zoom={!editMode && !addMode && [mapZoom]}
+                         movingMethod={"easeTo"}
+                         onZoomEnd={(map, event) => {
+                             setMapZoom(map.getZoom())
+                         }}
+                         onMouseDown={addMode && ((map, event) => {
+                             setAddMode(false);
+                             addWayPoint(map, event, wayPoints.length + 1)
+                         })}
+                         containerStyle={{height: "100%", width: "100%", touchAction: (editMode || addMode) && "none"}}>
+                        <Marker
+                            coordinates={[lng, lat]}
+                            anchor="center"
+                            className="h-6 w-6"
+                        >
+                            <img
+                                style={{"transform": "rotate(" + heading + "deg)"}}
+                                alt="" src={process.env.REACT_APP_APIURL + "/arrow_up.png"}/>
+                        </Marker>
 
-                    <GeoJSONLayer
-                        data={Object.assign({}, geoJSONLine)}
-                        linePaint={linePaint}
-                    />
+                        <GeoJSONLayer
+                            data={Object.assign({}, geoJSONLine)}
+                            linePaint={linePaint}
+                        />
 
-                    {wayPoints.map(wp =>
-                        <Layer
-                            key={wp.id}
-                            type="symbol"
-                            layout={{
-                                "icon-image": "harbor-15",
-                                "icon-allow-overlap": true,
-                                "text-field": emojiNumbers[wp.index] || '--',
-                                "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
-                                "text-size": 11,
-                                "text-transform": "uppercase",
-                                "text-letter-spacing": 0.05,
-                                "text-offset": [0, 1.5]
-                            }}>
-                            <Feature
-                                draggable={!!editMode}
-                                coordinates={[wp.lng, wp.lat]}
-                                onDragEnd={event => {
-                                    if (event.lngLat) setWayPoints(wps => {
-                                        wps[wp.index - 1].lat = event.lngLat.lat;
-                                        wps[wp.index - 1].lng = event.lngLat.lng;
-                                        return wps;
-                                    })
-                                }}
-                            />
-                        </Layer>
-                    )}
-                </Map>
-            </div>
-            <div
-                className="row-span-2 col-span-2 md:col-span-3 m-1 p-2 rounded-lg flex-wrap lg:flex justify-center align-top select-none bg-gray-200 dark:bg-black rounded">
-                {boatSensors && boatSensors['bno'] &&
-                <SensorDeck
-                    heading={heading}
-                    pitch={pitch}
-                    roll={roll}
-                    speed={speed}
-                    startup={true}
-                />
-                }
+                        {wayPoints.map(wp =>
+                            <Layer
+                                key={wp.id}
+                                type="symbol"
+                                layout={{
+                                    "icon-image": "harbor-15",
+                                    "icon-allow-overlap": true,
+                                    "text-field": emojiNumbers[wp.index] || '--',
+                                    "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+                                    "text-size": 11,
+                                    "text-transform": "uppercase",
+                                    "text-letter-spacing": 0.05,
+                                    "text-offset": [0, 1.5]
+                                }}>
+                                <Feature
+                                    draggable={!!editMode}
+                                    coordinates={[wp.lng, wp.lat]}
+                                    onDragEnd={event => {
+                                        if (event.lngLat) setWayPoints(wps => {
+                                            wps[wp.index - 1].lat = event.lngLat.lat;
+                                            wps[wp.index - 1].lng = event.lngLat.lng;
+                                            return wps;
+                                        })
+                                    }}
+                                />
+                            </Layer>
+                        )}
+                    </Map>
+                </div>
                 <div
-                    className="relative flex justify-between md:block space-x-2 md:space-x-0 md:space-y-2 text-gray-900 dark:text-gray-400 text-center font-mono flex-1 h-auto my-auto md:pl-1 md:pr-2">
+                    className="row-span-2 col-span-2 md:col-span-3 m-1 p-2 rounded-lg flex-wrap lg:flex justify-center align-top select-none bg-gray-200 dark:bg-black rounded">
                     {boatSensors && boatSensors['bno'] &&
-                    <div
-                        className="bg-gray-300 dark:bg-gray-900 h-8 rounded flex justify-center items-center p-1 w-full">
-                        <StrengthIndicator
-                            sys={sys_cal}
-                            gyro={gyro_cal}
-                            acc={acc_cal}
-                            mag={mag_cal}/>
-                    </div>
+                    <SensorDeck
+                        heading={heading}
+                        pitch={pitch}
+                        roll={roll}
+                        speed={speed}
+                        startup={true}
+                    />
                     }
-                    <button onClick={() => setDisplayTrail(t => !t)}
-                            className={"bg-gray-300 dark:bg-gray-900 ring-orange-500 ring-0 hover:ring-2 transition duration-200 h-8 md:w-full rounded p-1 " + (displayTrail && "ring-4 hover:ring-4")}>
-                        TRAIL
-                    </button>
-                    <button onClick={() => setShowConfig(true)}
-                            className="bg-gray-300 dark:bg-gray-900 ring-orange-500 ring-0 hover:ring-2 transition duration-200 h-8 md:w-full rounded p-1">
-                        STP
-                    </button>
-                    <button onClick={setupAGPS}
-                            className="bg-gray-300 dark:bg-gray-900 ring-orange-500 ring-0 hover:ring-2 transition duration-200 h-8 md:w-full rounded p-1">
-                        AGPS
-                    </button>
-                </div>
-            </div>
-            <div
-                className="row-span-1 col-span-2 md:col-span-1 h-32 md:h-auto m-1 bg-gray-200 dark:bg-black rounded-lg flex">
-                <div className="flex-wrap m-auto">
-                    <div className="flex space-x-1">
-                        <button
-                            hidden={sensorData?.autopilot?.active}
-                            className="my-auto cursor-default rounded bg-gray-200 dark:bg-black text-xs font-semibold font-mono text-gray-700 dark:text-gray-400 p-2">
-                            PILOT
+                    <div
+                        className="relative flex justify-between md:block space-x-2 md:space-x-0 md:space-y-2 text-gray-900 dark:text-gray-400 text-center font-mono flex-1 h-auto my-auto md:pl-1 md:pr-2">
+                        {boatSensors && boatSensors['bno'] &&
+                        <div
+                            className="bg-gray-300 dark:bg-gray-900 h-8 rounded flex justify-center items-center p-1 w-full">
+                            <StrengthIndicator
+                                sys={sys_cal}
+                                gyro={gyro_cal}
+                                acc={acc_cal}
+                                mag={mag_cal}/>
+                        </div>
+                        }
+                        <button onClick={() => setDisplayTrail(t => !t)}
+                                className={"bg-gray-300 dark:bg-gray-900 ring-orange-500 ring-0 hover:ring-2 transition duration-200 h-8 md:w-full rounded p-1 " + (displayTrail && "ring-4 hover:ring-4")}>
+                            TRAIL
                         </button>
-                        <button
-                            onClick={() => socket.emit("setup", JSON.stringify({type: sensorData.autopilot?.active ? 'autopilot_stop' : 'autopilot_start'}))}
-                            className={(sensorData?.autopilot?.active ? "bg-red-500" : "bg-green-600") + " py-3 px-5 font-bold font-mono text-xl rounded-lg text-white"}>
-                            {sensorData?.autopilot?.active ? "STOP" : "START"}
+                        <button onClick={() => setShowConfig(true)}
+                                className="bg-gray-300 dark:bg-gray-900 ring-orange-500 ring-0 hover:ring-2 transition duration-200 h-8 md:w-full rounded p-1">
+                            STP
                         </button>
-                        <button
-                            hidden={sensorData?.autopilot?.active}
-                            onClick={() => socket.emit("setup", JSON.stringify({type: 'autopilot_reset'}))}
-                            className="my-auto rounded bg-gray-200 hover:bg-gray-300 dark:bg-black dark:hover:bg-gray-700 text-xs font-semibold font-mono text-gray-700 dark:text-gray-400 p-2">
-                            RESET
+                        <button onClick={setupAGPS}
+                                className="bg-gray-300 dark:bg-gray-900 ring-orange-500 ring-0 hover:ring-2 transition duration-200 h-8 md:w-full rounded p-1">
+                            AGPS
                         </button>
                     </div>
                 </div>
-            </div>
-            <div
-                className="row-span-1 col-span-2 m-1 bg-gray-200 dark:bg-black rounded-lg px-4 py-3 font-mono text-black dark:text-white flex-wrap md:flex">
-                <div className="md:w-5/12 flex">
-                    <div className="md:m-auto space-y-2">
-                        <div>
-                            <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">⛵️ Mode</p>
-                            <p onClick={() => socket.emit("setup", JSON.stringify({
-                                type: "autopilot_mode",
-                            }))} className="ml-7 -mt-1 cursor-pointer">{sensorData?.autopilot?.mode || '---'}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">🚥 State</p>
-                            <p onClick={() => sensorData?.autopilot?.mode?.includes('MOTOR') && socket.emit("setup", JSON.stringify({
-                                type: "autopilot_state",
-                                state: sensorData?.autopilot?.state?.includes("STAY") ? 'linear_motor' : 'stay_motor'
-                            }))} className="ml-7 -mt-1 cursor-pointer">{sensorData?.autopilot?.state || '---'}</p>
+                <div
+                    className="row-span-1 col-span-2 md:col-span-1 h-32 md:h-auto m-1 bg-gray-200 dark:bg-black rounded-lg flex">
+                    <div className="flex-wrap m-auto">
+                        <div className="flex space-x-1">
+                            <button
+                                hidden={sensorData?.autopilot?.active}
+                                className="my-auto cursor-default rounded bg-gray-200 dark:bg-black text-xs font-semibold font-mono text-gray-700 dark:text-gray-400 p-2">
+                                PILOT
+                            </button>
+                            <button
+                                onClick={() => socket.emit("setup", JSON.stringify({type: sensorData.autopilot?.active ? 'autopilot_stop' : 'autopilot_start'}))}
+                                className={(sensorData?.autopilot?.active ? "bg-red-500" : "bg-green-600") + " py-3 px-5 font-bold font-mono text-xl rounded-lg text-white"}>
+                                {sensorData?.autopilot?.active ? "STOP" : "START"}
+                            </button>
+                            <button
+                                hidden={sensorData?.autopilot?.active}
+                                onClick={() => socket.emit("setup", JSON.stringify({type: 'autopilot_reset'}))}
+                                className="my-auto rounded bg-gray-200 hover:bg-gray-300 dark:bg-black dark:hover:bg-gray-700 text-xs font-semibold font-mono text-gray-700 dark:text-gray-400 p-2">
+                                RESET
+                            </button>
                         </div>
                     </div>
                 </div>
-                <div className="md:w-7/12 flex">
-                    <div className="my-2 md:my-auto md:ml-8 space-y-2">
-                        <div>
-                            <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">🔭 Approach Rate</p>
-                            <p className="ml-7 -mt-1">{sensorData?.autopilot?.approach_rate || '---'}</p>
+                <div
+                    className="row-span-1 col-span-2 m-1 bg-gray-200 dark:bg-black rounded-lg px-4 py-3 font-mono text-black dark:text-white flex-wrap md:flex">
+                    <div className="md:w-5/12 flex">
+                        <div className="md:m-auto space-y-2">
+                            <div>
+                                <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">⛵️ Mode</p>
+                                <p onClick={() => socket.emit("setup", JSON.stringify({
+                                    type: "autopilot_mode",
+                                }))} className="ml-7 -mt-1 cursor-pointer">{sensorData?.autopilot?.mode || '---'}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">🚥 State</p>
+                                <p onClick={() => sensorData?.autopilot?.mode?.includes('MOTOR') && socket.emit("setup", JSON.stringify({
+                                    type: "autopilot_state",
+                                    state: sensorData?.autopilot?.state?.includes("STAY") ? 'linear_motor' : 'stay_motor'
+                                }))} className="ml-7 -mt-1 cursor-pointer">{sensorData?.autopilot?.state || '---'}</p>
+                            </div>
                         </div>
-                        {/*<div>
+                    </div>
+                    <div className="md:w-7/12 flex">
+                        <div className="my-2 md:my-auto md:ml-8 space-y-2">
+                            <div>
+                                <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">🔭 Approach Rate</p>
+                                <p className="ml-7 -mt-1">{sensorData?.autopilot?.approach_rate || '---'}</p>
+                            </div>
+                            {/*<div>
                             <p className="text-sm text-gray-700 dark:text-gray-300 uppercase">📜 Last instruction</p>
                             <p className="ml-7 -mt-1">{sensorData?.autopilot?.last_instruction}</p>
                         </div>*/}
+                        </div>
                     </div>
                 </div>
             </div>
+            {sensorData?.simulated &&
+            <SimulationController boatSensors={boatSensors} sensorData={sensorData} socket={socket}/>
+            }
         </div>
     );
+}
+
+function SimulationController({socket, sensorData, boatSensors}) {
+    let [lat, setLat] = useState(null)
+    let [lng, setLng] = useState(null)
+
+    const uploadLatLng = useCallback(() => {
+        if (lat == null || lng == null)
+            return
+
+        console.log(lat)
+        console.log(lng)
+        socket.emit('setup', JSON.stringify({
+            'type': 'sim_origin',
+            'lat': lat,
+            'lng': lng
+        }))
+    }, [lat, lng, socket])
+
+    return (
+        <div className="mx-4 mb-20 md:mb-0">
+            <button
+                onClick={() =>
+                    socket.emit('setup', JSON.stringify({'type': 'toggle_sim'}))
+                }>{sensorData?.simulation ? 'stop simulation' : 'start simulation'}
+            </button>
+
+            <span className="ml-4">Wind</span>
+            <input onInput={event => socket.emit('setup', JSON.stringify({
+                'type': 'sim_wind_dir',
+                'wind_dir': parseFloat(event.target.value) % 360
+            }))} className="w-32 ring-0 ring-blue-500 hover:ring-2 focus:outline-none rounded mx-1"
+                   placeholder={sensorData && (parseFloat(sensorData[boatSensors['wind']?.Name]?.direction).toFixed(1) + '° (max. 359)')}/>
+            <input onInput={event => {
+                socket.emit('setup', JSON.stringify({
+                    'type': 'sim_wind_speed',
+                    'wind_speed': parseFloat(event.target.value) % 40
+                }))
+            }} className="w-32 ring-0 ring-blue-500 hover:ring-2 focus:outline-none rounded mx-1"
+                   placeholder={sensorData && (parseFloat(sensorData[boatSensors['wind']?.Name]?.speed).toFixed(1) + 'm/s (max. 40)')}/>
+
+            <span className="ml-4">Pos</span>
+            <input onInput={event => {setLat(event.target.value.split(', ')[0]); setLng(event.target.value.split(', ')[1])}} className="w-48 ring-0 ring-blue-500 hover:ring-2 focus:outline-none rounded mx-1"
+                   placeholder={'Lat, Lng'}/>
+            <button onClick={uploadLatLng}>Upload</button>
+        </div>
+    )
 }
 
 class WayPointListEntry extends React.Component {

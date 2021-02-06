@@ -68,7 +68,7 @@ const SensorConfigurator = ({itemOpen, onOpenChange, boatEmblem, creationMode, s
                         </>
                         :
                         <>
-                            Add Motor
+                            Add Sensor
                         </>
                     }
                 </h4>

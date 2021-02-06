@@ -30,7 +30,7 @@ function Boats() {
                         {boats.map(b =>
                             <div key={b.BoatEmblem} className="w-64 group shadow-sm hover:shadow-lg bg-white dark:bg-coolGray-900 rounded-xl p-3 m-4 transition duration-200">
                                 <Link to={"/boats/" + b.BoatEmblem}>
-                                    <img className="rounded-lg" src="https://cosmicsail.online/bg.JPG" alt=""/>
+                                    <img className="rounded-lg" src={b.Image} alt=""/>
                                     <div className="flex justify-between">
                                         <div>
                                             <h3 className="mt-2 font-semibold text-lg font-mono dark:text-white">{b.Name} ({b.BoatEmblem})</h3>
