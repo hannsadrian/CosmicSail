@@ -351,7 +351,7 @@ async def shore_api_loop():
             lng = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lng()
             heading = sensors.__getitem__(sensorTypes.__getitem__('bno')).get_heading()
 
-            if lat is not None or lng is not None and heading is not None and \
+            if (lat is not None or lng is not None and heading is not None) and \
                     (simulation.running is True or SIMULATION is False):
                 sensors.__getitem__(sensorTypes.__getitem__('shore')).fetch_shore(lat, lng, heading, alternate)
                 alternate = not alternate
@@ -383,7 +383,7 @@ async def digital_wind_loop():
             lat = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lat()
             lng = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lng()
 
-            if lat is not None or lng is not None and (simulation.running is True or SIMULATION is False):
+            if (lat is not None or lng is not None) and (simulation.running is True or SIMULATION is False):
                 sensors.__getitem__(sensorTypes.__getitem__('wind')).fetch_wind(lat, lng)
                 simulation.set_wind(sensors.__getitem__(sensorTypes.__getitem__('wind')).get_value()['direction'],
                                     sensors.__getitem__(sensorTypes.__getitem__('wind')).get_value()['speed'])
