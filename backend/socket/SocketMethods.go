@@ -8,7 +8,6 @@ import (
 	socketio "github.com/googollee/go-socket.io"
 	"log"
 	"strings"
-	"time"
 )
 
 func registerMethods(server *socketio.Server) {
@@ -128,13 +127,13 @@ func registerMethods(server *socketio.Server) {
 		if isBoat {
 			server.BroadcastToRoom("/", emblem + userSuffix, "data", msg)
 
-			boat, err := logic.GetBoatByEmblem(emblem)
-			if err == nil && len(msg) > 0 {
-				go logic.SaveDatapoint(boat.ID, models.Datapoint{
-					Timestamp: time.Now(),
-					Data:      msg,
-				})
-			}
+			//boat, err := logic.GetBoatByEmblem(emblem)
+			//if err == nil && len(msg) > 0 {
+			//	go logic.SaveDatapoint(boat.ID, models.Datapoint{
+			//		Timestamp: time.Now(),
+			//		Data:      msg,
+			//	})
+			//}
 		}
 	})
 }

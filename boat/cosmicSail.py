@@ -40,7 +40,7 @@ if SIMULATION is False:
 meta_interval = 1 / 3
 if SIMULATION:
     print('SIMULATION ACTIVE')
-    meta_interval = 1 / 8
+    meta_interval = 1 / 5
 
 # socket
 sio = socketio.Client(request_timeout=1, reconnection_delay=0.5, reconnection_delay_max=1)
