@@ -643,7 +643,7 @@ function SimulationController({socket, sensorData, boatSensors}) {
     }, [lat, lng, socket])
 
     return (
-        <div className="mx-4 mb-20 md:mb-4">
+        <div className="mx-4 mb-20 md:mb-4 dark:text-gray-400">
             <button
                 onClick={() =>
                     socket.emit('setup', JSON.stringify({'type': 'toggle_sim'}))
@@ -654,18 +654,18 @@ function SimulationController({socket, sensorData, boatSensors}) {
             <input onInput={event => socket.emit('setup', JSON.stringify({
                 'type': 'sim_wind_dir',
                 'wind_dir': parseFloat(event.target.value) % 360
-            }))} className="w-32 ring-0 ring-blue-500 hover:ring-2 focus:outline-none rounded mx-1"
+            }))} className="w-32 ring-0 ring-blue-500 hover:ring-2 focus:outline-none rounded mx-1 dark:bg-black dark:placeholder-gray-600"
                    placeholder={sensorData && (parseFloat(sensorData[boatSensors['wind']?.Name]?.direction).toFixed(1) + '° (max. 359)')}/>
             <input onInput={event => {
                 socket.emit('setup', JSON.stringify({
                     'type': 'sim_wind_speed',
                     'wind_speed': parseFloat(event.target.value) % 40
                 }))
-            }} className="w-32 ring-0 ring-blue-500 hover:ring-2 focus:outline-none rounded mx-1"
+            }} className="w-32 ring-0 ring-blue-500 hover:ring-2 focus:outline-none rounded mx-1 dark:bg-black dark:placeholder-gray-600"
                    placeholder={sensorData && (parseFloat(sensorData[boatSensors['wind']?.Name]?.speed).toFixed(1) + 'm/s (max. 40)')}/>
 
             <span className="ml-4">Pos</span>
-            <input onInput={event => {setLat(event.target.value.split(', ')[0]); setLng(event.target.value.split(', ')[1])}} className="w-48 ring-0 ring-blue-500 hover:ring-2 focus:outline-none rounded mx-1"
+            <input onInput={event => {setLat(event.target.value.split(', ')[0]); setLng(event.target.value.split(', ')[1])}} className="w-48 ring-0 ring-blue-500 hover:ring-2 focus:outline-none rounded mx-1 dark:bg-black dark:placeholder-gray-600"
                    placeholder={'Lat, Lng'}/>
             <button onClick={uploadLatLng}>Upload</button>
         </div>
