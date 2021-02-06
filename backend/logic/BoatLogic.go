@@ -71,7 +71,7 @@ func GetBoatByEmblem(emblem string) (models.Boat, error) {
 
 
 func SerializeBoat(boat models.Boat) fiber.Map {
-	return fiber.Map{"BoatEmblem": boat.BoatEmblem, "Name": boat.Name, "Series": boat.Series, "Make": boat.Make, "Online": boat.Online, "LastOnline": boat.LastOnline, "Motors": boat.Motors, "Sensors": boat.Sensors}
+	return fiber.Map{"BoatEmblem": boat.BoatEmblem, "Name": boat.Name, "Series": boat.Series, "Make": boat.Make, "Online": boat.Online, "LastOnline": boat.LastOnline, "Image": boat.ImageUrl, "Motors": boat.Motors, "Sensors": boat.Sensors}
 }
 
 func SetOnline(boatEmblem string) {

@@ -14,6 +14,8 @@ type registerBody struct {
 }
 
 func RegisterUser(c *fiber.Ctx) {
+	panic(fiber.NewError(fiber.StatusForbidden, "currently no signups allowed"))
+
 	body := registerBody{}
 
 	if err := c.BodyParser(&body); err != nil {
