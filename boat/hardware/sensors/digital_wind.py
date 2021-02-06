@@ -58,6 +58,9 @@ class DigitalWindSensor:
         return self.wind_data['wind_gust']
 
     def fetch_wind(self, lat, lng):
+        if 'lat' in self.wind_data and get_distance(self.wind_data['lat'], self.wind_data['lng'], lat, lng) < 25:
+            return None
+
         response = requests.get(
             'http://api.openweathermap.org/data/2.5/onecall',
             params={

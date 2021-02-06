@@ -28,14 +28,12 @@ import sys
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
-
 SIMULATION = True if os.getenv("SIMULATION") == 'True' else False
 
 if SIMULATION is False:
     from board import SCL, SDA
     import busio
     import adafruit_pca9685 as pca_driver
-
 
 meta_interval = 1 / 3
 if SIMULATION:
@@ -251,7 +249,9 @@ def init():
     for motor in boatData['Motors']:
         motorTypes.__setitem__(motor['Type'], motor['Name'])
         motors.__setitem__(motor['Name'],
-                           ServoMotor(motor['Name'], pca.channels[int(motor['Channel']) - 1] if SIMULATION is False else None, float(motor['Min']),
+                           ServoMotor(motor['Name'],
+                                      pca.channels[int(motor['Channel']) - 1] if SIMULATION is False else None,
+                                      float(motor['Min']),
                                       float(motor['Max']), float(motor['Default']), motor['Type']))
 
     for sensor in boatData['Sensors']:
@@ -351,7 +351,8 @@ async def shore_api_loop():
             lng = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lng()
             heading = sensors.__getitem__(sensorTypes.__getitem__('bno')).get_heading()
 
-            if lat is not None or lng is not None and heading is not None:
+            if lat is not None or lng is not None and heading is not None and \
+                    (simulation.running is True or SIMULATION is False):
                 sensors.__getitem__(sensorTypes.__getitem__('shore')).fetch_shore(lat, lng, heading, alternate)
                 alternate = not alternate
         except KeyError:
@@ -372,7 +373,7 @@ async def digital_shore_loop():
                 sensors.__getitem__(sensorTypes.__getitem__('shore')).get_shore_dist(lat, lng, heading)
         except KeyError:
             pass
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.5)
 
 
 # fetch wind data
@@ -382,7 +383,7 @@ async def digital_wind_loop():
             lat = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lat()
             lng = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lng()
 
-            if lat is not None or lng is not None:
+            if lat is not None or lng is not None and (simulation.running is True or SIMULATION is False):
                 sensors.__getitem__(sensorTypes.__getitem__('wind')).fetch_wind(lat, lng)
                 simulation.set_wind(sensors.__getitem__(sensorTypes.__getitem__('wind')).get_value()['direction'],
                                     sensors.__getitem__(sensorTypes.__getitem__('wind')).get_value()['speed'])
@@ -394,11 +395,6 @@ async def digital_wind_loop():
 # execute autopilot logic
 async def autopilot_loop():
     while True:
-        try:
-            sensors.__getitem__(sensorTypes.__getitem__('imu')).loop()
-        except KeyError:
-            pass
-
         if autopilot.running:
             autopilot.cycle()
         await asyncio.sleep(1 / 15)
