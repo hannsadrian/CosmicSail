@@ -26,15 +26,16 @@ from autopilot.waypoint import WayPoint
 from simulation.simulation import Simulation
 from autopilot.pilot import AutoPilot
 
-SIMULATION = True
-
-meta_interval = 1 / 3
-if SIMULATION:
-    meta_interval = 1 / 8
-
 # environment
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
+
+SIMULATION = True if os.getenv("SIMULATION") == 'True' else False
+
+meta_interval = 1 / 3
+if SIMULATION:
+    print('SIMULATION ACTIVE')
+    meta_interval = 1 / 8
 
 # socket
 sio = socketio.Client(request_timeout=1, reconnection_delay=0.5, reconnection_delay_max=1)
@@ -112,6 +113,32 @@ def command(data):
 def setup(data):
     payload = json.loads(data)
 
+    if payload['type'] == 'toggle_sim' and SIMULATION is True:
+        simulation.running = not simulation.running
+
+    if payload['type'] == 'sim_wind_dir' and SIMULATION is True:
+        try:
+            sensors.__getitem__(sensorTypes.__getitem__('wind')).debug = True
+            sensors.__getitem__(sensorTypes.__getitem__('wind')).debug_wind_dir = float(payload['wind_dir'])
+        except:
+            sensors.__getitem__(sensorTypes.__getitem__('wind')).debug = False
+            pass
+
+    if payload['type'] == 'sim_wind_speed' and SIMULATION is True:
+        try:
+            sensors.__getitem__(sensorTypes.__getitem__('wind')).debug = True
+            sensors.__getitem__(sensorTypes.__getitem__('wind')).debug_wind_speed = float(payload['wind_speed'])
+        except:
+            sensors.__getitem__(sensorTypes.__getitem__('wind')).debug = False
+            pass
+
+    if payload['type'] == 'sim_origin' and SIMULATION is True:
+        try:
+            simulation.origin_lat = float(payload['lat'])
+            simulation.origin_lng = float(payload['lng'])
+        except:
+            pass
+
     if payload['type'] == 'autopilot_start':
         autopilot.start()
 
@@ -119,7 +146,13 @@ def setup(data):
         autopilot.stop()
 
     if payload['type'] == 'autopilot_reset':
-        autopilot.reset()
+        try:
+            if SIMULATION:
+                simulation.reset()
+                sensors.__getitem__(sensorTypes.__getitem__('wind')).debug = False
+            autopilot.reset()
+        except:
+            pass
 
     if payload['type'] == 'autopilot_mode':
         autopilot.set_mode(AutoPilotMode.MOTOR if autopilot.mode is AutoPilotMode.SAIL else AutoPilotMode.SAIL)
@@ -144,18 +177,17 @@ def setup(data):
         autopilot.set_way_points(way_points)
 
     # type=agps name=from config lat=51 lon=13
-    if payload['type'] == 'agps':
+    if payload['type'] == 'agps' and not SIMULATION:
         sensors[payload['name']].init_agps(payload['lat'], payload['lon'])
 
     if payload['type'] == 'reload':
         print("Reloading...")
         sio.disconnect()
-        autopilot.stop_autopilot()
-        # TODO: test reloading
+        autopilot.stop()
         os.execv(sys.executable, ['python3'] + sys.argv)
         quit()
 
-    if payload['type'] == 'shutdown':
+    if payload['type'] == 'shutdown' and not SIMULATION:
         print("Shutdown!")
         subprocess.run("sudo shutdown now", shell=True, check=True)
 
@@ -402,6 +434,10 @@ def send_meta(entire_meta):
     # autopilot
     if entire_meta or autopilot.has_changed():
         sensor_data.append({'Name': 'autopilot', 'State': autopilot.get_meta()})
+
+    if entire_meta:
+        sensor_data.append({'Name': 'simulated', 'State': SIMULATION})
+        sensor_data.append({'Name': 'simulation', 'State': simulation.running})
 
     if len(motor_data) != 0:
         sio.emit("data", json.dumps({

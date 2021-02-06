@@ -45,6 +45,9 @@ class AutoPilot:
         self.bno = bno
         self.wind = wind
         self.shore = shore
+        self.mode = AutoPilotMode.MOTOR
+        self.motor_state = MotorState.LINEAR
+        self.sail_state = SailState.LINEAR
 
     def reset(self):
         self.set_way_points([])

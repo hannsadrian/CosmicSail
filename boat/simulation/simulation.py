@@ -19,6 +19,8 @@ class Simulation:
     wind_direction = 0  # degrees
     wind_speed = 0  # m/s
 
+    running = False
+
     def __init__(self, motors, motor_types, sensors, sensor_types) -> None:
         self.motors = motors
         self.motor_types = motor_types
@@ -30,11 +32,22 @@ class Simulation:
         self.wind_speed = speed
         return
 
+    def reset(self) -> None:
+        self.origin_lat = 50.919547
+        self.origin_lng = 13.652643
+        self.position = Vector2D(0, 0)
+        self.rotation = 0
+        self.wind_direction = 0  # degrees
+        self.wind_speed = 0  # m/s
+
     def start(self) -> None:
         # potential setup
         return None
 
     def update(self, time_step) -> None:
+        if not self.running:
+            return
+
         f3 = get_forward_force_by_wind(self.motors.__getitem__(self.motor_types.__getitem__('sail')).get_state(),
                                        self.wind_speed, self.wind_direction, self.rotation)
 
