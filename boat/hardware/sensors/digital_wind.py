@@ -38,31 +38,31 @@ class DigitalWindSensor:
         if self.debug:
             return self.debug_wind_dir
 
-        if 'wind_deg' not in self.wind_data:
+        if 'deg' not in self.wind_data:
             return None
-        return self.wind_data['wind_deg']
+        return self.wind_data['deg']
 
     # wind speed in m/s
     def get_wind_speed(self):
         if self.debug:
             return self.debug_wind_speed
 
-        if 'wind_speed' not in self.wind_data:
+        if 'speed' not in self.wind_data:
             return None
-        return self.wind_data['wind_speed']
+        return self.wind_data['speed']
 
     # wind gusts in m/s
     def get_gust(self):
-        if 'wind_gust' not in self.wind_data:
+        if 'gust' not in self.wind_data:
             return None
-        return self.wind_data['wind_gust']
+        return self.wind_data['gust']
 
     def fetch_wind(self, lat, lng):
         if 'lat' in self.wind_data and get_distance(self.wind_data['lat'], self.wind_data['lng'], lat, lng) < 25:
             return None
 
         response = requests.get(
-            'http://api.openweathermap.org/data/2.5/onecall',
+            'http://api.openweathermap.org/data/2.5/weather',
             params={
                 'lat': lat,
                 'lon': lng,
@@ -70,7 +70,7 @@ class DigitalWindSensor:
             }
         )
 
-        self.wind_data = response.json()['current']
+        self.wind_data = response.json()['wind']
         self.wind_data['lat'] = lat
         self.wind_data['lng'] = lng
         return None
