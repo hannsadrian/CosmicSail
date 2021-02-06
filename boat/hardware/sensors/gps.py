@@ -79,7 +79,7 @@ class GpsSensor():
         data = self.get_value()
         if data is None:
             return None
-        if data.mode < 1:
+        if data.mode < 2:
             return None
         return data.position()[0]
 
@@ -90,7 +90,7 @@ class GpsSensor():
         data = self.get_value()
         if data is None:
             return None
-        if data.mode < 1:
+        if data.mode < 2:
             return None
         return data.position()[1]
 
@@ -101,7 +101,7 @@ class GpsSensor():
         data = self.get_value()
         if data is None:
             return None
-        if data.mode < 1:
+        if data.mode < 2:
             return None
         return data.hspeed
 
