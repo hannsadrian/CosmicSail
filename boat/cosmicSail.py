@@ -263,8 +263,8 @@ def init():
             sensors.__setitem__(sensor['Name'], Bandwidth(sensor['Name']))
         if sensor['Type'] == "ip":
             sensors.__setitem__(sensor['Name'], IP(sensor['Name']))
-        #if sensor['Type'] == "imu":
-        #    sensors.__setitem__(sensor['Name'], IMU(sensor['Name']))
+        # if sensor['Type'] == "imu":
+        #     sensors.__setitem__(sensor['Name'], IMU(sensor['Name']))
         if sensor['Type'] == "bno":
             sensors.__setitem__(sensor['Name'], BNO(sensor['Name'], SIMULATION))
         if sensor['Type'] == "wind":
@@ -293,7 +293,8 @@ def init():
         pass
 
     except KeyboardInterrupt:
-        pca.deinit()
+        if SIMULATION is False:
+            pca.deinit()
         quit()
 
 
