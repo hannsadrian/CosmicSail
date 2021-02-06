@@ -66,10 +66,13 @@ func GetAllBoats(c *fiber.Ctx) {
 		c.JSON(output)
 	} else {
 		var boats []models.Boat
-		database.Db.Model(&boats)
+		database.Db.Find(&boats)
 
 		var output []fiber.Map
 		for _, boat := range boats {
+			database.Db.Model(&boat).Association("Motors").Find(&boat.Motors)
+			database.Db.Model(&boat).Association("Sensors").Find(&boat.Sensors)
+			database.Db.Model(&boat).Association("Trips").Find(&boat.Trips)
 			output = append(output, logic.SerializeBoat(boat))
 		}
 		c.JSON(output)
