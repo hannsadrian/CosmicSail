@@ -9,6 +9,12 @@ import StatusOverview from "../components/boatDetail/StatusOverview";
 import MotorController from "../components/boatDetail/MotorController";
 import ConfiguratorOverview from "../components/hardwareConfig/ConfiguratorOverview";
 import DraggableList from "react-draggable-list";
+import 'mapbox-gl/dist/mapbox-gl.css';
+import mapboxgl from 'mapbox-gl';
+
+// @ts-ignore
+// eslint-disable-next-line import/no-webpack-loader-syntax
+mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker').default;
 
 const axios = require("axios").default
 
