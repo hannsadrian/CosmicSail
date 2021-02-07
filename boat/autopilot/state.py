@@ -17,3 +17,4 @@ class SailState(Enum):
     TRACKING = 2  # is tracking the wind as close as possible
     GYBE = 3  # wende
     TACK = 4  # halse
+    DANGER = 5

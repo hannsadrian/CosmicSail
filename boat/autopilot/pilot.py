@@ -95,11 +95,12 @@ class AutoPilot:
             from autopilot.motor_instructions import execute_motor_mode
             execute_motor_mode(self, self.motor_state, self.rudder, self.sail, self.engine, self.bno.get_heading(),
                                self.gps.get_lat(), self.gps.get_lng(), self.way_points[0], self.shore.shortest_distance,
-                               self.wind.get_wind_direction())
+                               self.shore.straightest_distance, self.wind.get_wind_direction())
         if self.mode is AutoPilotMode.SAIL:
             from autopilot.sail_instructions import execute_sail_mode
             execute_sail_mode(self, self.sail_state, self.rudder, self.sail, self.engine, self.bno.get_heading(),
-                              self.bno.get_roll(), self.wind.get_wind_direction(), self.gps.get_speed(), self.gps.get_lat(),
+                              self.bno.get_roll(), self.wind.get_wind_direction(), self.gps.get_speed(),
+                              self.gps.get_lat(),
                               self.gps.get_lng(), self.way_points[0], self.shore.straightest_distance,
                               self.shore.shortest_distance, self.approach_rate)
 
