@@ -20,7 +20,7 @@ def execute_sail_mode(autopilot: AutoPilot, state: SailState, rudder: ServoMotor
     # angle between turning angle and wind
     gamma = abs(boat_gamma) - angle
     # angle between wind_direction and magnetic bearing of waypoint
-    beta = abs(wind_direction - way_point.magnetic_bearing(current_lat, current_lng))
+    beta = abs(wind_direction - (way_point.magnetic_bearing(current_lat, current_lng) % 360))
 
     if state is SailState.LINEAR:
         linear(autopilot, rudder, sail, shortest_shore_distance, boat_gamma, beta, angle)
@@ -47,7 +47,7 @@ def linear(autopilot: AutoPilot, rudder: ServoMotor, sail: ServoMotor, closest_s
     return
 
 
-def tracking(autopilot: AutoPilot, rudder: ServoMotor, sail: ServoMotor, shore_ahead: ShoreDistance,
+def tracking(autopilot: AutoPilot, rudder: ServoMotor, sail: ServoMotor, shore_ahead: ShoreDistance, shore_straight: ShoreDistance,
              way_point_proximity_trend: float, boat_gamma: float, beta: float, angle: float, speed: float):
     if abs(beta) >= 70:
         autopilot.set_state(sail=SailState.LINEAR)
@@ -56,7 +56,7 @@ def tracking(autopilot: AutoPilot, rudder: ServoMotor, sail: ServoMotor, shore_a
     rudder.set_state(get_optimal_rudder_state(-boat_gamma - 60 if boat_gamma < 0 else -boat_gamma + 60))
     sail.set_state(remap(abs(boat_gamma), 180, 60, 1, -1))
 
-    if way_point_proximity_trend <= -0.25 or (shore_ahead.dist is not None and shore_ahead.dist < 60):
+    if way_point_proximity_trend <= -0.25 or (shore_ahead.dist is not None and shore_ahead.dist < 60) or (shore_straight.dist is not None and shore_straight.dist < 20):
         if angle < 0:
             autopilot.turning_direction = -1
         else:
