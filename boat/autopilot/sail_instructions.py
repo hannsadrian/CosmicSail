@@ -8,7 +8,7 @@ from utility.coordinates import get_bearing, get_distance
 
 
 def execute_sail_mode(autopilot: AutoPilot, state: SailState, rudder: ServoMotor, sail: ServoMotor,
-                      engine: ServoMotor, bearing: float, wind_direction: float, speed: float,
+                      engine: ServoMotor, bearing: float, roll: float, wind_direction: float, speed: float,
                       current_lat: float, current_lng: float, way_point: WayPoint,
                       straightest_shore_distance: ShoreDistance,
                       shortest_shore_distance: ShoreDistance, way_point_proximity_trend: float):
@@ -23,10 +23,10 @@ def execute_sail_mode(autopilot: AutoPilot, state: SailState, rudder: ServoMotor
     beta = abs(wind_direction - (way_point.magnetic_bearing(current_lat, current_lng) % 360))
 
     if state is SailState.LINEAR:
-        linear(autopilot, rudder, sail, shortest_shore_distance, boat_gamma, beta, angle)
+        linear(autopilot, rudder, sail, shortest_shore_distance, boat_gamma, beta, angle, roll)
     if state is SailState.TRACKING:
         tracking(autopilot, rudder, sail, straightest_shore_distance, shortest_shore_distance,
-                 way_point_proximity_trend, boat_gamma, beta, angle, speed)
+                 way_point_proximity_trend, boat_gamma, beta, angle, speed, roll)
     if state is SailState.GYBE:
         gybe(autopilot, rudder, sail, boat_gamma, angle)
     if state is SailState.TACK:
@@ -34,13 +34,13 @@ def execute_sail_mode(autopilot: AutoPilot, state: SailState, rudder: ServoMotor
 
 
 def linear(autopilot: AutoPilot, rudder: ServoMotor, sail: ServoMotor, closest_shore: ShoreDistance, boat_gamma: float,
-           beta: float, angle: float):
+           beta: float, angle: float, roll: float):
     if abs(beta) < 70:
         autopilot.set_state(sail=SailState.TRACKING)
         return
 
     rudder.set_state(get_optimal_rudder_state(angle))
-    sail.set_state(remap(abs(boat_gamma), 180, 70, 1, -1))
+    sail.set_state(compensate_roll(roll, remap(abs(boat_gamma), 180, 70, 1, -1)))
 
     # TODO: check if shore is too close
 
@@ -48,20 +48,20 @@ def linear(autopilot: AutoPilot, rudder: ServoMotor, sail: ServoMotor, closest_s
 
 
 def tracking(autopilot: AutoPilot, rudder: ServoMotor, sail: ServoMotor, shore_ahead: ShoreDistance,
-             shore_straight: ShoreDistance,
-             way_point_proximity_trend: float, boat_gamma: float, beta: float, angle: float, speed: float):
+             shore_straight: ShoreDistance, way_point_proximity_trend: float, boat_gamma: float, beta: float,
+             angle: float, speed: float, roll: float):
     if abs(beta) >= 70:
         autopilot.set_state(sail=SailState.LINEAR)
         return
 
     rudder.set_state(get_optimal_rudder_state(-boat_gamma - 60 if boat_gamma < 0 else -boat_gamma + 60))
-    sail.set_state(remap(abs(boat_gamma), 180, 60, 1, -1))
+    sail.set_state(compensate_roll(roll, remap(abs(boat_gamma), 180, 60, 1, -1)))
 
     if way_point_proximity_trend <= -0.25 or (shore_ahead.dist is not None and shore_ahead.dist < 60) or (
             shore_straight.dist is not None and shore_straight.dist < 20):
         autopilot.turning_direction = 0
 
-        if speed < 1:
+        if speed < 1 or way_point_proximity_trend < -1:
             autopilot.set_state(sail=SailState.TACK)
         else:
             autopilot.set_state(sail=SailState.GYBE)
@@ -95,6 +95,11 @@ def tack(autopilot: AutoPilot, rudder: ServoMotor, sail: ServoMotor, boat_gamma:
         autopilot.set_state(sail=SailState.TRACKING)
 
     rudder.set_state(-autopilot.turning_direction)
+
+
+def compensate_roll(roll, sail_state):
+    roll_modifier = min(60, abs(roll)) / 60
+    return min(1, roll_modifier * 2 + sail_state)
 
 
 def remap(value, max_input, min_input, max_output, min_output):

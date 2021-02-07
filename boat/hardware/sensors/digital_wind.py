@@ -39,7 +39,7 @@ class DigitalWindSensor:
             return self.debug_wind_dir
 
         if 'deg' not in self.wind_data:
-            return None
+            return 0
         return self.wind_data['deg']
 
     # wind speed in m/s
@@ -48,7 +48,7 @@ class DigitalWindSensor:
             return self.debug_wind_speed
 
         if 'speed' not in self.wind_data:
-            return None
+            return 0
         return self.wind_data['speed']
 
     # wind gusts in m/s
