@@ -221,21 +221,27 @@ def init():
     global boatData, autopilot, simulation
     print("Retrieving data from rudder service on " + os.getenv("BACKEND"))
 
-    # call rudder api for hardware loading!
-    # get `/boat/v1/` with Auth Header
-    try:
-        url = os.getenv("BACKEND") + "/boat/v1/"
-        headers = {'Authorization': 'Bearer ' + os.getenv("TOKEN")}
+    connected = False
 
-        r = requests.get(url, headers=headers)
-        r.raise_for_status()
+    while not connected:
+        # call rudder api for hardware loading!
+        # get `/boat/v1/` with Auth Header
+        try:
+            url = os.getenv("BACKEND") + "/boat/v1/"
+            headers = {'Authorization': 'Bearer ' + os.getenv("TOKEN")}
 
-        # save data locally
-        boatData = r.json()
-    except requests.HTTPError:
-        raise Exception("Access error!")
-    except requests.ConnectionError:
-        raise Exception("Connection error!")
+            r = requests.get(url, headers=headers)
+            r.raise_for_status()
+
+            # save data locally
+            boatData = r.json()
+            connected = True
+        except requests.HTTPError:
+            raise Exception("Access error!")
+        except requests.ConnectionError:
+            print("Couldn't connect, retrying!")
+            connected = False
+            time.sleep(1)
 
     if not boatData:
         raise Exception("No boat data!")
