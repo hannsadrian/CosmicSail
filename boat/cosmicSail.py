@@ -7,7 +7,7 @@ import os
 from os.path import join, dirname
 from dotenv import load_dotenv
 
-from autopilot.state import AutoPilotMode, MotorState
+from autopilot.state import AutoPilotMode, MotorState, SailState
 from hardware.motors.servo import ServoMotor
 from hardware.sensors.gps import GpsSensor
 from hardware.sensors.bandwidth import Bandwidth
@@ -157,6 +157,13 @@ def setup(data):
             autopilot.reset()
         except:
             pass
+
+    if payload['type'] == 'tack' and autopilot.running:
+        autopilot.turning_direction = 0
+        autopilot.set_state(sail=SailState.TACK)
+    if payload['type'] == 'gybe' and autopilot.running:
+        autopilot.turning_direction = 0
+        autopilot.set_state(sail=SailState.GYBE)
 
     if payload['type'] == 'autopilot_mode':
         autopilot.set_mode(AutoPilotMode.MOTOR if autopilot.mode is AutoPilotMode.SAIL else AutoPilotMode.SAIL)

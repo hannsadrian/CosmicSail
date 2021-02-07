@@ -572,6 +572,12 @@ function BoatDetail(props) {
                                 PILOT
                             </button>
                             <button
+                                hidden={!sensorData?.autopilot?.active}
+                                onClick={() => socket.emit("setup", JSON.stringify({type: 'tack'}))}
+                                className="my-auto cursor-default rounded bg-gray-200 dark:bg-black text-xs font-semibold font-mono text-gray-700 dark:text-gray-400 p-2">
+                                TACK
+                            </button>
+                            <button
                                 onClick={() => socket.emit("setup", JSON.stringify({type: sensorData.autopilot?.active ? 'autopilot_stop' : 'autopilot_start'}))}
                                 className={(sensorData?.autopilot?.active ? "bg-red-500" : "bg-green-600") + " py-3 px-5 font-bold font-mono text-xl rounded-lg text-white"}>
                                 {sensorData?.autopilot?.active ? "STOP" : "START"}
@@ -581,6 +587,12 @@ function BoatDetail(props) {
                                 onClick={() => socket.emit("setup", JSON.stringify({type: 'autopilot_reset'}))}
                                 className="my-auto rounded bg-gray-200 hover:bg-gray-300 dark:bg-black dark:hover:bg-gray-700 text-xs font-semibold font-mono text-gray-700 dark:text-gray-400 p-2">
                                 RESET
+                            </button>
+                            <button
+                                hidden={!sensorData?.autopilot?.active}
+                                onClick={() => socket.emit("setup", JSON.stringify({type: 'gybe'}))}
+                                className="my-auto cursor-default rounded bg-gray-200 dark:bg-black text-xs font-semibold font-mono text-gray-700 dark:text-gray-400 p-2">
+                                GYBE
                             </button>
                         </div>
                     </div>
