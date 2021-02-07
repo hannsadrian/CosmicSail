@@ -78,6 +78,9 @@ class AutoPilot:
     def cycle(self):
         time_step = 1 / 15
 
+        if self.gps.get_lat() is None or self.gps.get_lat() is None or self.bno.get_heading() is None:
+            return
+
         if (len(self.way_points) > 0 and self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng()) < 20) and \
                 (self.motor_state is not MotorState.STAY or self.mode is AutoPilotMode.SAIL):
             self.way_points.pop(0)
@@ -121,6 +124,8 @@ class AutoPilot:
             state = self.motor_state
         if self.running and self.mode == AutoPilotMode.SAIL:
             state = self.sail_state
+        if self.gps.get_lat() is None or self.gps.get_lat() is None or self.bno.get_heading() is None:
+            state = "No position data!"
 
         approach_rate = '---m/s'
         if self.running:
