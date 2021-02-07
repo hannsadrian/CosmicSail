@@ -2,6 +2,10 @@ import math
 
 
 def get_bearing(lat1, lng1, lat2, lng2):
+    lat1 = math.radians(lat1)
+    lng1 = math.radians(lng1)
+    lat2 = math.radians(lat2)
+    lng2 = math.radians(lng2)
     y = math.sin(lng2 - lng1) * math.cos(lat2)
     x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(lng2 - lng1)
     return math.degrees(math.atan2(y, x))
