@@ -11,7 +11,7 @@ def get_forward_force_by_wind(sail, wind_speed, wind_direction, heading) -> floa
     sail_area = 0.366  # in m**2
     air_density = 1.229  # in kg/m**3
 
-    wind_force = (sail_area ** 2) * (air_density ** 3) * wind_speed ** 2  # results in Newton
+    wind_force = sail_area * (1/2 * air_density) * wind_speed**2  # results in Newton
 
     # find smallest possible angle from wind_dir to heading
     gamma = math.radians(360 - abs(wind_direction - heading) if abs(wind_direction - heading) > 180 else abs(
