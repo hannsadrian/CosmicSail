@@ -344,6 +344,7 @@ async def simulation_loop():
     simulation.start()
 
     while True:
+        # run simulation at 15 Hz
         simulation.update(1 / 15)
         await asyncio.sleep(1 / 15)
 
@@ -360,12 +361,14 @@ async def shore_api_loop():
     alternate = False
     while True:
         try:
+            # get location information
             lat = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lat()
             lng = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lng()
             heading = sensors.__getitem__(sensorTypes.__getitem__('bno')).get_heading()
 
             if (lat is not None or lng is not None and heading is not None) and \
                     (simulation.running is True or SIMULATION is False):
+                # fetch shore-data from api
                 sensors.__getitem__(sensorTypes.__getitem__('shore')).fetch_shore(lat, lng, heading, alternate)
                 alternate = not alternate
         except KeyError:
