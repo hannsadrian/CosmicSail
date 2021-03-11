@@ -301,7 +301,16 @@ def init():
     connect_socket()
 
     try:
-        asyncio.run(main_loops())
+        # asyncio.run(main_loops())
+        loop = asyncio.get_event_loop()
+        loop.create_task(internet_loop())
+        loop.create_task(meta_loop())
+        loop.create_task(autopilot_loop())
+        loop.create_task(digital_shore_loop())
+        loop.create_task(shore_api_loop())
+        loop.create_task(digital_wind_loop())
+        loop.create_task(simulation_loop())
+        loop.run_forever()
     except asyncio.CancelledError:
         pass
 
@@ -331,10 +340,10 @@ def reset_all_motors():
         motors[motor].reset()
 
 
-async def main_loops():
-    # register services mandatory for running the boat
-    await asyncio.gather(internet_loop(), meta_loop(), autopilot_loop(), digital_shore_loop(), shore_api_loop(),
-                         digital_wind_loop(), simulation_loop())
+# async def main_loops():
+# register services mandatory for running the boat
+# await asyncio.gather(internet_loop(), meta_loop(), autopilot_loop(), digital_shore_loop(), shore_api_loop(),
+#                     digital_wind_loop(), simulation_loop())
 
 
 async def simulation_loop():
