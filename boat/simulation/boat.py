@@ -19,7 +19,7 @@ def get_forward_force_by_wind(sail, wind_speed, wind_direction, heading) -> floa
 
     min_sheet_len = 6
     max_sheet_len = 12
-    boom_height = min_sheet_len
+    boom_height = 4
     boom_len = 21
     # 2 * asin(sqrt(c^2-b^2)/21)
     # calculate elongation from middle of boat with minimal offset
