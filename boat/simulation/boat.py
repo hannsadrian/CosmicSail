@@ -19,12 +19,13 @@ def get_forward_force_by_wind(sail, wind_speed, wind_direction, heading) -> floa
 
     min_sheet_len = 6
     max_sheet_len = 12
+    boom_height = min_sheet_len
     boom_len = 21
     # 2 * asin(sqrt(c^2-b^2)/21)
     # calculate elongation from middle of boat with minimal offset
     # -> the sail is never straight over the middle of the boat, as this calculation proposes without offset
     # latex: \beta = 2\arcsin{\frac{\sqrt{(a + \frac{(x + 1)}{2} * (q-a))^2 - a^2}}{2b}} + 0.17453
-    beta = 2 * math.asin(math.sqrt((min_sheet_len + ((sail + 1)/2) * (max_sheet_len - min_sheet_len)) ** 2 - min_sheet_len ** 2) / (2 * boom_len)) + 0.17453
+    beta = 2 * math.asin(math.sqrt((min_sheet_len + ((sail + 1)/2) * (max_sheet_len - min_sheet_len)) ** 2 - boom_height ** 2) / (2 * boom_len)) + 0.17453
     # if the sail elongation is greater than the wind, simulate sail flutter in the wind
     if beta > gamma:
         beta = gamma
