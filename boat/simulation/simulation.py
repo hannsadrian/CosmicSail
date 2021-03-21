@@ -45,25 +45,32 @@ class Simulation:
         return None
 
     def update(self, time_step) -> None:
+        """executes one simulation iteration"""
         if not self.running:
             return
 
+        # calculate the forward force caused by the wind
         f3 = get_forward_force_by_wind(self.motors.__getitem__(self.motor_types.__getitem__('sail')).get_state(),
                                        self.wind_speed, self.wind_direction, self.rotation)
 
+        # calculate the forward force caused by the motor
         f_engine = self.motors.__getitem__(self.motor_types.__getitem__('engine')).get_state() * 6
 
+        # rotate the simulated vessel based on rudder state
         self.rotation = (self.rotation + self.motors.__getitem__(
             self.motor_types.__getitem__('rudder')).get_state() * 3) % 360
 
+        # create directional vectors resulting from calculated forces
         sail_vector = (vector_from_heading(360 - (self.rotation - 90) % 360) * -f3) * time_step
         engine_vector = (vector_from_heading(360 - (self.rotation - 90) % 360) * f_engine) * time_step
 
+        # add up both impact vectors to create a velocity
         velocity = sail_vector + engine_vector
 
+        # apply resulting velocity to the simulated position
         self.position = self.position + velocity
 
-        # set sensor state
+        # set sensor data resulting from the simulation
         self.sensors.__getitem__(self.sensor_types.__getitem__('bno')).set_simulated_heading(round(self.rotation))
         coords = get_point(self.origin_lat, self.origin_lng, math.degrees(math.atan2(self.position.x, self.position.y)),
                            abs(self.position))

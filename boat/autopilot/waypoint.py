@@ -2,6 +2,7 @@ from utility.coordinates import get_distance, get_bearing
 
 
 class WayPoint:
+    """Class to describe a point in the autopilot route, equipped with useful calculation functions"""
     lat = 0
     lng = 0
     danger_point = False

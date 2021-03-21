@@ -1,6 +1,9 @@
 from hardware.sensors.lib.MPU6050 import MPU6050
 
 
+"""CURRENTLY NOT USED"""
+
+
 class IMU:
     name = ""
     prev_state = {}

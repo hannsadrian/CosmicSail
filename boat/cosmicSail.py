@@ -64,6 +64,7 @@ simulation = Simulation({}, {}, {}, {})
 
 
 async def internet_check():
+    """function to check internet connection and register outages early"""
     try:
         t = requests.get('https://rudder.cosmicsail.online', timeout=3).text
     except requests.exceptions.Timeout:
@@ -106,6 +107,7 @@ def disconnect():
 
 @sio.event
 def command(data):
+    """event that is called when a command should be executed by the boat"""
     command = json.loads(data)
     if command["type"] == "motor":
         motors[command["name"]].set_state(command["value"])
@@ -115,6 +117,7 @@ def command(data):
 
 @sio.event
 def setup(data):
+    """setup event that can trigger many hard- and software settings"""
     payload = json.loads(data)
 
     if payload['type'] == 'toggle_sim' and SIMULATION is True:
@@ -224,8 +227,7 @@ def init():
     connected = False
 
     while not connected:
-        # call rudder api for hardware loading!
-        # get `/boat/v1/` with Auth Header
+        # try to get boat data from backend
         try:
             url = os.getenv("BACKEND") + "/boat/v1/"
             headers = {'Authorization': 'Bearer ' + os.getenv("TOKEN")}
@@ -246,7 +248,7 @@ def init():
     if not boatData:
         raise Exception("No boat data!")
 
-    # ultra long & fancy console spam
+    # initialization message
     print("\n" +
           "╔═╗┌─┐┌─┐┌┬┐┬┌─┐╔═╗┌─┐┬┬  \n" +
           "║  │ │└─┐│││││  ╚═╗├─┤││  \n" +
@@ -258,7 +260,6 @@ def init():
     print()
 
     # load hardware
-    # ⚠ We are currently ignoring per-motor-pwm-cycle from config ⚠
     for motor in boatData['Motors']:
         motorTypes.__setitem__(motor['Type'], motor['Name'])
         motors.__setitem__(motor['Name'],
@@ -267,6 +268,7 @@ def init():
                                       float(motor['Min']),
                                       float(motor['Max']), float(motor['Default']), motor['Type']))
 
+    # load sensors
     for sensor in boatData['Sensors']:
         sensorTypes.__setitem__(sensor['Type'], sensor['Name'])
         if sensor['Type'] == "gps":
@@ -296,11 +298,14 @@ def init():
                           sensors.__getitem__(sensorTypes.__getitem__('shore')))
 
     if SIMULATION:
+        # start simulation
         simulation = Simulation(motors, motorTypes, sensors, sensorTypes)
 
     connect_socket()
 
     try:
+        # start periodic tasks that the boat has to execute for fetching sensor data,
+        # executing the autopilot and simulation and transmitting telemetry
         # asyncio.run(main_loops())
         loop = asyncio.get_event_loop()
         loop.create_task(internet_loop())
@@ -425,9 +430,9 @@ async def autopilot_loop():
         await asyncio.sleep(1 / 15)
 
 
-# send metadata over socket
+# send telemetry over socket
 async def meta_loop():
-    counter = 4  # weird counter logic counting down; starting at 4 to give some time to setup
+    counter = 4  # counter logic counting down; starting at 4 to allow initial setup time
     while True:
         if counter == 0:
             send_meta(True)
@@ -443,6 +448,7 @@ previous_motor_data = []
 previous_sensor_data = []
 
 
+# send telemetry data
 def send_meta(entire_meta):
     global previous_motor_data, previous_sensor_data
 
@@ -480,4 +486,5 @@ def send_meta(entire_meta):
         })))
 
 
+# call initialization function
 init()

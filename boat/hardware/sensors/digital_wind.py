@@ -76,6 +76,7 @@ class DigitalWindSensor:
         return None
 
     def has_changed(self):
+        """compares changes in the wind data for telemetry purposes"""
         changed = self.get_meta() != self.prev_state
         self.prev_state = self.get_meta()
 

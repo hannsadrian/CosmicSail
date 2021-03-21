@@ -2,6 +2,7 @@ import math
 
 
 def get_bearing(lat1, lng1, lat2, lng2):
+    """calculates the direction relative to north pointing from (lat1, lng1) to (lat2, lng2)"""
     lat1 = math.radians(lat1)
     lng1 = math.radians(lng1)
     lat2 = math.radians(lat2)
@@ -12,6 +13,7 @@ def get_bearing(lat1, lng1, lat2, lng2):
 
 
 def get_distance(lat1, lng1, lat2, lng2):
+    """calculates the distance from (lat1, lng1) to (lat2, lng2)"""
     R = 6371e3
     phi1 = math.radians(lat1)
     phi2 = math.radians(lat2)
@@ -25,6 +27,7 @@ def get_distance(lat1, lng1, lat2, lng2):
 
 
 def get_point(lat, lng, bearing, distance):
+    """calculates coordinates in bearing and distance from given (lat, lng)"""
     R = 6371e3
     bearing = math.radians(bearing)
 

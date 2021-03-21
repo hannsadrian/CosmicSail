@@ -15,6 +15,7 @@ class Bandwidth:
         return self.name
 
     def has_changed(self):
+        """compares changes in the bandwidth usage for telemetry purposes"""
         changed = self.get_value() != self.prev_state
         self.prev_state = self.get_value()
 

@@ -5,7 +5,7 @@ def vector_from_heading(angle):
     return Vector2D(math.cos(math.radians(angle)), math.sin(math.radians(angle)))
 
 
-# see https://scipython.com/book2/chapter-4-the-core-python-language-ii/examples/a-2d-vector-class/
+# vector class derived from https://scipython.com/book2/chapter-4-the-core-python-language-ii/examples/a-2d-vector-class/
 class Vector2D:
     """A two-dimensional vector with Cartesian coordinates."""
 

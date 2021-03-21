@@ -6,6 +6,7 @@ from utility.coordinates import get_point
 
 
 def danger(autopilot: AutoPilot, current_lat: float, current_lng: float, closest_shore: ShoreDistance):
+    """function to add a shore dodging way_point"""
     rescue_coords = get_point(current_lat, current_lng, closest_shore.bearing - 180 % 360, 30)
     rescue_point = WayPoint(rescue_coords[0], rescue_coords[1])
     rescue_point.danger_point = True

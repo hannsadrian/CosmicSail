@@ -111,6 +111,7 @@ class DigitalShoreSensor:
             pass
 
     def has_changed(self):
+        """compares changes in the shore proximity output for telemetry purposes"""
         changed = self.get_meta() != self.prev_state
         self.prev_state = self.get_meta()
 

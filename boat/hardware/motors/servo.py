@@ -19,7 +19,6 @@ class ServoMotor:
         self.reset()
 
     def reset(self):
-        #print(self.name + " resetting to " + str(self.default))
         self.set_state(self.default)
 
     def set_raw_state(self, raw):
@@ -32,6 +31,7 @@ class ServoMotor:
             self.channel.duty_cycle = remapped
 
     def has_changed(self):
+        """compares changes in the motor state for telemetry purposes"""
         changed = self.state != self.prev_state
         self.prev_state = self.state
 
