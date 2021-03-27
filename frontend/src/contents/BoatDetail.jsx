@@ -41,8 +41,8 @@ const emojiNumbers = {
 }
 
 const linePaint = {
-    'line-color': 'white',
-    'line-width': 2
+    'line-color': 'yellow',
+    'line-width': 3
 };
 
 

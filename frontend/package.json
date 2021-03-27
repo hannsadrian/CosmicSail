@@ -21,7 +21,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
     "react-style-normalizer": "^1.2.8",
-    "socket.io-client": "^2.4.0",
+    "socket.io-client": "2.4.0",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat",
     "web-vitals": "^0.2.4",
     "worker-loader": "^3.0.7"
