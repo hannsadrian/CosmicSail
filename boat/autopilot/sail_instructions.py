@@ -81,6 +81,7 @@ def tracking(autopilot: AutoPilot, rudder: ServoMotor, sail: ServoMotor, shore_a
         autopilot.turning_direction = 0
 
         if speed < 1 or abs(angle) > 160:
+            # EXPERIMENTAL
             autopilot.set_state(sail=SailState.TACK)
         else:
             autopilot.set_state(sail=SailState.GYBE)
@@ -105,7 +106,7 @@ def gybe(autopilot: AutoPilot, rudder: ServoMotor, sail: ServoMotor, boat_gamma:
 
 
 def tack(autopilot: AutoPilot, rudder: ServoMotor, sail: ServoMotor, boat_gamma: float, angle: float):
-    """execute a tack maneuver"""
+    """EXPERIMENTAL: execute a tack maneuver"""
     if autopilot.turning_direction == 0:
         if angle < 0:
             autopilot.turning_direction = -1
