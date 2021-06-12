@@ -98,27 +98,32 @@ class AutoPilot:
         if len(self.way_points) == 0:
             self.set_mode(AutoPilotMode.MOTOR)
             self.set_state(motor=MotorState.STAY)
-            self.add_immediate_way_point(WayPoint(self.gps.get_lat(), self.gps.get_lng()))
+            self.add_immediate_way_point(
+                WayPoint(self.gps.get_lat(), self.gps.get_lng()))
 
         # calculate relevant autopilot performance data
-        waypoint_distance = self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng())
-        self.approach_rate = (self.prev_waypoint_dist - waypoint_distance) / time_step
+        waypoint_distance = self.way_points[0].distance(
+            self.gps.get_lat(), self.gps.get_lng())
+        self.approach_rate = (self.prev_waypoint_dist -
+                              waypoint_distance) / time_step
         self.prev_waypoint_dist = waypoint_distance
 
         if self.mode is AutoPilotMode.MOTOR:
             # execute motor instructions
             from autopilot.motor_instructions import execute_motor_mode
             execute_motor_mode(self, self.motor_state, self.rudder, self.sail, self.engine, self.bno.get_heading(),
-                               self.gps.get_lat(), self.gps.get_lng(), self.way_points[0], self.shore.shortest_distance,
-                               self.shore.straightest_distance, self.wind.get_wind_direction())
+                               self.gps.get_lat(), self.gps.get_lng(
+            ), self.way_points[0], self.shore.shortest_distance,
+                self.shore.straightest_distance, self.wind.get_wind_direction())
         if self.mode is AutoPilotMode.SAIL:
             # execute sailing instructions
             from autopilot.sail_instructions import execute_sail_mode
             execute_sail_mode(self, self.sail_state, self.rudder, self.sail, self.engine, self.bno.get_heading(),
                               self.bno.get_roll(), self.wind.get_wind_direction(), self.gps.get_speed(),
                               self.gps.get_lat(),
-                              self.gps.get_lng(), self.way_points[0], self.shore.straightest_distance,
-                              self.shore.shortest_distance, self.approach_rate)
+                              self.gps.get_lng(
+            ), self.way_points[0], self.shore.straightest_distance,
+                self.shore.shortest_distance, self.approach_rate)
 
     def has_changed(self):
         """compares changes in the autopilot telemetry"""
@@ -130,7 +135,7 @@ class AutoPilot:
     def get_meta(self):
         """:returns a dictionary with information about the current autopilot state"""
         next_waypoint_dist = "--m"
-        if len(self.way_points) > 0:
+        if len(self.way_points) > 0 and self.gps.get_lat() is not None and self.gps.get_lng() is not None:
             next_waypoint_dist = str(
                 round(self.way_points[0].distance(self.gps.get_lat(), self.gps.get_lng()), 1)) + "m"
 

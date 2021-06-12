@@ -41,7 +41,8 @@ if SIMULATION:
     meta_interval = 1 / 5
 
 # socket
-sio = socketio.Client(request_timeout=1, reconnection_delay=0.5, reconnection_delay_max=1)
+sio = socketio.Client(
+    request_timeout=1, reconnection_delay=0.5, reconnection_delay_max=1)
 
 # PWM Control
 if SIMULATION is False:
@@ -119,6 +120,7 @@ def command(data):
 def setup(data):
     """setup event that can trigger many hard- and software settings"""
     payload = json.loads(data)
+    print(payload)
 
     if payload['type'] == 'toggle_sim' and SIMULATION is True:
         simulation.running = not simulation.running
@@ -126,7 +128,8 @@ def setup(data):
     if payload['type'] == 'sim_wind_dir' and SIMULATION is True:
         try:
             sensors.__getitem__(sensorTypes.__getitem__('wind')).debug = True
-            sensors.__getitem__(sensorTypes.__getitem__('wind')).debug_wind_dir = float(payload['wind_dir'])
+            sensors.__getitem__(sensorTypes.__getitem__(
+                'wind')).debug_wind_dir = float(payload['wind_dir'])
         except:
             sensors.__getitem__(sensorTypes.__getitem__('wind')).debug = False
             pass
@@ -134,7 +137,8 @@ def setup(data):
     if payload['type'] == 'sim_wind_speed' and SIMULATION is True:
         try:
             sensors.__getitem__(sensorTypes.__getitem__('wind')).debug = True
-            sensors.__getitem__(sensorTypes.__getitem__('wind')).debug_wind_speed = float(payload['wind_speed'])
+            sensors.__getitem__(sensorTypes.__getitem__(
+                'wind')).debug_wind_speed = float(payload['wind_speed'])
         except:
             sensors.__getitem__(sensorTypes.__getitem__('wind')).debug = False
             pass
@@ -156,7 +160,8 @@ def setup(data):
         try:
             if SIMULATION:
                 simulation.reset()
-                sensors.__getitem__(sensorTypes.__getitem__('wind')).debug = False
+                sensors.__getitem__(
+                    sensorTypes.__getitem__('wind')).debug = False
             autopilot.reset()
         except:
             pass
@@ -169,7 +174,8 @@ def setup(data):
         autopilot.set_state(sail=SailState.GYBE)
 
     if payload['type'] == 'autopilot_mode':
-        autopilot.set_mode(AutoPilotMode.MOTOR if autopilot.mode is AutoPilotMode.SAIL else AutoPilotMode.SAIL)
+        autopilot.set_mode(
+            AutoPilotMode.MOTOR if autopilot.mode is AutoPilotMode.SAIL else AutoPilotMode.SAIL)
 
     if payload['type'] == 'autopilot_state':
         if payload['state'] == 'linear_motor':
@@ -191,7 +197,8 @@ def setup(data):
         autopilot.set_way_points(way_points)
 
     # type=agps name=from config lat=51 lon=13
-    if payload['type'] == 'agps' and not SIMULATION:
+    if payload['type'] == 'agps' and SIMULATION is False:
+        print("AGPS setup")
         sensors[payload['name']].init_agps(payload['lat'], payload['lon'])
 
     if payload['type'] == 'reload':
@@ -264,7 +271,8 @@ def init():
         motorTypes.__setitem__(motor['Type'], motor['Name'])
         motors.__setitem__(motor['Name'],
                            ServoMotor(motor['Name'],
-                                      pca.channels[int(motor['Channel']) - 1] if SIMULATION is False else None,
+                                      pca.channels[int(
+                                          motor['Channel']) - 1] if SIMULATION is False else None,
                                       float(motor['Min']),
                                       float(motor['Max']), float(motor['Default']), motor['Type']))
 
@@ -281,11 +289,14 @@ def init():
         # if sensor['Type'] == "imu":
         #     sensors.__setitem__(sensor['Name'], IMU(sensor['Name']))
         if sensor['Type'] == "bno":
-            sensors.__setitem__(sensor['Name'], BNO(sensor['Name'], SIMULATION))
+            sensors.__setitem__(sensor['Name'], BNO(
+                sensor['Name'], SIMULATION))
         if sensor['Type'] == "wind":
-            sensors.__setitem__(sensor['Name'], DigitalWindSensor(sensor['Name'], os.getenv("OPENWEATHERMAP_TOKEN")))
+            sensors.__setitem__(sensor['Name'], DigitalWindSensor(
+                sensor['Name'], os.getenv("OPENWEATHERMAP_TOKEN")))
         if sensor['Type'] == "shore":
-            sensors.__setitem__(sensor['Name'], DigitalShoreSensor(sensor['Name'], os.getenv("ONWATER_TOKEN")))
+            sensors.__setitem__(sensor['Name'], DigitalShoreSensor(
+                sensor['Name'], os.getenv("ONWATER_TOKEN")))
 
     # load autopilot
     autopilot = AutoPilot(0,
@@ -327,7 +338,8 @@ def init():
 
 def connect_socket():
     try:
-        sio.connect(os.getenv("SOCKET") + "?token=" + os.getenv("TOKEN") + "&boatEmblem=" + os.getenv("BOAT_EMBLEM"), )
+        sio.connect(os.getenv("SOCKET") + "?token=" + os.getenv("TOKEN") +
+                    "&boatEmblem=" + os.getenv("BOAT_EMBLEM"), )
     except socketio.exceptions.ConnectionError:
         time.sleep(2)
         print("Reconnecting...")
@@ -378,12 +390,14 @@ async def shore_api_loop():
             # get location information
             lat = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lat()
             lng = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lng()
-            heading = sensors.__getitem__(sensorTypes.__getitem__('bno')).get_heading()
+            heading = sensors.__getitem__(
+                sensorTypes.__getitem__('bno')).get_heading()
 
             if (lat is not None or lng is not None and heading is not None) and \
                     (simulation.running is True or SIMULATION is False):
                 # fetch shore-data from api
-                sensors.__getitem__(sensorTypes.__getitem__('shore')).fetch_shore(lat, lng, heading, alternate)
+                sensors.__getitem__(sensorTypes.__getitem__(
+                    'shore')).fetch_shore(lat, lng, heading, alternate)
                 alternate = not alternate
         except KeyError:
             pass
@@ -396,11 +410,14 @@ async def digital_shore_loop():
         try:
             lat = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lat()
             lng = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lng()
-            heading = sensors.__getitem__(sensorTypes.__getitem__('bno')).get_heading()
+            heading = sensors.__getitem__(
+                sensorTypes.__getitem__('bno')).get_heading()
 
             if lat is not None or lng is not None and heading is not None:
-                sensors.__getitem__(sensorTypes.__getitem__('shore')).get_meta()
-                sensors.__getitem__(sensorTypes.__getitem__('shore')).get_shore_dist(lat, lng, heading)
+                sensors.__getitem__(
+                    sensorTypes.__getitem__('shore')).get_meta()
+                sensors.__getitem__(sensorTypes.__getitem__(
+                    'shore')).get_shore_dist(lat, lng, heading)
         except KeyError:
             pass
         await asyncio.sleep(0.5)
@@ -414,7 +431,8 @@ async def digital_wind_loop():
             lng = sensors.__getitem__(sensorTypes.__getitem__('gps')).get_lng()
 
             if (lat is not None or lng is not None) and (simulation.running is True or SIMULATION is False):
-                sensors.__getitem__(sensorTypes.__getitem__('wind')).fetch_wind(lat, lng)
+                sensors.__getitem__(sensorTypes.__getitem__(
+                    'wind')).fetch_wind(lat, lng)
                 simulation.set_wind(sensors.__getitem__(sensorTypes.__getitem__('wind')).get_value()['direction'],
                                     sensors.__getitem__(sensorTypes.__getitem__('wind')).get_value()['speed'])
         except KeyError:
@@ -459,15 +477,18 @@ def send_meta(entire_meta):
 
     for motor in motors:
         if entire_meta or motors[motor].has_changed():
-            motor_data.append({'Name': motors[motor].get_name(), 'State': motors[motor].get_state()})
+            motor_data.append(
+                {'Name': motors[motor].get_name(), 'State': motors[motor].get_state()})
 
     for sensor in sensors:
         if entire_meta or sensors[sensor].has_changed():
-            sensor_data.append({'Name': sensors[sensor].get_name(), 'State': sensors[sensor].get_meta()})
+            sensor_data.append(
+                {'Name': sensors[sensor].get_name(), 'State': sensors[sensor].get_meta()})
 
     # autopilot
     if entire_meta or autopilot.has_changed():
-        sensor_data.append({'Name': 'autopilot', 'State': autopilot.get_meta()})
+        sensor_data.append(
+            {'Name': 'autopilot', 'State': autopilot.get_meta()})
 
     if entire_meta:
         sensor_data.append({'Name': 'simulated', 'State': SIMULATION})
