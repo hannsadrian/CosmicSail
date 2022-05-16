@@ -9,7 +9,7 @@
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "autoprefixer": "^9",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "mapbox-gl": "^2.1.0",
     "postcss": "^7",
     "react": "^17.0.1",
